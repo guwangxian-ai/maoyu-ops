@@ -1,3 +1,4 @@
+import { scopedSessionStorage } from '@/utils/scopedStorage'
 ﻿/**
  * 批量发布页面
  *
@@ -62,12 +63,12 @@ export function BatchPublish() {
 
   /** 清除 sessionStorage 中的 batch_id */
   const clearStoredBatchId = useCallback(() => {
-    try { sessionStorage.removeItem(BATCH_ID_STORAGE_KEY) } catch { /* ignore */ }
+    try { scopedSessionStorage.removeItem(BATCH_ID_STORAGE_KEY) } catch { /* ignore */ }
   }, [])
 
   /** 保存 batch_id 到 sessionStorage */
   const storeBatchId = useCallback((batchId: string) => {
-    try { sessionStorage.setItem(BATCH_ID_STORAGE_KEY, batchId) } catch { /* ignore */ }
+    try { scopedSessionStorage.setItem(BATCH_ID_STORAGE_KEY, batchId) } catch { /* ignore */ }
   }, [])
 
   /** 启动轮询批量发布进度 */
@@ -112,7 +113,7 @@ export function BatchPublish() {
 
     // 恢复未完成的批量发布任务轮询
     try {
-      const savedBatchId = sessionStorage.getItem(BATCH_ID_STORAGE_KEY)
+      const savedBatchId = scopedSessionStorage.getItem(BATCH_ID_STORAGE_KEY)
       if (savedBatchId) {
         // 先查询一次状态，确认任务仍有效后再启动轮询
         getBatchStatus(savedBatchId).then(res => {

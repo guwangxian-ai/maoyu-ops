@@ -8,7 +8,8 @@
     <!-- 在页面加载前立即设置主题，避免闪白 -->
     <script>
       (function() {
-        var theme = localStorage.getItem('theme');
+        var basePath = '%BASE_URL%'.replace(/^\/+|\/+$/g, '').replace(/\//g, ':');
+        var theme = localStorage.getItem((basePath ? basePath + ':' : '') + 'theme');
         var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
         if (theme === 'dark' || (!theme && prefersDark)) {
           document.documentElement.classList.add('dark');

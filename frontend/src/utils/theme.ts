@@ -1,3 +1,4 @@
+import { scopedLocalStorage } from '@/utils/scopedStorage'
 import type { CSSProperties } from 'react'
 import type {
   SystemSettings,
@@ -431,7 +432,7 @@ const getStoredThemeMode = (): ThemeMode | null => {
     return null
   }
 
-  const storedMode = window.localStorage.getItem(THEME_MODE_STORAGE_KEY)
+  const storedMode = scopedLocalStorage.getItem(THEME_MODE_STORAGE_KEY)
   return storedMode === 'dark' || storedMode === 'light' ? storedMode : null
 }
 
@@ -449,7 +450,7 @@ export const applyThemeMode = (mode: ThemeMode): ThemeMode => {
   }
 
   document.documentElement.classList.toggle('dark', mode === 'dark')
-  window.localStorage.setItem(THEME_MODE_STORAGE_KEY, mode)
+  scopedLocalStorage.setItem(THEME_MODE_STORAGE_KEY, mode)
   return mode
 }
 

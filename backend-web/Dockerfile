@@ -14,7 +14,7 @@ RUN pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
 
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y curl ca-certificates gcc \
+RUN apt-get update && apt-get install -y curl ca-certificates gcc nodejs \
     fonts-dejavu-core fonts-liberation \
     && update-ca-certificates \
     && rm -rf /var/lib/apt/lists/*
@@ -23,6 +23,7 @@ RUN apt-get update && apt-get install -y curl ca-certificates gcc \
 COPY common /app/common
 COPY backend-web /app/backend-web
 COPY launcher /app/launcher
+COPY skills/xianyu-operations /app/skills/xianyu-operations
 
 # 从pyproject.toml提取并安装依赖
 RUN python -c "\

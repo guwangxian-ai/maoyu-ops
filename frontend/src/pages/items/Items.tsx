@@ -11,6 +11,7 @@ import { PageLoading } from '@/components/common/Loading'
 import { useAuthStore } from '@/store/authStore'
 import { Select } from '@/components/common/Select'
 import { ConfirmModal } from '@/components/common/ConfirmModal'
+import { getApiErrorMessage } from '@/utils/apiError'
 import type { Account, Item } from '@/types'
 import LocationContactReplyFields, { DEFAULT_LOCATION_TITLE, type LocationContactReplyValue } from '@/pages/common/LocationContactReplyFields'
 
@@ -322,12 +323,16 @@ export function Items() {
   const handleDelete = async (item: Item) => {
     setDeleting(true)
     try {
-      await deleteItem(item.cookie_id, item.item_id)
-      addToast({ type: 'success', message: '删除成功' })
+      const result = await deleteItem(item.cookie_id, item.item_id)
+      if (!result.success) {
+        addToast({ type: 'error', message: `本地删除失败：${result.message || '请稍后重试'}` })
+        return
+      }
+      addToast({ type: 'success', message: '本地商品记录及卡券关联已删除' })
       setDeleteItemConfirm({ open: false, item: null })
       loadItems()
-    } catch {
-      addToast({ type: 'error', message: '删除失败' })
+    } catch (error) {
+      addToast({ type: 'error', message: `本地删除失败：${getApiErrorMessage(error, '请稍后重试')}` })
     } finally {
       setDeleting(false)
     }
@@ -356,7 +361,7 @@ export function Items() {
 
   const handleBatchDelete = async () => {
     if (selectedIds.size === 0) {
-      addToast({ type: 'warning', message: '请先选择要删除的商品' })
+      addToast({ type: 'warning', message: '请先选择要删除的本地商品记录' })
       return
     }
     setDeleting(true)
@@ -367,17 +372,17 @@ export function Items() {
         .map((item) => ({ cookie_id: item.cookie_id, item_id: item.item_id }))
       const result = await batchDeleteItems(itemsToDelete)
       if (result.success) {
-        addToast({ type: 'success', message: result.message || `成功删除 ${selectedIds.size} 个商品` })
+        addToast({ type: 'success', message: `本地删除：${result.message || `已删除 ${selectedIds.size} 条商品记录及卡券关联`}` })
         setSelectedIds(new Set())
         setBatchDeleteItemConfirm(false)
         loadItems()
       } else {
         setBatchDeleteItemConfirm(false)
-        addToast({ type: 'error', message: result.message || '删除失败' })
+        addToast({ type: 'error', message: `本地删除失败：${result.message || '请稍后重试'}` })
       }
     } catch {
       setBatchDeleteItemConfirm(false)
-      addToast({ type: 'error', message: '批量删除失败' })
+      addToast({ type: 'error', message: '批量删除本地商品记录失败' })
     } finally {
       setDeleting(false)
     }
@@ -388,7 +393,7 @@ export function Items() {
   // 打开批量下架确认框（账号下拉复用顶部「筛选账号」，必须选具体账号）
   const openBatchOffline = () => {
     if (selectedIds.size === 0) {
-      addToast({ type: 'warning', message: '请先选择要下架的商品' })
+      addToast({ type: 'warning', message: '请先选择要从闲鱼下架的商品' })
       return
     }
     if (!selectedAccount) {
@@ -423,21 +428,21 @@ export function Items() {
           const suffix = failedIds.length > 5 ? ` 等 ${failedIds.length} 个` : ''
           addToast({
             type: 'warning',
-            message: `${result.message || '下架完成'}${preview ? `；失败商品：${preview}${suffix}` : ''}`,
+            message: `闲鱼下架：${result.message || '下架完成'}${preview ? `；失败商品：${preview}${suffix}` : ''}`,
           })
         } else {
-          addToast({ type: 'success', message: result.message || '下架成功' })
+          addToast({ type: 'success', message: `闲鱼下架：${result.message || '下架成功'}；本地记录及卡券关联保留` })
         }
         setSelectedIds(new Set())
         setBatchOfflineConfirm(false)
         loadItems()
       } else {
         setBatchOfflineConfirm(false)
-        addToast({ type: 'error', message: result.message || '下架失败' })
+        addToast({ type: 'error', message: `闲鱼下架失败：${result.message || '请查看平台状态'}` })
       }
     } catch {
       setBatchOfflineConfirm(false)
-      addToast({ type: 'error', message: '批量下架失败' })
+      addToast({ type: 'error', message: '未获得完整的闲鱼下架回执，请先核对平台状态' })
     } finally {
       setOfflining(false)
     }
@@ -491,43 +496,48 @@ export function Items() {
               cookie_message?: string
             }[]
             fail_count?: number
+            local_failed_ids?: string[]
           }
         | undefined
       const failedResults = (data?.results || []).filter((entry) => !entry.success)
       const cookieFailures = (data?.results || []).filter(
         (entry) => entry.cookie_saved === false,
       )
+      const localFailedIds = data?.local_failed_ids || []
       if (result.success) {
-        if (failedResults.length > 0 || cookieFailures.length > 0) {
+        if (failedResults.length > 0 || cookieFailures.length > 0 || localFailedIds.length > 0) {
           const preview = failedResults
             .slice(0, 3)
-            .map((entry) => `${entry.item_id}：${entry.message || '删除失败'}`)
+            .map((entry) => `${entry.item_id}：${entry.message || '闲鱼平台删除失败'}`)
             .join('；')
           const suffix = failedResults.length > 3 ? `；另有 ${failedResults.length - 3} 个失败` : ''
           const cookieWarning = cookieFailures.length > 0
             ? `；Cookie写回失败 ${cookieFailures.length} 个：${cookieFailures[0].cookie_message || '具体原因未知'}`
             : ''
+          const localWarning = localFailedIds.length > 0
+            ? `；本地清理失败 ${localFailedIds.length} 个：${localFailedIds.slice(0, 3).join('、')}${localFailedIds.length > 3 ? '等' : ''}。这些商品已在闲鱼删除，请仅对失败项执行“删除本地记录”，不要再次删除闲鱼商品`
+            : ''
           addToast({
             type: 'warning',
-            message: `${result.message || '删除完成'}${preview ? `；${preview}${suffix}` : ''}${cookieWarning}`,
+            message: `闲鱼平台删除：${result.message || '删除完成'}${preview ? `；${preview}${suffix}` : ''}${cookieWarning}${localWarning}`,
           })
         } else {
-          addToast({ type: 'success', message: result.message || '闲鱼商品删除成功' })
+          addToast({ type: 'success', message: `闲鱼平台删除：${result.message || '平台删除成功，请刷新核对本地记录'}` })
         }
         setSelectedIds(new Set())
-        // 平台删除成功的商品已同步删除本地库记录，刷新列表移除这些商品
+        // 平台删除成功后后端会尝试清理本地记录及卡券关联，刷新列表核对结果
         loadItems()
       } else {
         const firstFailure = failedResults[0]
         addToast({
           type: 'error',
-          message: firstFailure?.message || result.message || '删除闲鱼商品失败',
+          message: `闲鱼平台删除失败：${firstFailure?.message || result.message || '请查看平台状态'}`,
         })
       }
       setBatchXianyuDeleteConfirm(false)
     } catch {
       setBatchXianyuDeleteConfirm(false)
-      addToast({ type: 'error', message: '删除闲鱼商品失败' })
+      addToast({ type: 'error', message: '未获得完整的闲鱼平台删除回执，请先核对平台状态和本地记录' })
     } finally {
       deletingFromXianyuRef.current = false
       setDeletingFromXianyu(false)
@@ -642,27 +652,31 @@ export function Items() {
     }
   }
 
-  // 打开编辑弹窗
+  // 打开本地商品编辑弹窗
   const handleEdit = (item: Item) => {
     setEditingItem(item)
     setEditDetail(item.item_detail || item.desc || '')
     setEditPrice(item.item_price || item.price || '')
   }
 
-  // 保存编辑
+  // 保存本地记录，不调用闲鱼平台编辑接口
   const handleSaveEdit = async () => {
     if (!editingItem) return
     setEditSaving(true)
     try {
-      await updateItem(editingItem.cookie_id, editingItem.item_id, {
+      const result = await updateItem(editingItem.cookie_id, editingItem.item_id, {
         item_detail: editDetail,
         price: editPrice,
       })
-      addToast({ type: 'success', message: '商品信息已更新' })
+      if (!result.success) {
+        addToast({ type: 'error', message: `本地保存失败：${result.message || '请稍后重试'}` })
+        return
+      }
+      addToast({ type: 'success', message: '本地商品信息已保存，闲鱼平台商品未修改' })
       setEditingItem(null)
       loadItems()
-    } catch {
-      addToast({ type: 'error', message: '更新失败' })
+    } catch (error) {
+      addToast({ type: 'error', message: `本地保存失败：${getApiErrorMessage(error, '请稍后重试')}` })
     } finally {
       setEditSaving(false)
     }
@@ -1287,14 +1301,14 @@ export function Items() {
       <div className="page-header flex-between flex-wrap gap-4">
         <div>
           <h1 className="page-title">商品管理</h1>
-          <p className="page-description">管理各账号的商品信息</p>
+          <p className="page-description">列表展示本地商品记录，查看闲鱼最新商品请先同步。</p>
         </div>
         <div className="flex flex-wrap gap-1.5">
           {selectedIds.size > 0 && (
             <>
               <button onClick={() => setBatchDeleteItemConfirm(true)} className="btn-ios-danger btn-sm whitespace-nowrap">
                 <Trash2 className="w-3.5 h-3.5" />
-                删除选中 ({selectedIds.size})
+                删除本地记录 ({selectedIds.size})
               </button>
               <button
                 onClick={openBatchXianyuDelete}
@@ -1306,7 +1320,7 @@ export function Items() {
               </button>
               <button onClick={openBatchOffline} className="btn-ios-secondary btn-sm whitespace-nowrap">
                 <PackageX className="w-3.5 h-3.5" />
-                下架选中 ({selectedIds.size})
+                闲鱼下架 ({selectedIds.size})
               </button>
               <button onClick={() => setBatchDeleteDefaultReplyConfirm(true)} className="btn-ios-secondary btn-sm whitespace-nowrap">
                 <Trash2 className="w-3.5 h-3.5" />
@@ -1697,7 +1711,7 @@ export function Items() {
                             setSellerEditingItem(item)
                           }}
                           className="table-action-btn hover:!bg-blue-50"
-                          title={item.is_seller_item ? '编辑（同步到闲鱼）' : '编辑'}
+                          title={item.is_seller_item ? '编辑闲鱼平台商品（鱼小铺）' : '编辑本地商品记录'}
                         >
                           <Edit2 className="w-4 h-4 text-blue-500" />
                         </button>
@@ -1705,7 +1719,7 @@ export function Items() {
                           <button
                             onClick={() => handleOpenPriceModal(item)}
                             className="table-action-btn hover:!bg-amber-50"
-                            title="改价"
+                            title="修改闲鱼平台价格与库存（鱼小铺）"
                           >
                             <Tag className="w-4 h-4 text-amber-500" />
                           </button>
@@ -1713,7 +1727,7 @@ export function Items() {
                         <button
                           onClick={() => setDeleteItemConfirm({ open: true, item })}
                           className="table-action-btn hover:!bg-red-50"
-                          title="删除"
+                          title="删除本地商品记录"
                         >
                           <Trash2 className="w-4 h-4 text-red-500" />
                         </button>
@@ -1849,7 +1863,7 @@ export function Items() {
         <div className="modal-overlay">
           <div className="modal-content max-w-4xl">
             <div className="modal-header">
-              <h2 className="modal-title">修改价格/库存</h2>
+              <h2 className="modal-title">修改闲鱼平台价格与库存</h2>
               <button onClick={() => setPriceModalItem(null)} className="modal-close">
                 <X className="w-4 h-4" />
               </button>
@@ -1987,11 +2001,11 @@ export function Items() {
         </div>
       )}
 
-      {/* 编辑弹窗 */}
+      {/* 本地商品编辑弹窗 */}
       {editingItem && (        <div className="modal-overlay">
           <div className="modal-content max-w-lg">
             <div className="modal-header">
-              <h2 className="modal-title">编辑商品</h2>
+              <h2 className="modal-title">编辑本地商品记录</h2>
               <button onClick={() => setEditingItem(null)} className="modal-close">
                 <X className="w-4 h-4" />
               </button>
@@ -2016,7 +2030,7 @@ export function Items() {
                 />
               </div>
               <div className="input-group">
-                <label className="input-label">商品价格(没有同步闲鱼功能)</label>
+                <label className="input-label">本地商品价格（不修改闲鱼价格）</label>
                 <input
                   type="text"
                   value={editPrice}
@@ -2026,7 +2040,7 @@ export function Items() {
                 />
               </div>
               <div className="input-group">
-                <label className="input-label">商品详情(没有同步闲鱼功能)</label>
+                <label className="input-label">本地商品详情（不修改闲鱼详情）</label>
                 <textarea
                   value={editDetail}
                   onChange={(e) => setEditDetail(e.target.value)}
@@ -2055,7 +2069,7 @@ export function Items() {
                     保存中...
                   </span>
                 ) : (
-                  '保存'
+                  '保存本地记录'
                 )}
               </button>
             </div>
@@ -2890,12 +2904,12 @@ export function Items() {
         </div>
       )}
 
-      {/* 删除商品确认弹窗 */}
+      {/* 删除本地商品记录确认弹窗 */}
       <ConfirmModal
         isOpen={deleteItemConfirm.open}
-        title="删除确认"
-        message="确定要删除这个商品吗？删除后无法恢复。"
-        confirmText="删除"
+        title="删除本地商品记录"
+        message="确定要删除该商品的本地记录及卡券关联吗？此操作不会下架或删除闲鱼平台商品，也不会删除卡券本身。重新同步可再次获取平台商品，卡券关联需要重新配置。"
+        confirmText="删除本地记录"
         cancelText="取消"
         type="danger"
         loading={deleting}
@@ -2903,12 +2917,12 @@ export function Items() {
         onCancel={() => setDeleteItemConfirm({ open: false, item: null })}
       />
 
-      {/* 批量删除商品确认弹窗 */}
+      {/* 批量删除本地商品记录确认弹窗 */}
       <ConfirmModal
         isOpen={batchDeleteItemConfirm}
-        title="批量删除确认"
-        message={`确定要删除选中的 ${selectedIds.size} 个商品吗？删除后无法恢复。`}
-        confirmText="删除"
+        title="批量删除本地商品记录"
+        message={`确定要删除选中的 ${selectedIds.size} 条本地商品记录及卡券关联吗？此操作不会下架或删除闲鱼平台商品，也不会删除卡券本身。重新同步可再次获取平台商品，卡券关联需要重新配置。`}
+        confirmText="删除本地记录"
         cancelText="取消"
         type="danger"
         loading={deleting}
@@ -2919,9 +2933,9 @@ export function Items() {
       {/* 批量下架确认弹窗 */}
       <ConfirmModal
         isOpen={batchOfflineConfirm}
-        title="批量下架确认"
-        message={`确定要用账号「${selectedAccount}」下架选中的 ${selectedIds.size} 个商品吗？下架后商品将从在卖中移除（可在卖家后台重新上架）。`}
-        confirmText="下架"
+        title="闲鱼平台下架确认"
+        message={`确定要用账号「${selectedAccount}」下架选中的 ${selectedIds.size} 个闲鱼商品吗？此操作调用闲鱼下架接口，本地商品记录及卡券关联保留，不执行平台删除或重新发布。`}
+        confirmText="闲鱼下架"
         cancelText="取消"
         type="warning"
         loading={offlining}
@@ -2933,7 +2947,7 @@ export function Items() {
       <ConfirmModal
         isOpen={batchXianyuDeleteConfirm}
         title="删除闲鱼商品确认"
-        message={`确定要用账号「${selectedAccount}」删除选中的 ${selectedXianyuItems.length} 个闲鱼平台商品吗？平台删除后无法恢复，本地商品记录和配置会保留。`}
+        message={`确定要用账号「${selectedAccount}」删除选中的 ${selectedXianyuItems.length} 个闲鱼平台商品吗？平台删除成功后会清理对应的本地商品记录及卡券关联，卡券本身保留；平台删除失败项保留本地记录。本地清理可能失败，请按返回结果核对。这是平台删除操作，不是下架。`}
         confirmText="删除闲鱼商品"
         cancelText="取消"
         type="danger"

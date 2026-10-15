@@ -19,9 +19,11 @@ from . import (
     auto_reply_logs,
     auth,
     auto_rate,
+    baidu_drive,
     blacklist,
     captcha,
     cards,
+    cloud_assets,
     card_dock,
     data_analysis,
     distribution,
@@ -71,6 +73,7 @@ from . import (
     agree_pickup,
     qr_login,
     qrcode,
+    quark_drive,
     risk_control_logs,
     account_login_logs,
     db_backup_logs,
@@ -87,6 +90,8 @@ from . import (
 
 # 创建API路由器
 api_router = APIRouter()
+api_router.include_router(baidu_drive.router)
+api_router.include_router(cloud_assets.router)
 
 # 健康检查（放在最前面）
 api_router.include_router(health.router, tags=["健康检查"])  # 已定义prefix="/health"
@@ -104,6 +109,7 @@ api_router.include_router(auth.router, prefix="/auth", tags=["认证"])
 # 用户管理
 api_router.include_router(users.router, prefix="/users", tags=["用户管理"])
 api_router.include_router(user_settings.router, prefix="/user-settings", tags=["用户设置"])
+api_router.include_router(quark_drive.router)
 
 # 账号管理
 api_router.include_router(cookies.router, prefix="/cookies", tags=["账号管理"])

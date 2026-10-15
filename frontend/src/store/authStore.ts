@@ -1,3 +1,4 @@
+import { scopedLocalStorage } from '@/utils/scopedStorage'
 import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
 import type { User } from '@/types'
@@ -25,9 +26,9 @@ export const useAuthStore = create<AuthState>()(
       _hasHydrated: false,
 
       setAuth: (token, refreshToken, user) => {
-        localStorage.setItem('auth_token', token)
-        localStorage.setItem('refresh_token', refreshToken)
-        localStorage.setItem('user_info', JSON.stringify(user))
+        scopedLocalStorage.setItem('auth_token', token)
+        scopedLocalStorage.setItem('refresh_token', refreshToken)
+        scopedLocalStorage.setItem('user_info', JSON.stringify(user))
         // 注意：此处不清除弹窗公告会话标记。
         // setAuth 在每次刷新页面验证 token 后也会被调用，若在此清除标记，
         // 会导致刷新后公告重复弹出。清除标记的逻辑放在真正的登录成功处（Login.tsx）。
@@ -35,9 +36,9 @@ export const useAuthStore = create<AuthState>()(
       },
 
       clearAuth: () => {
-        localStorage.removeItem('auth_token')
-        localStorage.removeItem('refresh_token')
-        localStorage.removeItem('user_info')
+        scopedLocalStorage.removeItem('auth_token')
+        scopedLocalStorage.removeItem('refresh_token')
+        scopedLocalStorage.removeItem('user_info')
         set({ token: null, refreshToken: null, user: null, isAuthenticated: false })
       },
 
@@ -45,7 +46,7 @@ export const useAuthStore = create<AuthState>()(
         set((state) => {
           const newUser = state.user ? { ...state.user, ...userData } : null
           if (newUser) {
-            localStorage.setItem('user_info', JSON.stringify(newUser))
+            scopedLocalStorage.setItem('user_info', JSON.stringify(newUser))
           }
           return { user: newUser }
         })
@@ -56,14 +57,14 @@ export const useAuthStore = create<AuthState>()(
       },
 
       updateTokens: (token, refreshToken) => {
-        localStorage.setItem('auth_token', token)
-        localStorage.setItem('refresh_token', refreshToken)
+        scopedLocalStorage.setItem('auth_token', token)
+        scopedLocalStorage.setItem('refresh_token', refreshToken)
         set({ token, refreshToken })
       },
     }),
     {
       name: 'auth-storage',
-      storage: createJSONStorage(() => localStorage),
+      storage: createJSONStorage(() => scopedLocalStorage),
       // 只持久化token和refreshToken，user从localStorage单独读取
       partialize: (state) => ({ 
         token: state.token,
@@ -77,14 +78,14 @@ export const useAuthStore = create<AuthState>()(
             return
           }
           if (state?.token) {
-            localStorage.setItem('auth_token', state.token)
+            scopedLocalStorage.setItem('auth_token', state.token)
           }
           if (state?.refreshToken) {
-            localStorage.setItem('refresh_token', state.refreshToken)
+            scopedLocalStorage.setItem('refresh_token', state.refreshToken)
           }
           // 从localStorage读取user信息，使用setTimeout避免循环引用
           setTimeout(() => {
-            const userInfoStr = localStorage.getItem('user_info')
+            const userInfoStr = scopedLocalStorage.getItem('user_info')
             if (userInfoStr) {
               try {
                 const user = JSON.parse(userInfoStr)
@@ -103,7 +104,7 @@ export const useAuthStore = create<AuthState>()(
       migrate: (persistedState: any, version: number) => {
         if (version < 2) {
           // 清除旧版本数据
-          localStorage.removeItem('user_info')
+          scopedLocalStorage.removeItem('user_info')
           return {
             token: null,
             refreshToken: null,

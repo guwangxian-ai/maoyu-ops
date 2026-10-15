@@ -29,6 +29,7 @@ from fastapi.responses import JSONResponse
 
 from app.core.config import get_settings
 from common.db.error_messages import get_public_database_error_message
+from common.db.redis_client import close_redis_client, initialize_redis_client
 from common.utils.logging_utils import setup_logging
 from common.utils.network_utils import resolve_listen_host
 
@@ -67,7 +68,7 @@ async def check_database_connection():
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def _application_lifespan(app: FastAPI):
     """应用生命周期管理"""
     logger.info(f"{settings.project_name} 启动中...")
     logger.info(f"服务端口: {settings.service_port}")
@@ -77,6 +78,13 @@ async def lifespan(app: FastAPI):
     if not await check_database_connection():
         logger.error("数据库连接失败，服务退出")
         sys.exit(1)
+
+    # 初始化 Redis 健康连接池；失败时按指数退避重试，最终失败则停止启动。
+    try:
+        await initialize_redis_client()
+    except Exception:
+        logger.exception("Redis连接初始化失败，服务退出")
+        raise
     
     # 初始化数据库（创建表、默认数据等）
     try:
@@ -106,6 +114,11 @@ async def lifespan(app: FastAPI):
         await mark_stale_running_failed()
     except Exception as e:
         logger.error(f"AI铺货任务自检失败: {e}")
+
+    from app.services.quark_drive_jobs import recover_interrupted_jobs, stop_running_jobs
+    await recover_interrupted_jobs()
+    from app.services.cloud_assets import recover as recover_assets, shutdown as stop_assets
+    await recover_assets()
 
     # 从数据库加载日志保留天数配置
     from common.utils.logging_utils import apply_db_log_retention, run_db_log_retention_sync
@@ -142,6 +155,14 @@ async def lifespan(app: FastAPI):
     yield
     
     logger.info(f"{settings.project_name} 关闭中...")
+    from app.services.quark_drive_sessions import stop_sessions
+    await stop_sessions()
+    from app.services.baidu_drive_skill_auth import shutdown as stop_baidu_sessions
+    await stop_baidu_sessions()
+    from app.services.baidu_pcs_auth import shutdown as stop_baidu_pcs_sessions
+    await stop_baidu_pcs_sessions()
+    await stop_running_jobs()
+    await stop_assets()
     
     # 停止所有在线聊天IM会话
     try:
@@ -173,6 +194,20 @@ async def lifespan(app: FastAPI):
         await log_retention_sync_task
     except asyncio.CancelledError:
         pass
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """启动、退出或取消时均释放 Redis；保留业务生命周期的原始异常。"""
+    try:
+        async with _application_lifespan(app):
+            async with app.state.mcp_gateway.manager.run():
+                try:
+                    yield
+                finally:
+                    await app.state.mcp_gateway.close()
+    finally:
+        await close_redis_client()
 
 
 async def start_goofish_crawl_jobs():
@@ -244,6 +279,18 @@ if static_path.exists():
 from app.api import api_router
 
 app.include_router(api_router, prefix="/api/v1")
+
+# Private MCP access uses the existing business routes and a separate scoped
+# principal. It never grants the website administrator role to an AI client.
+from app.api.routes.mcp_access import router as mcp_access_router
+from app.api.routes.ai_connect import router as ai_connect_router
+from app.mcp.server import McpGateway
+from starlette.routing import Route
+
+app.include_router(mcp_access_router, prefix="/api/v1")
+app.include_router(ai_connect_router)
+app.state.mcp_gateway = McpGateway(app.routes)
+app.router.routes.append(Route("/mcp", endpoint=app.state.mcp_gateway.asgi, methods=["GET", "POST", "DELETE"]))
 
 
 @app.get("/health")

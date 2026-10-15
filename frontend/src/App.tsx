@@ -1,3 +1,4 @@
+import { scopedLocalStorage } from '@/utils/scopedStorage'
 import React, { Suspense, useEffect, useState, useRef } from 'react'
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { useAuthStore } from '@/store/authStore'
@@ -28,6 +29,7 @@ const Items = React.lazy(() => import('@/pages/items/Items').then(m => ({ defaul
 const Orders = React.lazy(() => import('@/pages/orders/Orders').then(m => ({ default: m.Orders })))
 const Keywords = React.lazy(() => import('@/pages/keywords/Keywords').then(m => ({ default: m.Keywords })))
 const About = React.lazy(() => import('@/pages/about/About').then(m => ({ default: m.About })))
+const PublicAbout = React.lazy(() => import('@/pages/about/PublicAbout').then(m => ({ default: m.PublicAbout })))
 const Disclaimer = React.lazy(() => import('@/pages/disclaimer/Disclaimer').then(m => ({ default: m.Disclaimer })))
 const NotificationChannels = React.lazy(() => import('@/pages/notifications/NotificationChannels').then(m => ({ default: m.NotificationChannels })))
 const MessageNotifications = React.lazy(() => import('@/pages/notifications/MessageNotifications').then(m => ({ default: m.MessageNotifications })))
@@ -43,6 +45,10 @@ const ItemSearch = React.lazy(() => import('@/pages/search/ItemSearch').then(m =
 const GoofishCompass = React.lazy(() => import('@/pages/compass/GoofishCompass').then(m => ({ default: m.GoofishCompass })))
 const GoofishScheduledCrawler = React.lazy(() => import('@/pages/crawler/GoofishScheduledCrawler').then(m => ({ default: m.GoofishScheduledCrawler })))
 const Cards = React.lazy(() => import('@/pages/cards/Cards').then(m => ({ default: m.Cards })))
+const QuarkDrive = React.lazy(() => import('@/pages/cloud-drive/QuarkDrive').then(m => ({ default: m.QuarkDrive })))
+const BaiduDrive = React.lazy(() => import('@/pages/cloud-drive/BaiduDrive').then(m => ({ default: m.BaiduDrive })))
+const CloudAssets = React.lazy(() => import('@/pages/cloud-drive/CloudAssets').then(m => ({ default: m.CloudAssets })))
+const AiAccess = React.lazy(() => import('@/pages/ai-access/AiAccess').then(m => ({ default: m.AiAccess })))
 const PersonalSettings = React.lazy(() => import('@/pages/personalSettings/PersonalSettings').then(m => ({ default: m.PersonalSettings })))
 const Blacklist = React.lazy(() => import('@/pages/blacklist/Blacklist'))
 const SupplyManagement = React.lazy(() => import('@/pages/distribution/SupplyManagement').then(m => ({ default: m.SupplyManagement })))
@@ -142,7 +148,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
       checkingRef.current = true
       
       // 优先使用 store 中的 token，其次是 localStorage
-      const token = storeToken || localStorage.getItem('auth_token')
+      const token = storeToken || scopedLocalStorage.getItem('auth_token')
       
       if (!token) {
         setAuthState('unauthenticated')
@@ -155,7 +161,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
       try {
         const result = await verifyToken()
         if (result.authenticated && result.user_id) {
-          const refreshToken = localStorage.getItem('refresh_token') || ''
+          const refreshToken = scopedLocalStorage.getItem('refresh_token') || ''
           setAuth(token, refreshToken, {
             user_id: result.user_id,
             username: result.username || '',
@@ -311,7 +317,7 @@ function App() {
   }, [setIsExeMode])
 
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={import.meta.env.BASE_URL}>
       <Toast />
       <Suspense fallback={<PageLoading />}>
         <Routes>
@@ -323,6 +329,7 @@ function App() {
           <Route path="/renew-activation" element={<RenewActivation />} />
           <Route path="/get-local-version" element={<GetLocalVersion />} />
           <Route path="/get-source-code" element={<GetSourceCode />} />
+          <Route path="/about-public" element={<PublicAbout />} />
           {/* 兼职端扫码页面：无需登录，公开访问 */}
           <Route path="/shared-scan-page" element={<SharedScanPage />} />
           {/* 同意后发货提货页：无需登录，公开访问 */}
@@ -359,6 +366,10 @@ function App() {
             <Route path="goofish-compass" element={<GoofishCompass />} />
             <Route path="goofish-scheduled-crawler" element={<GoofishScheduledCrawler />} />
             <Route path="cards" element={<Cards />} />
+            <Route path="cloud-drive/quark" element={<QuarkDrive />} />
+            <Route path="cloud-drive/baidu" element={<BaiduDrive />} />
+            <Route path="cloud-drive/assets" element={<CloudAssets />} />
+            <Route path="ai-access" element={<AiAccess />} />
             <Route path="distribution/supply" element={<SupplyManagement />} />
             <Route path="distribution/card-pickup" element={<CardPickup />} />
             <Route path="distribution/docked" element={<DockedProducts />} />

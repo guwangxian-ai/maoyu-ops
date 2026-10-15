@@ -57,11 +57,20 @@ class BackendWebConfig(BaseConfig):
     
     # 静态文件目录（共享）
     static_dir: str = Field(default="static", alias="STATIC_DIR")
+    quark_auth_dir: str = Field(default="data/quark-auth", alias="QUARK_AUTH_DIR")
+    quark_fast_read: bool = Field(default=True, alias="QUARK_FAST_READ")
+    baidu_auth_dir: str = Field(default="data/baidu-auth", alias="BAIDU_AUTH_DIR")
+    baidu_client_id: str = Field(default="", alias="BAIDU_CLIENT_ID")
+    baidu_client_secret: str = Field(default="", alias="BAIDU_CLIENT_SECRET", repr=False)
     
     frontend_public_url: str = Field(
         default="",
         alias="FRONTEND_PUBLIC_URL"
     )
+
+    # Canonical, credential-free base for public AI documents and MCP. A trusted
+    # deployment setting avoids publishing attacker-controlled Host headers.
+    mcp_public_base_url: str = Field(default="", alias="MCP_PUBLIC_BASE_URL")
 
     # Backend-Web服务的公网访问地址（用于生成文件URL）
     backend_web_public_url: str = Field(

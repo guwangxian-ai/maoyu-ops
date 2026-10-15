@@ -6,10 +6,12 @@ import {
   Bell,
   BellOff,
   BookOpen,
+  Cloud,
   Database,
   FileText,
   Filter,
   Flower2,
+  HardDrive,
   Image,
   Info,
   Key,
@@ -26,6 +28,7 @@ import {
   Package,
   PackageCheck,
   PackageSearch,
+  Plug,
   Repeat,
   ScrollText,
   Send,
@@ -88,6 +91,16 @@ export const mainNavItems: NavEntry[] = [
   { key: 'online-chat-new', icon: MessageSquare, label: '在线聊天', path: '/online-chat-new' },
   { key: 'items', icon: Package, label: '商品管理', path: '/items' },
   { key: 'cards', icon: Ticket, label: '卡券管理', path: '/cards' },
+  {
+    key: 'cloud-drive',
+    icon: Cloud,
+    label: '网盘管理',
+    children: [
+      { key: 'cloud-drive-quark', icon: HardDrive, label: '夸克网盘', path: '/cloud-drive/quark' },
+      { key: 'cloud-drive-baidu', icon: HardDrive, label: '百度网盘', path: '/cloud-drive/baidu' },
+      { key: 'cloud-drive-assets', icon: Repeat, label: '同步资料', path: '/cloud-drive/assets' },
+    ],
+  },
   { key: 'orders', icon: ShoppingCart, label: '订单管理', path: '/orders' },
   {
     key: 'distribution',
@@ -137,6 +150,7 @@ export const mainNavItems: NavEntry[] = [
   { key: 'message-notifications', icon: MessageCircle, label: '消息通知', path: '/message-notifications' },
   { key: 'blacklist', icon: Ban, label: '黑名单管理', path: '/blacklist' },
   { key: 'personal-settings', icon: UserCog, label: '个人设置', path: '/personal-settings' },
+  { key: 'ai-access', icon: Plug, label: 'AI 接入', path: '/ai-access' },
 ]
 
 export const adminNavItems: NavEntry[] = [

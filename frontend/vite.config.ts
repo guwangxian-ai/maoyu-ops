@@ -59,6 +59,8 @@ function rejectUnsafeDevServerPaths(): Plugin {
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  // 生产环境可部署在共享域名/IP 的独立路径下；本地开发仍使用根路径。
+  base: process.env.PUBLIC_BASE_PATH || '/',
   plugins: [rejectUnsafeDevServerPaths(), react()],
   resolve: {
     alias: {
@@ -75,6 +77,17 @@ export default defineConfig({
       'xy-back.zhinianboke.com'
     ],
     proxy: {
+      // 精确匹配公共接入文档，保留 /ai-access 前端页面。
+      '^/ai(?:/|$)': {
+        target: 'http://127.0.0.1:8089',
+        changeOrigin: true,
+      },
+      '/mcp': {
+        target: 'http://127.0.0.1:8089',
+        changeOrigin: true,
+        timeout: 1900000,
+        proxyTimeout: 1900000,
+      },
       // 所有 API 请求统一代理到后端（含WebSocket升级）
       '/api': {
         target: 'http://localhost:8089',

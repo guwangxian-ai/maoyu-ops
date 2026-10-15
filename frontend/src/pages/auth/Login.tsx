@@ -1,3 +1,4 @@
+import { scopedLocalStorage, scopedSessionStorage } from '@/utils/scopedStorage'
 import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
@@ -62,7 +63,7 @@ export function Login() {
       return
     }
 
-    const token = localStorage.getItem('auth_token')
+    const token = scopedLocalStorage.getItem('auth_token')
     if (token) {
       verifyToken()
         .then((result) => {
@@ -71,7 +72,7 @@ export function Login() {
           }
         })
         .catch(() => {
-          localStorage.removeItem('auth_token')
+          scopedLocalStorage.removeItem('auth_token')
         })
     }
   }, [isAuthenticated, navigate])
@@ -252,7 +253,7 @@ export function Login() {
 
       if (result.success && result.token && result.refresh_token) {
         // 清除弹窗公告会话标记，确保本次登录后重新弹窗展示一次
-        sessionStorage.removeItem(POPUP_ANNOUNCEMENT_SHOWN_KEY)
+        scopedSessionStorage.removeItem(POPUP_ANNOUNCEMENT_SHOWN_KEY)
         setAuth(result.token, result.refresh_token, {
           user_id: result.user_id!,
           username: result.username!,

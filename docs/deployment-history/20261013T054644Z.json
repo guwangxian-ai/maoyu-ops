@@ -1,0 +1,213 @@
+{
+  "release_id": "20261013T054644Z",
+  "deployed_at": "2026-10-13",
+  "status": "deployed",
+  "previous_release_id": "20261013T044930Z",
+  "url": "https://43.136.91.22/xianyu-auto-reply/",
+  "items_url": "https://43.136.91.22/xianyu-auto-reply/items",
+  "ai_access_url": "https://43.136.91.22/xianyu-auto-reply/ai-access",
+  "ai_guide_url": "https://43.136.91.22/xianyu-auto-reply/ai",
+  "mcp_url": "https://43.136.91.22/xianyu-auto-reply/mcp",
+  "changes": [
+    "Clarify local edits/deletion, fishshop platform edits, offline and platform deletion in Skill/MCP/UI",
+    "Handle unsuccessful local edit/delete receipts without false success",
+    "Warn about partial local cleanup after platform deletion; do not repeat platform delete"
+  ],
+  "source_archive_sha256": "e5da8078abbb1e294624b9507a1b3e3dd50869734df0dcd1d0c354b2eb865076",
+  "source_files": 1217,
+  "site_files": 169,
+  "skill_version": "2026.10.13.2",
+  "skill_sha256": "df3f7f620cb2d6630345de25a4eaea6a6ddb8e52f58590c850bf3a90b8d64415",
+  "verification": {
+    "local_mcp_tests_passed": 22,
+    "local_ai_access_tests_passed": 6,
+    "local_skill_tests_passed": 11,
+    "frontend_receipt_branches_passed": 6,
+    "local_native_sdk_tools": 248,
+    "local_native_sdk_product_descriptions_checked": 9,
+    "skill_quick_validate": true,
+    "frontend_production_build": true,
+    "local_browser_confirmations_checked": [
+      "local deletion",
+      "platform deletion",
+      "platform offline"
+    ],
+    "local_browser_confirmations_cancelled": true,
+    "ordinary_local_edit_browser_flow": "not exercised; current account item is fishshop; handler receipt branches verified in isolation",
+    "container_mcp_tests_passed": 22,
+    "container_ai_access_tests_passed": 6,
+    "container_skill_tests_passed": 11,
+    "live_backend_catalog_product_descriptions_checked": 9,
+    "all_five_containers_healthy": true,
+    "container_restart_counts_zero": true,
+    "backend_database_connected": true,
+    "mysql_redis_websocket_scheduler_container_ids_preserved": true,
+    "existing_project_entry_status_and_content_preserved": true,
+    "nginx_validation": true,
+    "nginx_configuration_unchanged": true,
+    "route_unit_unchanged": true,
+    "public_https_checks": {
+      "release_id": "20261013T054644Z",
+      "tls_verified": true,
+      "skill_version": "2026.10.13.2",
+      "skill_sha256": "df3f7f620cb2d6630345de25a4eaea6a6ddb8e52f58590c850bf3a90b8d64415",
+      "skill_zip_bytes": 29540,
+      "skill_matches_local": true,
+      "public_product_semantics_updated": true,
+      "frontend_items_bundle_matches_local": true,
+      "anonymous_mcp_status": 401,
+      "business_external_writes_performed": false
+    },
+    "authenticated_cloud_browser_flow": "passed: user completed CAPTCHA, readonly key created/validated, metadata survived refresh, audit entries verified",
+    "cloud_native_sdk_authenticated_flow": "passed: HTTPS SDK and configured stdio bridge discovered 101 read tools and called capabilities",
+    "business_external_writes_performed": false
+  },
+  "images": {
+    "backend-web": "sha256:f02f168dc824133f93acea6b660f20cd20ab2565eca9d78054f6808ee8f90d94",
+    "websocket": "sha256:4efec615569d5dcfb413438035fa09962f46aa74fce4adc72b626a601258aade",
+    "scheduler": "sha256:a1146df4b5dacb62b6da961b99e66b2ad8e91fa62c497f9b0bdcf84411288447"
+  },
+  "linux_baidu_bridge_sha256": "c3d2aa9ad1bb4ea83b7b12a9fb52a2ba2677c04a60398fcfa16fc8e912aa8fac",
+  "backup_directory": "/srv/xianyu-auto-reply/releases/20261013T054644Z/backup",
+  "rollback_script": "/srv/xianyu-auto-reply/incoming/20261013T054644Z/rollback-remote.py",
+  "rollback_images_retained": true,
+  "build_strategy": "incremental from previous backend image; validate existing dependency versions; no dependency upgrade",
+  "persistent_volumes": [
+    "quark_auth",
+    "baidu_auth",
+    "cloud_asset_data",
+    "mcp_files"
+  ],
+  "local_credentials_copied": false,
+  "post_deploy_metadata_files": [
+    "docs/tencent-hermes-deployment.json",
+    "docs/ai-access-center.md"
+  ],
+  "new_cost_cny": 0,
+  "cloud_client_followup": {
+    "verified_at": "2026-10-13T07:48:12.053101+00:00",
+    "server": "https://43.136.91.22/xianyu-auto-reply",
+    "skill_version": "2026.10.13.2",
+    "skill_sha256": "df3f7f620cb2d6630345de25a4eaea6a6ddb8e52f58590c850bf3a90b8d64415",
+    "installed_package_verified": true,
+    "codex_mcp_name": "xianyu",
+    "configured_transport_verified": true,
+    "tool_count": 101,
+    "scopes": [
+      "delivery:read",
+      "drive:read",
+      "messages:read",
+      "xianyu:read"
+    ],
+    "server_write_denied": "FORBIDDEN",
+    "product_operation_guide_verified": true,
+    "account_count": 1,
+    "enabled_accounts": 0,
+    "is_fish_shop": true,
+    "support_sku_or_inventory": true,
+    "drive_status": [
+      {
+        "provider": "quark",
+        "connected": false,
+        "verified": null
+      },
+      {
+        "provider": "baidu",
+        "connected": false,
+        "verified": false
+      }
+    ],
+    "cloud_drive_files_tested": false,
+    "cloud_drive_files_blocker": "Cloud providers are not authorized",
+    "key_expires_at": "2026-11-12T07:23:41Z",
+    "key_retained_for_connection": true,
+    "cloud_browser_key_create_check_refresh": true,
+    "cloud_browser_audit_seen": true,
+    "business_external_writes": false,
+    "local_backend_tests_run": false,
+    "deployment_performed": false,
+    "new_cost_cny": 0,
+    "codex_native_tool_verified": true,
+    "codex_native_tool_receipt": "native-call.json",
+    "cloud_audit_screenshot_visually_checked": true
+  },
+  "cloud_drive_auth_migration": {
+    "operation": "cloud-drive-auth-20261014",
+    "completed_at": "2026-10-14T03:46:20.683Z",
+    "status": "completed",
+    "site_user": "admin",
+    "user_explicitly_confirmed_server": "43.136.91.22",
+    "local_credentials_migrated": true,
+    "providers": {
+      "baidu": {
+        "connected": true,
+        "verified": true,
+        "root_files_read": 5
+      },
+      "quark": {
+        "connected": true,
+        "verified": true,
+        "root_files_read": 9
+      }
+    },
+    "backup_directory": "/srv/xianyu-auto-reply/operations/cloud-drive-auth-20261014",
+    "backup_verified": true,
+    "private_permissions_verified": true,
+    "deployment_performed": false,
+    "services_restarted": false,
+    "all_five_services_healthy": true,
+    "mcp_doctor_passed": true,
+    "receipt": "data/ops-runs/cloud-drive-auth-20261014/verification.json",
+    "new_cost_cny": 0
+  },
+  "mcp_access_followup_20261014": {
+    "updated_at": "2026-10-14T12:31:53Z",
+    "site_user": "admin",
+    "scopes": [
+      "delivery:read",
+      "delivery:write",
+      "drive:read",
+      "drive:write",
+      "messages:read",
+      "xianyu:read"
+    ],
+    "expires_at": "2027-01-12T12:31:53Z",
+    "persistent_write_access_user_authorized": true,
+    "live_capabilities_verified": true,
+    "original_secret_preserved": true,
+    "scope_backup_container_path": "/app/backups/operations/silkroad-card-20261014/mcp-permissions-before.json",
+    "local_skill_repaired": true,
+    "local_skill_validation_passed": true,
+    "server_public_skill_bundle_redeployed": false,
+    "deployment_performed": false,
+    "new_cost_cny": 0,
+    "expiry_extension_days": 90,
+    "expiry_extension_user_authorized": true,
+    "expiry_backup_container_path": "/app/backups/operations/silkroad-card-20261014/mcp-expiry-before-extension.json",
+    "private_client_metadata_synchronized": true
+  },
+  "silkroad_delivery_configuration_20261014": {
+    "transport": "Installed Skill -> server MCP",
+    "share_created": true,
+    "share_permanent": true,
+    "share_passcode_protected": true,
+    "share_remote_read_verified": true,
+    "card_id": 1,
+    "card_enabled": true,
+    "item_id": "1063991587179",
+    "binding_readback_verified": true,
+    "account_enabled": true,
+    "actual_order_delivery_tested": false,
+    "receipt": "data/ops-runs/silkroad-card-20261014/verification.json",
+    "pending_account_enable_confirmation": false,
+    "new_cost_cny": 0,
+    "account_online": true,
+    "delivery_disabled": false,
+    "account_enable_user_authorized": true,
+    "account_enabled_via": "Skill -> MCP account_update_account_status",
+    "temporary_xianyu_write_restored": true,
+    "final_scopes_verified": true,
+    "account_enable_receipt": "data/ops-runs/silkroad-card-20261014/account-enable-verification.json",
+    "scope_restoration_container_receipt": "/app/backups/operations/silkroad-card-20261014/mcp-after-account-enable-restored.json"
+  }
+}

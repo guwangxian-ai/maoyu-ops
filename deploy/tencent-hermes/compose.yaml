@@ -1,0 +1,229 @@
+name: xianyu-auto-reply
+
+x-logging: &bounded-logging
+  driver: json-file
+  options:
+    max-size: 10m
+    max-file: "3"
+
+x-common-env: &common-env
+  ENVIRONMENT: production
+  MYSQL_HOST: mysql
+  MYSQL_PORT: "3306"
+  MYSQL_USER: xianyu
+  MYSQL_PASSWORD: ${MYSQL_PASSWORD:?set MYSQL_PASSWORD in .env}
+  MYSQL_DATABASE: xianyu_data
+  REDIS_HOST: redis
+  REDIS_PORT: "6379"
+  REDIS_PASSWORD: ${REDIS_PASSWORD:?set REDIS_PASSWORD in .env}
+  REDIS_DB: "0"
+  HOST: 0.0.0.0
+  LOG_LEVEL: INFO
+  SQL_ECHO: "false"
+  DB_POOL_SIZE: "5"
+  DB_MAX_OVERFLOW: "10"
+  TZ: Asia/Shanghai
+
+services:
+  mysql:
+    image: registry.cn-shanghai.aliyuncs.com/zhinian-software/xianyu-mysql:8.0
+    dns: [183.60.83.19, 183.60.82.98]
+    restart: unless-stopped
+    mem_limit: 768m
+    oom_score_adj: 500
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?set MYSQL_ROOT_PASSWORD in .env}
+      MYSQL_DATABASE: xianyu_data
+      MYSQL_USER: xianyu
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?set MYSQL_PASSWORD in .env}
+      TZ: Asia/Shanghai
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --max-connections=100
+      - --max-connect-errors=100000
+      - --max-allowed-packet=256M
+      - --default-time-zone=+08:00
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u root -p\"$$MYSQL_ROOT_PASSWORD\" --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+    logging: *bounded-logging
+
+  redis:
+    image: registry.cn-shanghai.aliyuncs.com/zhinian-software/xianyu-redis:7-alpine
+    dns: [183.60.83.19, 183.60.82.98]
+    restart: unless-stopped
+    mem_limit: 320m
+    oom_score_adj: 500
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?set REDIS_PASSWORD in .env}
+      TZ: Asia/Shanghai
+    command:
+      - sh
+      - -c
+      - exec redis-server --requirepass "$$REDIS_PASSWORD" --maxmemory 192mb --maxmemory-policy allkeys-lru --appendonly yes
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a \"$$REDIS_PASSWORD\" ping | grep -q PONG"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    logging: *bounded-logging
+
+  backend-web:
+    build:
+      context: ../..
+      dockerfile: backend-web/Dockerfile
+      network: host
+    dns: [183.60.83.19, 183.60.82.98]
+    restart: unless-stopped
+    mem_limit: 1250m
+    oom_score_adj: 500
+    environment:
+      <<: *common-env
+      BACKEND_WEB_PORT: "8089"
+      WEBSOCKET_SERVICE_URL: http://websocket:8090
+      SCHEDULER_SERVICE_URL: http://scheduler:8091
+      CORS_ORIGINS: https://43.136.91.22
+      FRONTEND_PUBLIC_URL: https://43.136.91.22/xianyu-auto-reply
+      MCP_PUBLIC_BASE_URL: https://43.136.91.22/xianyu-auto-reply
+      MCP_ALLOWED_HOSTS: 43.136.91.22,127.0.0.1,127.0.0.1:*,localhost,localhost:*
+      MCP_ALLOWED_ORIGINS: https://43.136.91.22
+      MCP_FILE_DIR: /app/mcp-files
+      BACKEND_WEB_PUBLIC_URL: https://43.136.91.22
+      STATIC_DIR: /app/static
+      BACKUP_DIR: /app/backups
+      QUARK_AUTH_DIR: /app/quark-auth
+      QUARK_FAST_READ: ${QUARK_FAST_READ:-true}
+      BAIDU_AUTH_DIR: /app/baidu-auth
+      BAIDU_PCS_BIN: /opt/xianyu-tools/xianyu-baidu-pcs-bridge
+      CLOUD_ASSET_DIR: /app/cloud-assets
+      AUTO_START_CRAWL_JOBS: "false"
+      BROWSER_HEADLESS: "true"
+    ports:
+      - "127.0.0.1:18089:8089"
+    volumes:
+      - backend_web_logs:/app/backend-web/logs
+      - static_files:/app/static
+      - backup_files:/app/backups
+      - quark_auth:/app/quark-auth
+      - baidu_auth:/app/baidu-auth
+      - cloud_asset_data:/app/cloud-assets
+      - mcp_files:/app/mcp-files
+      - type: bind
+        source: ./bin/xianyu-baidu-pcs-bridge
+        target: /opt/xianyu-tools/xianyu-baidu-pcs-bridge
+        read_only: true
+        bind:
+          create_host_path: false
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8089/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 90s
+    logging: *bounded-logging
+
+  websocket:
+    build:
+      context: ../..
+      dockerfile: deploy/tencent-hermes/Dockerfile.websocket
+      network: host
+    dns: [183.60.83.19, 183.60.82.98]
+    restart: unless-stopped
+    mem_limit: 1250m
+    oom_score_adj: 500
+    environment:
+      <<: *common-env
+      WEBSOCKET_PORT: "8090"
+      BACKEND_WEB_SERVICE_URL: http://backend-web:8089
+      STATIC_DIR: /app/static
+      BROWSER_HEADLESS: "true"
+      AUTO_START_WEBSOCKET: "true"
+    volumes:
+      - websocket_logs:/app/websocket/logs
+      - static_files:/app/static
+      - browser_data:/app/browser_data
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      backend-web:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8090/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 90s
+    logging: *bounded-logging
+
+  scheduler:
+    build:
+      context: ../..
+      dockerfile: deploy/tencent-hermes/Dockerfile.scheduler
+      network: host
+    dns: [183.60.83.19, 183.60.82.98]
+    restart: unless-stopped
+    mem_limit: 768m
+    oom_score_adj: 500
+    environment:
+      <<: *common-env
+      SCHEDULER_PORT: "8091"
+      WEBSOCKET_SERVICE_URL: http://websocket:8090
+      BACKEND_WEB_SERVICE_URL: http://backend-web:8089
+      STATIC_DIR: /app/static
+      BACKUP_DIR: /app/backups
+    volumes:
+      - scheduler_logs:/app/scheduler/logs
+      - static_files:/app/static
+      - backup_files:/app/backups
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      backend-web:
+        condition: service_healthy
+      websocket:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8091/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 90s
+    logging: *bounded-logging
+
+volumes:
+  mysql_data:
+  redis_data:
+  backend_web_logs:
+  websocket_logs:
+  scheduler_logs:
+  static_files:
+  backup_files:
+  browser_data:
+  quark_auth:
+  baidu_auth:
+  cloud_asset_data:
+  mcp_files:
+
+networks:
+  default:
+    ipam:
+      config:
+        - subnet: 172.18.0.0/24

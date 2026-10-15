@@ -25,6 +25,7 @@ from fastapi.responses import JSONResponse
 from loguru import logger
 
 from app.core.config import get_settings
+from common.db.redis_client import close_redis_client, initialize_redis_client
 from common.utils.logging_utils import setup_logging
 from common.utils.network_utils import resolve_listen_host
 
@@ -63,7 +64,7 @@ async def check_database_connection():
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def _application_lifespan(app: FastAPI):
     """应用生命周期管理"""
     logger.info(f"{settings.project_name} 启动中...")
     logger.info(f"服务端口: {settings.service_port}")
@@ -73,6 +74,13 @@ async def lifespan(app: FastAPI):
     if not await check_database_connection():
         logger.error("数据库连接失败，服务退出")
         sys.exit(1)
+
+    # 初始化 Redis 健康连接池；失败时按指数退避重试，最终失败则停止启动。
+    try:
+        await initialize_redis_client()
+    except Exception:
+        logger.exception("Redis连接初始化失败，服务退出")
+        raise
 
     # 只读取 backend 已准备好的服务间 API 令牌，scheduler 不负责数据库初始化。
     try:
@@ -116,6 +124,15 @@ async def lifespan(app: FastAPI):
     from common.services.order_service import close_goofish_connector
     await close_goofish_connector()
     logger.info("goofish API 连接池已关闭")
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """保证启动异常、取消和退出都释放 Redis 连接池。"""
+    try:
+        async with _application_lifespan(app):
+            yield
+    finally:
+        await close_redis_client()
 
 
 # 创建FastAPI应用

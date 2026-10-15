@@ -1,3 +1,4 @@
+import { scopedLocalStorage } from '@/utils/scopedStorage'
 import { get, post, put } from '@/utils/request'
 import type {
   ApiResponse,
@@ -417,7 +418,7 @@ export const getBackupList = async (): Promise<{ backups: Array<{ filename: stri
 
 // 下载数据库备份（管理员）
 export const downloadDatabaseBackup = (): string => {
-  const token = localStorage.getItem('auth_token')
+  const token = scopedLocalStorage.getItem('auth_token')
   return `${ADMIN_PREFIX}/backup/download?token=${token}`
 }
 
@@ -430,7 +431,7 @@ export const uploadDatabaseBackup = async (file: File): Promise<ApiResponse> => 
 
 // 导出用户备份
 export const exportUserBackup = (): string => {
-  const token = localStorage.getItem('auth_token')
+  const token = scopedLocalStorage.getItem('auth_token')
   return `/api/v1/backup/export?token=${token}`
 }
 

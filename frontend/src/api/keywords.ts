@@ -1,3 +1,4 @@
+import { scopedLocalStorage } from '@/utils/scopedStorage'
 import { get, post, put } from '@/utils/request'
 import type { Keyword, ApiResponse } from '@/types'
 
@@ -101,7 +102,7 @@ export const deleteKeyword = async (
   }
   const url = `${KEYWORD_PREFIX}/${cookieId}/${encodeURIComponent(keyword)}${params.toString() ? '?' + params.toString() : ''}`
   
-  const token = localStorage.getItem('auth_token')
+  const token = scopedLocalStorage.getItem('auth_token')
   const response = await fetch(url, {
     method: 'DELETE',
     headers: { 
@@ -207,7 +208,7 @@ export const uploadDefaultReplyImage = async (cookieId: string, image: File): Pr
 
 // 导出关键词
 export const exportKeywords = async (cookieId: string): Promise<Blob> => {
-  const token = localStorage.getItem('auth_token')
+  const token = scopedLocalStorage.getItem('auth_token')
   const response = await fetch(`${KEYWORD_PREFIX}/${cookieId}/export`, {
     headers: { Authorization: `Bearer ${token}` }
   })

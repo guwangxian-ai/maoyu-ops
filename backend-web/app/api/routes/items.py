@@ -740,7 +740,7 @@ async def get_item_detail(
     return {"item": item}
 
 
-@items_router.put("/{cookie_id}/{item_id}", response_model=ApiResponse)
+@items_router.put("/{cookie_id}/{item_id}", response_model=ApiResponse, summary="修改本地商品记录")
 async def update_item(
     cookie_id: str,
     item_id: str,
@@ -749,7 +749,12 @@ async def update_item(
     account_service: AccountService = Depends(deps.get_account_service),
     item_service: ItemService = Depends(deps.get_item_service),
 ) -> ApiResponse:
-    """更新商品信息"""
+    """仅修改本项目数据库中的商品记录，不会修改闲鱼平台商品。
+
+    success 只代表本地保存成功，不会下架或重新发布。鱼小铺平台编辑用
+    update_seller_item，平台改价/库存用 update_item_price，先核对账号能力。
+    普通账号当前没有通用平台编辑接口；下架后重新发布是需要相应授权的独立流程。
+    """
     # 管理员可以操作所有账号，普通用户只能操作自己的账号
     owner_id, _ = resolve_owner_scope(current_user)
 
@@ -761,7 +766,7 @@ async def update_item(
     if not updated:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="商品不存在")
     logger.info(f"商品更新成功: item_id={item_id}")
-    return ApiResponse(success=True, message="商品已更新")
+    return ApiResponse(success=True, message="本地商品记录已更新，未修改闲鱼平台商品")
 
 
 @items_router.put("/{cookie_id}/{item_id}/multi-spec", response_model=ApiResponse)
@@ -773,7 +778,7 @@ async def update_item_multi_spec(
     account_service: AccountService = Depends(deps.get_account_service),
     item_service: ItemService = Depends(deps.get_item_service),
 ) -> ApiResponse:
-    """更新商品的多规格状态"""
+    """修改本地商品的多规格配置，不会修改闲鱼平台的规格或库存。"""
     # 管理员可以操作所有账号，普通用户只能操作自己的账号
     owner_id, _ = resolve_owner_scope(current_user)
 
@@ -788,7 +793,7 @@ async def update_item_multi_spec(
     return ApiResponse(success=True, message=f"商品多规格状态已{status_text}")
 
 
-@items_router.put("/{cookie_id}/{item_id}/price", response_model=ApiResponse)
+@items_router.put("/{cookie_id}/{item_id}/price", response_model=ApiResponse, summary="修改鱼小铺平台商品价格与库存")
 async def update_item_price(
     cookie_id: str,
     item_id: str,
@@ -797,7 +802,10 @@ async def update_item_price(
     account_service: AccountService = Depends(deps.get_account_service),
     item_service: ItemService = Depends(deps.get_item_service),
 ) -> ApiResponse:
-    """鱼小铺商品改价（价格与库存一并提交）。
+    """直接修改闲鱼平台原商品的价格与库存，不会下架或重新发布。
+
+    仅鱼小铺账号可用，先核对真实账号能力；平台成功后更新本地价格与库存。
+    不能通过本地 update_item 替代平台改价。执行后核对平台结果，保留原商品 ID。
 
     单规格：payload = {"price": 22.22, "quantity": 242}
     多规格：payload = {"skus": [{"sku_id": "...", "price": 11.11, "quantity": 111}, ...]}
@@ -854,7 +862,7 @@ async def get_seller_item_edit_detail(
     )
 
 
-@items_router.put("/{cookie_id}/{item_id}/seller-edit", response_model=ApiResponse)
+@items_router.put("/{cookie_id}/{item_id}/seller-edit", response_model=ApiResponse, summary="编辑鱼小铺平台原商品")
 async def update_seller_item(
     cookie_id: str,
     item_id: str,
@@ -863,7 +871,11 @@ async def update_seller_item(
     account_service: AccountService = Depends(deps.get_account_service),
     item_service: ItemService = Depends(deps.get_item_service),
 ) -> ApiResponse:
-    """提交鱼小铺商品编辑到闲鱼平台，成功后重新同步该账号商品。
+    """直接修改闲鱼平台原商品，仅鱼小铺账号可用，保留原商品 ID。
+
+    此接口不会先下架再发布，不适用于普通账号。先核对账号能力与平台编辑详情。
+    平台成功后重新同步该账号商品；若平台修改成功但本地同步失败，只补查/同步，
+    不能将其视为修改未执行而重复提交或重新发布。
 
     编辑为全量覆盖式提交，服务层会先拉取平台详情作为快照，
     未改动的图片/视频/宝贝所在地/发货设置直接复用平台数据。
@@ -930,7 +942,7 @@ async def update_item_multi_quantity_delivery(
     account_service: AccountService = Depends(deps.get_account_service),
     item_service: ItemService = Depends(deps.get_item_service),
 ) -> ApiResponse:
-    """更新商品的多数量发货状态"""
+    """修改本地商品的多数量发货配置，不会修改闲鱼平台价格、规格或库存。"""
     # 管理员可以操作所有账号，普通用户只能操作自己的账号
     owner_id, _ = resolve_owner_scope(current_user)
 
@@ -955,14 +967,17 @@ class ItemDeleteRequest(PydanticBaseModel):
     cookie_id: str | None = None
 
 
-@items_router.delete("/delete", response_model=ApiResponse)
+@items_router.delete("/delete", response_model=ApiResponse, summary="删除本地商品记录及卡券关联")
 async def delete_item_unified(
     payload: ItemDeleteRequest,
     current_user: User = Depends(deps.get_current_active_user),
     account_service: AccountService = Depends(deps.get_account_service),
     item_service: ItemService = Depends(deps.get_item_service),
 ) -> ApiResponse:
-    """删除商品（统一入口，账号可选，兼容账号已删除的孤儿商品）
+    """仅删除本地商品记录及卡券关联，不会删除或下架闲鱼平台商品。
+
+    此操作会影响本站按商品匹配卡券，不能用于让平台商品停止销售。
+    统一入口，账号可选，兼容账号已删除的孤儿商品。
 
     - 传入 cookie_id：校验账号归属后按账号删除；账号不存在直接报错。
     - 未传 cookie_id：若商品所属账号仍存在则要求指定账号；账号已删除（孤儿商品）则按商品ID删除。
@@ -979,13 +994,13 @@ async def delete_item_unified(
 
     result = await item_service.delete_item_smart(owner_id, payload.item_id, account)
     if result == "ok":
-        return ApiResponse(success=True, message="商品已删除")
+        return ApiResponse(success=True, message="本地商品记录及卡券关联已删除，闲鱼平台商品未改动")
     if result == "account_required":
         return ApiResponse(success=False, message="该商品所属账号仍存在，请指定账号后再删除")
     return ApiResponse(success=False, message="商品不存在")
 
 
-@items_router.delete("/{cookie_id}/{item_id}", response_model=ApiResponse)
+@items_router.delete("/{cookie_id}/{item_id}", response_model=ApiResponse, summary="删除指定账号的本地商品记录及卡券关联")
 async def delete_item(
     cookie_id: str,
     item_id: str,
@@ -993,6 +1008,10 @@ async def delete_item(
     account_service: AccountService = Depends(deps.get_account_service),
     item_service: ItemService = Depends(deps.get_item_service),
 ) -> ApiResponse:
+    """仅删除指定账号的本地商品记录及卡券关联，不会删除或下架闲鱼平台商品。
+
+    本地删除成功不代表平台商品停止销售；停止销售应使用平台下架操作。
+    """
     # 管理员可以操作所有账号，普通用户只能操作自己的账号
     owner_id, _ = resolve_owner_scope(current_user)
 
@@ -1002,16 +1021,20 @@ async def delete_item(
     deleted = await item_service.delete_item(account, item_id)
     if not deleted:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="商品不存在")
-    return ApiResponse(success=True, message="商品已删除")
+    return ApiResponse(success=True, message="本地商品记录及卡券关联已删除，闲鱼平台商品未改动")
 
 
-@items_router.delete("/batch", response_model=ApiResponse)
+@items_router.delete("/batch", response_model=ApiResponse, summary="批量删除本地商品记录及卡券关联")
 async def batch_delete_items(
     payload: ItemBatchDeleteRequest,
     current_user: User = Depends(deps.get_current_active_user),
     account_service: AccountService = Depends(deps.get_account_service),
     item_service: ItemService = Depends(deps.get_item_service),
 ) -> ApiResponse:
+    """批量删除本地商品记录及卡券关联，不会删除或下架闲鱼平台商品。
+
+    本地删除会影响本站卡券匹配，不能将其报告为平台下架或平台删除。
+    """
     from loguru import logger
 
     # 管理员可以操作所有账号，普通用户只能操作自己的账号
@@ -1035,11 +1058,11 @@ async def batch_delete_items(
             not_found_items.append(entry.item_id)
     logger.info(f"批量删除商品: 请求={len(payload.items)}, 成功={removed}, 商品未找到={not_found_items}")
     if removed == 0 and len(payload.items) > 0:
-        return ApiResponse(success=False, message=f"未能删除任何商品（共 {len(payload.items)} 个），请检查商品是否存在")
-    return ApiResponse(success=True, message=f"已删除 {removed} 个商品")
+        return ApiResponse(success=False, message=f"未能删除任何本地商品记录（共 {len(payload.items)} 个），请检查本地记录及账号归属")
+    return ApiResponse(success=True, message=f"已删除 {removed} 个本地商品记录及其卡券关联，闲鱼平台商品未改动")
 
 
-@items_router.post("/batch-offline", response_model=ApiResponse)
+@items_router.post("/batch-offline", response_model=ApiResponse, summary="下架闲鱼平台商品（保留本地记录）")
 async def batch_offline_items(
     payload: ItemBatchOfflineRequest,
     current_user: User = Depends(deps.get_current_active_user),
@@ -1047,7 +1070,9 @@ async def batch_offline_items(
 ) -> ApiResponse:
     """批量下架商品（调用闲鱼接口，使用所选账号的Cookie）
 
-    下架 ≠ 删除：商品在卖家后台下架后仍可重新上架，本接口不改动本地商品库记录。
+    停止平台销售，保留本地商品记录和卡券关联，不删除平台商品，不自动重新发布。
+    success 可能代表部分成功，必须逐项核对 results/suc_count/fail_count。
+    本地列表仍有该商品不能证明平台仍在售。
     所选账号必须是这些商品的归属账号，否则闲鱼会对不属于该账号的商品返回失败。
     """
     # 管理员可操作所有账号，普通用户只能操作自己的账号
@@ -1085,7 +1110,7 @@ async def batch_offline_items(
     return ApiResponse(success=True, message=message, data=data)
 
 
-@items_router.post("/batch-delete-xianyu", response_model=ApiResponse)
+@items_router.post("/batch-delete-xianyu", response_model=ApiResponse, summary="删除闲鱼平台商品并清理成功项的本地记录及卡券关联")
 async def batch_delete_xianyu_items(
     request: Request,
     current_user: User = Depends(deps.get_current_active_user),
@@ -1095,7 +1120,10 @@ async def batch_delete_xianyu_items(
     """使用指定账号 Cookie 批量删除闲鱼平台商品，并同步删除本地库记录。
 
     平台删除成功的商品会同步删除本地商品记录及其卡券关联，保持本地与平台一致；
-    平台删除失败的商品保留本地记录。本地清理失败不影响平台删除结果，仅记录日志。
+    平台删除失败的商品保留本地记录。此操作是平台删除，不是下架。
+    success 可能代表部分成功，逐项核对 results/success_count/fail_count。
+    本地清理失败不改变已发生的平台删除：检查 local_deleted_count/local_failed_ids，
+    仅补查或清理失败项的本地记录，不再次删除平台商品。
     """
     owner_id, _ = resolve_owner_scope(current_user)
     try:
@@ -1229,7 +1257,8 @@ async def batch_delete_xianyu_items(
     base_message = result.get("message") or f"已删除 {success_count} 个闲鱼商品"
     if local_failed_ids:
         base_message = (
-            f"{base_message}；其中 {len(local_failed_ids)} 个本地记录清理失败，请稍后重试"
+            f"{base_message}；其中 {len(local_failed_ids)} 个本地记录或卡券关联清理失败，"
+            "请核对后仅清理这些本地记录，不要再次执行平台删除"
         )
     return ApiResponse(
         success=True,

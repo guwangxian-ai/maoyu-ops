@@ -707,7 +707,12 @@ async def publish_single(
     current_user: User = Depends(get_current_active_user),
     session: AsyncSession = Depends(get_db_session),
 ) -> Dict[str, Any]:
-    """单品发布（同步调用闲鱼卖家工作台接口并返回结果）。"""
+    """在闲鱼平台发布一个新商品，返回新商品 ID；不是修改已有商品。
+
+    不会自动下架旧商品或迁移旧商品的卡券关联。若用于修改后重发，必须已有
+    对下架/重发的授权，保存旧商品资料并核对下架结果，再发布并绑定新商品。
+    返回商品 ID 后即使本地同步失败，也应先核对平台，不能直接重复发布。
+    """
     svc = PublishExecutorService(session)
     result = await svc.publish_single(
         user_id=current_user.id,

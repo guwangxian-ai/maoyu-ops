@@ -1,3 +1,4 @@
+import { scopedLocalStorage } from '@/utils/scopedStorage'
 import { useEffect, useState, useRef } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { X, Home } from 'lucide-react'
@@ -68,6 +69,10 @@ const routeTitles: Record<string, string> = {
   '/about': '关于',
   '/personal-settings': '个人设置',
   '/cards': '卡券管理',
+  '/cloud-drive/quark': '夸克网盘',
+  '/cloud-drive/baidu': '百度网盘',
+  '/cloud-drive/assets': '同步资料',
+  '/ai-access': 'AI 接入',
   '/distribution/supply': '货源广场',
   '/distribution/card-pickup': '分销卡券',
   '/distribution/sources': '货源管理',
@@ -164,7 +169,7 @@ export const useTabsStore = create<TabsStore>()(
     }),
     {
       name: 'tabs-storage',
-      storage: createJSONStorage(() => localStorage),
+      storage: createJSONStorage(() => scopedLocalStorage),
     }
   )
 )

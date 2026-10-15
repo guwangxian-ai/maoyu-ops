@@ -24,6 +24,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from common.models.card import Card
+from common.services.cloud_asset_delivery import CloudAssetDeliveryError, resolve_cloud_asset_delivery
 from common.services.delivery_utils import (
     process_delivery_content_with_description,
     recursive_replace_params,
@@ -217,9 +218,15 @@ async def build_delivery_content(
     context = context or {}
     card_type = card.type
     text_content: Optional[str] = None
+    cloud_asset_content: Optional[str] = None
 
     if card_type == 'text':
-        text_content = card.text_content
+        try:
+            cloud_asset_content = await resolve_cloud_asset_delivery(session, card)
+        except CloudAssetDeliveryError as exc:
+            logger.warning(f"卡券 {card.id} 资料发货校验失败: {exc}")
+            return None
+        text_content = cloud_asset_content if cloud_asset_content is not None else card.text_content
     elif card_type == 'data':
         text_content = await consume_batch_data(session, card.id)
         if text_content is None:
@@ -250,6 +257,10 @@ async def build_delivery_content(
         image_urls = [card.image_url]
 
     card_description = card.description or ''
+    if cloud_asset_content is not None and card_description and '{DELIVERY_CONTENT}' not in card_description:
+        # A description containing only an order variable otherwise replaces the
+        # entire body, silently dropping every validated delivery link.
+        card_description += '\n\n{DELIVERY_CONTENT}'
 
     # 组装文本部分
     if text_content:

@@ -1,3 +1,4 @@
+import { scopedSessionStorage } from '@/utils/scopedStorage'
 /**
  * 登录弹窗公告组件
  *
@@ -24,14 +25,14 @@ export function PopupAnnouncementModal() {
   useEffect(() => {
     if (!_hasHydrated || !isAuthenticated || !token) return
     // 本次登录会话已展示过则不再拉取
-    if (sessionStorage.getItem(POPUP_ANNOUNCEMENT_SHOWN_KEY)) return
+    if (scopedSessionStorage.getItem(POPUP_ANNOUNCEMENT_SHOWN_KEY)) return
 
     let cancelled = false
     const load = async () => {
       try {
         const result = await getPublicPopupAnnouncements()
         // 无论是否有公告，本次会话都标记为已处理，避免重复拉取
-        sessionStorage.setItem(POPUP_ANNOUNCEMENT_SHOWN_KEY, '1')
+        scopedSessionStorage.setItem(POPUP_ANNOUNCEMENT_SHOWN_KEY, '1')
         if (!cancelled && result.success && result.data && result.data.items.length > 0) {
           setItems(result.data.items)
           setVisible(true)

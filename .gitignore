@@ -4,6 +4,16 @@
 
 # ------------------------------------------
 # 环境变量文件（包含敏感信息）
+# 夸克授权状态只保留在本机/私有卷，不提交到仓库
+/data/quark-auth/
+/backend-web/data/quark-auth/
+/xianyu_auto_reply/quark-auth/
+/data/baidu-auth/
+/backend-web/data/baidu-auth/
+/data/cloud-assets/
+/backend-web/data/cloud-assets/
+/data/mcp-files/
+/backend-web/data/mcp-files/
 # ------------------------------------------
 **/.env
 **/.env.local
@@ -210,6 +220,7 @@ test/
 # ------------------------------------------
 /build_output/
 /release/
+/deploy/tencent-hermes/bin/
 /data/
 *.build/
 *.dist/
@@ -267,6 +278,8 @@ slider_test/
 # AI 助手/代理本地配置（不纳入版本管理）
 # ------------------------------------------
 AGENTS.md
+# 项目级协作规则纳入版本，其他目录的个人规则继续忽略
+!/AGENTS.md
 .codex/
 .omo/
 

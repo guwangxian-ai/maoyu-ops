@@ -1,3 +1,4 @@
+import { scopedLocalStorage } from '@/utils/scopedStorage'
 import axios, { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig } from 'axios'
 import { useAuthStore } from '@/store/authStore'
 
@@ -65,7 +66,7 @@ const onRefreshFailed = (error: Error) => {
 const refreshAccessToken = async (): Promise<string> => {
   if (isRefreshing) return waitForTokenRefresh()
 
-  const refreshToken = localStorage.getItem('refresh_token')
+  const refreshToken = scopedLocalStorage.getItem('refresh_token')
   if (!refreshToken) {
     const error = new Error('登录已过期，请重新登录')
     useAuthStore.getState().clearAuth()
@@ -129,7 +130,7 @@ const retryAfterTokenRefresh = async (
 // 请求拦截器
 request.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('auth_token')
+    const token = scopedLocalStorage.getItem('auth_token')
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }

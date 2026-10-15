@@ -1,3 +1,4 @@
+import { scopedLocalStorage } from '@/utils/scopedStorage'
 import { get, post, del as httpDel, patch } from '@/utils/request'
 
 const PREFIX = '/api/v1/blacklist'
@@ -80,7 +81,7 @@ export const batchDeletePersonalBlacklist = (ids: number[]): Promise<{ success: 
 }
 
 export const exportPersonalBlacklist = async (): Promise<Blob> => {
-  const token = localStorage.getItem('auth_token')
+  const token = scopedLocalStorage.getItem('auth_token')
   const response = await fetch(`${PREFIX}/personal/export`, {
     headers: { Authorization: `Bearer ${token}` },
   })

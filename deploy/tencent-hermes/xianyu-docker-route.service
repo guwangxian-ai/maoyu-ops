@@ -1,0 +1,13 @@
+[Unit]
+Description=Host route to the Xianyu Docker network
+After=network-online.target docker.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/sbin/ip -4 rule add pref 2499 to 172.18.0.0/24 lookup main
+ExecStop=/usr/sbin/ip -4 rule del pref 2499 to 172.18.0.0/24 lookup main
+
+[Install]
+WantedBy=multi-user.target

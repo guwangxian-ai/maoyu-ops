@@ -1,3 +1,4 @@
+import { scopedLocalStorage } from '@/utils/scopedStorage'
 import { del, get, post, put } from '@/utils/request'
 import type { ApiResponse, User, UserRole, UserStatus } from '@/types'
 
@@ -423,7 +424,7 @@ export const getDbBackupLogs = async (params?: {
 export const downloadDbBackupFile = async (
   logId: number,
 ): Promise<{ success: boolean; blob?: Blob; filename?: string; message?: string }> => {
-  const token = localStorage.getItem('auth_token')
+  const token = scopedLocalStorage.getItem('auth_token')
   const response = await fetch(`${API_PREFIX}/db-backup-logs/${logId}/download`, {
     headers: token ? { Authorization: `Bearer ${token}` } : undefined,
   })

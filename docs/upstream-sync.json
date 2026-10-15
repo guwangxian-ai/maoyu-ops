@@ -1,0 +1,127 @@
+{
+  "upstream_repository": "https://github.com/zhinianboke/xianyu-auto-reply",
+  "upstream_commit": "4ba6c59d700b090d38f4976a4bbc453af02239ab",
+  "upstream_commit_date": "2026-10-11T16:53:52+08:00",
+  "synced_at": "2026-10-11T22:45:56+08:00",
+  "local_git_head": "9554f75d1f2936d000b532869162f557f9604054",
+  "common_ancestor": "1be6493c36f8c66547b91d3940ac32580b1937b9",
+  "method": "three-way working-tree merge; upstream history is recorded here without committing existing user changes",
+  "upstream_files": [
+    "README.md",
+    "backend-web/.env.example",
+    "backend-web/_bootstrap.py",
+    "backend-web/app/api/routes/chat_new.py",
+    "backend-web/pyproject.toml",
+    "common/core/config.py",
+    "common/db/redis_client.py",
+    "common/db/redis_pool.py",
+    "deploy.sh",
+    "deploy_remote.sh",
+    "docker-compose.yml",
+    "frontend/src/App.tsx",
+    "frontend/src/api/chatNew.ts",
+    "frontend/src/components/common/AuthNavbar.tsx",
+    "frontend/src/pages/about/About.tsx",
+    "frontend/src/pages/about/PublicAbout.tsx",
+    "frontend/src/pages/chat-new/ChatNew.tsx",
+    "frontend/src/pages/chat-new/useChatNewWs.ts",
+    "frontend/src/pages/dashboard/Dashboard.tsx",
+    "launcher/service_manager.py",
+    "promotion/backend/.env.example",
+    "promotion/backend/pyproject.toml",
+    "scheduler/.env.example",
+    "scheduler/_bootstrap.py",
+    "scheduler/pyproject.toml",
+    "update.sh",
+    "websocket/.env.example",
+    "websocket/_bootstrap.py",
+    "websocket/pyproject.toml"
+  ],
+  "updates": [
+    "Redis healthy connection pool, retry/configuration and lifecycle initialization",
+    "Online chat connected account restoration, reconnect message catch-up and history loading",
+    "Public about page and login navigation",
+    "Dashboard advertisement ordering and about page updates"
+  ],
+  "local_adaptations": [
+    "Keep existing Quark/Baidu/cloud assets, scoped storage and router basename",
+    "Preserve MCP dependency and align redis-py==6.2.0 across services",
+    "Serialize Redis initialization/close and close cancelled startup resources",
+    "Guarantee Redis shutdown with lifespan finally and support macOS Keepalive idle",
+    "Use token-idempotent distributed-lock acquisition for lost Redis responses",
+    "Protect chat message identity, incomplete history catch-up cursor and scroll anchor",
+    "Keep connected-accounts authorization and remove database details from error responses"
+  ],
+  "validation": {
+    "backend_tests": 189,
+    "real_redis_tests": 4,
+    "frontend_focused_checks": 13,
+    "frontend_typescript_and_vite_build": "passed",
+    "dependency_check": "passed",
+    "python_syntax": "passed",
+    "git_diff_check": "passed",
+    "config_checks": {
+      "shell_syntax": "passed",
+      "compose_yaml": "passed",
+      "redis_env_counts": {
+        "backend-web": 16,
+        "websocket": 16,
+        "scheduler": 16
+      },
+      "quark_auth_volume_preserved": true
+    },
+    "local_browser_pages": [
+      "login",
+      "dashboard",
+      "about-public",
+      "online-chat-new",
+      "cloud-drive/assets"
+    ],
+    "local_api_checks": [
+      {
+        "path": "/api/v1/chat-new/connected-accounts",
+        "http_status": 200,
+        "success": true,
+        "code": 200,
+        "connected_account_count": 0
+      },
+      {
+        "path": "/api/v1/cloud-drive/quark/status",
+        "http_status": 200,
+        "success": true,
+        "code": 200,
+        "connected": true,
+        "verified": true,
+        "provider": null
+      },
+      {
+        "path": "/api/v1/cloud-drive/baidu/status",
+        "http_status": 200,
+        "success": true,
+        "code": 200,
+        "connected": true,
+        "verified": true,
+        "provider": null
+      },
+      {
+        "path": "/api/v1/cloud-drive/assets",
+        "http_status": 200,
+        "success": true,
+        "code": 200
+      },
+      {
+        "path": "connected-accounts without auth",
+        "http_status": 200,
+        "body_code": 401,
+        "success": false
+      }
+    ],
+    "protected_existing_files": 1517,
+    "unrelated_existing_file_changes": []
+  },
+  "unverified": [
+    "Real Xianyu IM reconnect requires an authorized connected Xianyu account; local account list is empty"
+  ],
+  "deployment_performed": false,
+  "git_push_performed": false
+}

@@ -1,3 +1,4 @@
+import { scopedLocalStorage } from '@/utils/scopedStorage'
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { ShoppingCart, RefreshCw, Search, Trash2, Eye, X, Send, Loader2, Settings, Filter, Ban } from 'lucide-react'
@@ -109,12 +110,12 @@ export function Orders() {
 
   // 列配置状态
   const [columns, setColumns] = useState<ColumnConfig[]>(() => {
-    const saved = localStorage.getItem('order-columns-config')
+    const saved = scopedLocalStorage.getItem('order-columns-config')
     if (saved) {
       const parsed: ColumnConfig[] = JSON.parse(saved)
       // 如果缓存的列数量与默认不一致（新增/删除了列），重置为默认
       if (parsed.length !== defaultColumns.length) {
-        localStorage.removeItem('order-columns-config')
+        scopedLocalStorage.removeItem('order-columns-config')
         return defaultColumns
       }
       return parsed
@@ -206,12 +207,12 @@ export function Orders() {
       col.key === key ? { ...col, visible: !col.visible } : col
     )
     setColumns(newColumns)
-    localStorage.setItem('order-columns-config', JSON.stringify(newColumns))
+    scopedLocalStorage.setItem('order-columns-config', JSON.stringify(newColumns))
   }
 
   const resetColumns = () => {
     setColumns(defaultColumns)
-    localStorage.setItem('order-columns-config', JSON.stringify(defaultColumns))
+    scopedLocalStorage.setItem('order-columns-config', JSON.stringify(defaultColumns))
     addToast({ type: 'success', message: '已恢复默认列设置' })
   }
 

@@ -1,0 +1,4 @@
+Reused from https://github.com/baidu-netdisk/bdpan-storage
+Commit: 069dc7ee9f51e5a4595abd221d6263f000eaa340
+Skill v1.7.5, Apache-2.0. Official login.sh is unmodified.
+The proprietary bdpan binary is not bundled in version control.

@@ -1,0 +1,4 @@
+interface:
+  display_name: "闲鱼运营"
+  short_description: "通过 MCP 同步查询账号商品、选品上架、双网盘分享和卡券发货，核对真实回执"
+  default_prompt: "使用 $xianyu-operations 完成这次闲鱼运营任务，沿用已批准的范围并保存每一步的真实回执。"

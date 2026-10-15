@@ -1,3 +1,4 @@
+import { scopedLocalStorage } from '@/utils/scopedStorage'
 import { get, post, put, del } from '@/utils/request'
 import type { AccountDetail, ApiResponse } from '@/types'
 
@@ -781,7 +782,7 @@ export const exportAccountsExcel = async (params: {
   account_id?: string | null
   has_password?: boolean | null
 }): Promise<Blob> => {
-  const token = localStorage.getItem('auth_token')
+  const token = scopedLocalStorage.getItem('auth_token')
   const response = await fetch(`${COOKIE_PREFIX}/export`, {
     method: 'POST',
     headers: {
@@ -814,7 +815,7 @@ export const importAccountsExcel = async (file: File, enableAll: boolean): Promi
     errors: string[]
   }
 }> => {
-  const token = localStorage.getItem('auth_token')
+  const token = scopedLocalStorage.getItem('auth_token')
   const formData = new FormData()
   formData.append('file', file)
   formData.append('enable_all', String(enableAll))

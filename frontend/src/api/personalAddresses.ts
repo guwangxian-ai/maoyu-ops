@@ -1,3 +1,4 @@
+import { scopedLocalStorage } from '@/utils/scopedStorage'
 /**
  * 个人发布地址库 API
  *
@@ -71,7 +72,7 @@ export const batchDeletePersonalAddresses = (
 }
 
 export const exportPersonalAddresses = async (): Promise<Blob> => {
-  const token = localStorage.getItem('auth_token')
+  const token = scopedLocalStorage.getItem('auth_token')
   const response = await fetch(`${PREFIX}/export`, {
     headers: { Authorization: `Bearer ${token}` },
   })

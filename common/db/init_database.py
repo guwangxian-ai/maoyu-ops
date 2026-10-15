@@ -1883,6 +1883,90 @@ class DatabaseInitializer:
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='在线聊天快捷短语';
         """,
 
+        # MCP 用户令牌与调用回执
+        "xy_mcp_access_tokens": """
+            CREATE TABLE IF NOT EXISTS xy_mcp_access_tokens (
+                id VARCHAR(32) NOT NULL PRIMARY KEY,
+                owner_id BIGINT NOT NULL,
+                name VARCHAR(80) NOT NULL,
+                token_hash VARCHAR(64) NOT NULL,
+                scopes JSON NOT NULL,
+                expires_at DATETIME NOT NULL,
+                revoked_at DATETIME DEFAULT NULL,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                INDEX ix_xy_mcp_access_tokens_owner_id (owner_id)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+        """,
+        "xy_mcp_tool_logs": """
+            CREATE TABLE IF NOT EXISTS xy_mcp_tool_logs (
+                id VARCHAR(32) NOT NULL PRIMARY KEY,
+                owner_id BIGINT NOT NULL,
+                token_id VARCHAR(32) NOT NULL,
+                tool_name VARCHAR(128) NOT NULL,
+                success BOOLEAN NOT NULL DEFAULT FALSE,
+                duration_ms INT NOT NULL DEFAULT 0,
+                error_code VARCHAR(64) DEFAULT NULL,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                INDEX idx_mcp_log_owner_created (owner_id, created_at)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+        """,
+        "xy_mcp_operations": """
+            CREATE TABLE IF NOT EXISTS xy_mcp_operations (
+                id VARCHAR(32) NOT NULL PRIMARY KEY,
+                owner_id BIGINT NOT NULL,
+                token_id VARCHAR(32) NOT NULL,
+                operation_id VARCHAR(160) NOT NULL,
+                tool_name VARCHAR(128) NOT NULL,
+                required_scope VARCHAR(80) NOT NULL,
+                request_hash VARCHAR(64) NOT NULL,
+                state VARCHAR(24) NOT NULL,
+                lease_expires_at DATETIME DEFAULT NULL,
+                finished_at DATETIME DEFAULT NULL,
+                response JSON DEFAULT NULL,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                CONSTRAINT uq_mcp_operation_owner_key UNIQUE (owner_id, operation_id),
+                INDEX idx_mcp_operation_owner_created (owner_id, created_at)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+        """,
+        "xy_cloud_assets": """
+            CREATE TABLE IF NOT EXISTS xy_cloud_assets (
+                id VARCHAR(32) NOT NULL PRIMARY KEY,
+                owner_id BIGINT NOT NULL,
+                name VARCHAR(100) NOT NULL,
+                version INT NOT NULL DEFAULT 1,
+                status VARCHAR(24) NOT NULL DEFAULT 'staged',
+                message TEXT,
+                manifest JSON NOT NULL,
+                targets JSON NOT NULL,
+                published JSON,
+                analysis JSON,
+                card_id BIGINT UNIQUE,
+                created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                INDEX ix_xy_cloud_assets_owner_id (owner_id),
+                INDEX idx_cloud_asset_owner_created (owner_id, created_at)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+        """,
+        "xy_cloud_drive_jobs": """
+            CREATE TABLE IF NOT EXISTS xy_cloud_drive_jobs (
+                id VARCHAR(32) NOT NULL PRIMARY KEY,
+                owner_id BIGINT NOT NULL,
+                provider VARCHAR(20) NOT NULL DEFAULT 'quark',
+                operation VARCHAR(40) NOT NULL,
+                status VARCHAR(24) NOT NULL DEFAULT 'queued',
+                message TEXT,
+                params JSON NOT NULL,
+                progress JSON,
+                result JSON,
+                created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                INDEX ix_xy_cloud_drive_jobs_owner_id (owner_id),
+                INDEX idx_cdj_owner_created (owner_id, created_at)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+        """,
         # 52. AI铺货配置表
         "xy_ai_listing_configs": """
             CREATE TABLE IF NOT EXISTS xy_ai_listing_configs (

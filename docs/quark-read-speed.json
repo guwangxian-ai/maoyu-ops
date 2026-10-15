@@ -1,0 +1,130 @@
+{
+  "verified_at": "2026-10-12T12:42:05+08:00",
+  "status": "verified_locally",
+  "provider": "quark",
+  "official_cli_version": "1.0.22-3882c32",
+  "vendor_sha256": "0e132196bea28114cffd248b055f2e1bc64a521cb16c5cb5aba5e786199e572e",
+  "vendor_modified": false,
+  "comparison": {
+    "status": {
+      "before_mean_seconds": 5.683,
+      "after_mean_seconds": 0.973,
+      "reduction_percent": 82.9
+    },
+    "files": {
+      "before_mean_seconds": 5.713,
+      "after_mean_seconds": 1.03,
+      "reduction_percent": 82.0
+    }
+  },
+  "result_equivalence": {
+    "count_before": 7,
+    "count_after": 7,
+    "same_names": true,
+    "changed_metadata_counts": {
+      "fid": 7,
+      "size": 0,
+      "updated_at": 0,
+      "file_type": 0,
+      "category": 0,
+      "content_hash": 0,
+      "includeItems": 0
+    },
+    "stable_metadata_digest_before": "ac909253d44d5e39ed86e0b2f4f2ccab80dc8865d96a0ba478c1b79c09892613",
+    "stable_metadata_digest_after": "ac909253d44d5e39ed86e0b2f4f2ccab80dc8865d96a0ba478c1b79c09892613"
+  },
+  "browser": {
+    "first_complete_root_list_seconds": 2.53,
+    "first_status_request_seconds": 1.062,
+    "first_files_request_seconds": 1.156,
+    "first_status_request_count": 1,
+    "first_files_request_count": 1,
+    "directory_refresh_and_back": {
+      "folderSeconds": 2.114,
+      "requests": [
+        {
+          "path": "/api/v1/cloud-drive/quark/files",
+          "seconds": 1.008
+        },
+        {
+          "path": "/api/v1/cloud-drive/quark/files",
+          "seconds": 1.052
+        },
+        {
+          "path": "/api/v1/cloud-drive/quark/files",
+          "seconds": 0.995
+        }
+      ],
+      "rootRows": 7,
+      "hasError": false
+    },
+    "rapid_filter": {
+      "filter": "dir",
+      "rows": 7,
+      "hasError": false,
+      "requests": [
+        {
+          "seconds": 1.06
+        },
+        {
+          "seconds": 2.009
+        }
+      ]
+    }
+  },
+  "parallel_read_and_other_provider": {
+    "parallel_read_queue": [
+      {
+        "operation": "status",
+        "seconds": 0.96,
+        "success": true,
+        "verified": true,
+        "files": null
+      },
+      {
+        "operation": "files",
+        "seconds": 1.948,
+        "success": true,
+        "verified": null,
+        "files": 7
+      }
+    ],
+    "baidu_status": {
+      "success": true,
+      "connected": true,
+      "verified": true
+    }
+  },
+  "changes": [
+    "Only two audited diagnostic timer sites are shortened after complete successful reads",
+    "CLI hash, command, source frame, artifact and stdout-backpressure guards; retain normal process exit",
+    "No file/status result cache; coalesce identical in-flight GETs by authenticated identity and parameters",
+    "Bounded 3-second read queue preserves account serialization",
+    "Authorization session/version guards reject stale results"
+  ],
+  "validation": {
+    "python_tests_run": 197,
+    "python_tests_passed": 193,
+    "python_tests_skipped": 4,
+    "skipped_reason": "Existing optional Redis integration tests require a separate Redis test socket; Redis code was not modified in this task",
+    "node_read_bridge_tests_passed": 9,
+    "frontend_focused_checks_passed": 18,
+    "typescript_vite_build": "passed",
+    "targeted_hooks_lint": "passed",
+    "git_diff_check": "passed",
+    "real_api": "passed",
+    "real_browser": "passed"
+  },
+  "limits": [
+    "Large directories still require complete official pagination and network time",
+    "Unknown versions, invalid output, absent artifacts or backpressure retain original timing",
+    "Pure diagnostic probes or telemetry may not all finish before normal CLI exit after shortening their budget"
+  ],
+  "configuration": {
+    "QUARK_FAST_READ": true,
+    "disable": "Set QUARK_FAST_READ=false for local backend and restart"
+  },
+  "new_dependencies": [],
+  "new_service_purchases": 0,
+  "deployed": false
+}

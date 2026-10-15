@@ -1,0 +1,19 @@
+{
+  "repository": "https://github.com/qjfoidnh/BaiduPCS-Go",
+  "commit": "1b9131817aaf8ca7dee24bc00e33ebc4c7a5cc73",
+  "source": "git archive",
+  "license": "Apache-2.0",
+  "retrieved_at": "2026-10-10",
+  "local_patches": [
+    {
+      "file": "requester/http_client.go",
+      "reason": "Verify TLS certificates by default and make SetHTTPSecure honor its argument; require TLS 1.2 or newer.",
+      "test": "requester/http_client_tls_test.go"
+    },
+    {
+      "directory": "cmd/xianyu-bridge",
+      "reason": "Project-private stdin JSON bridge with pinned upstream PCS AppID, validated resource acknowledgements, credential isolation and bounded I/O.",
+      "test": "cmd/xianyu-bridge/main_test.go"
+    }
+  ]
+}

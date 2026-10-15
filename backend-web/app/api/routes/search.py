@@ -35,7 +35,7 @@ async def search_items(
     """
     搜索闲鱼商品
     
-    使用Playwright进行商品搜索，支持自动处理滑块验证
+    使用 Playwright 搜索；遇到平台验证时提示用户人工处理。
     """
     try:
         logger.info(
@@ -48,7 +48,8 @@ async def search_items(
             keyword=request.keyword,
             page=request.page,
             page_size=request.page_size,
-            db_session=db
+            db_session=db,
+            user_id=str(current_user.id),
         )
         
         # 检查是否有错误
@@ -57,6 +58,7 @@ async def search_items(
             return ApiResponse(
                 success=False,
                 message=result["error"],
+                data={"error_code": result.get("error_code", "search_failed")},
             )
         
         items = result.get("items", [])

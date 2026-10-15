@@ -5,6 +5,9 @@ SQLAlchemy模型导出
 """
 
 from common.models.user import User, UserRole, UserStatus
+from common.models.cloud_drive_job import CloudDriveJob
+from common.models.cloud_asset import CloudAsset
+from common.models.mcp_access import McpAccessToken, McpToolLog, McpOperation
 from common.models.xy_account import XYAccount
 from common.models.xy_catalog_item import XYCatalogItem
 from common.models.xy_keyword_rule import XYKeywordRule
@@ -70,6 +73,11 @@ from common.models.auto_relist_event import AutoRelistEvent
 from common.models.relist_association_migration import RelistAssociationMigration
 
 __all__ = [
+    "McpAccessToken",
+    "McpToolLog",
+    "McpOperation",
+    "CloudAsset",
+    "CloudDriveJob",
     "User",
     "UserRole",
     "UserStatus",

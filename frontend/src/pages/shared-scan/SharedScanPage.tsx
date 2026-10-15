@@ -1,3 +1,4 @@
+import { scopedSessionStorage } from '@/utils/scopedStorage'
 /**
  * 共享多人扫码登录 - 兼职端公开页面
  *
@@ -45,12 +46,12 @@ export function SharedScanPage() {
   const visitorTokenRef = useRef('')
 
   if (!visitorTokenRef.current) {
-    const existingToken = window.sessionStorage.getItem('shared_scan_visitor_token') || ''
+    const existingToken = scopedSessionStorage.getItem('shared_scan_visitor_token') || ''
     if (existingToken) {
       visitorTokenRef.current = existingToken
     } else {
       const newToken = createVisitorToken()
-      window.sessionStorage.setItem('shared_scan_visitor_token', newToken)
+      scopedSessionStorage.setItem('shared_scan_visitor_token', newToken)
       visitorTokenRef.current = newToken
     }
   }

@@ -85,6 +85,7 @@ services:
       - SCHEDULER_SERVICE_URL=http://scheduler:8091
       - STATIC_DIR=/app/static
       - BACKUP_DIR=/app/backups
+      - QUARK_AUTH_DIR=/app/quark-auth
       - BACKEND_WEB_PUBLIC_URL=${BACKEND_WEB_PUBLIC_URL:-}
       - CARD_DOCK_BASE_URL=${CARD_DOCK_BASE_URL:-http://backend.zhinianboke.com}
       - EXTERNAL_API_KEY=${EXTERNAL_API_KEY:-zhinian_bk}
@@ -104,6 +105,7 @@ services:
       - ./xianyu_auto_reply/logs/backend_web:/app/backend-web/logs
       - ./xianyu_auto_reply/static:/app/static
       - ./xianyu_auto_reply/backups:/app/backups
+      - ./xianyu_auto_reply/quark-auth:/app/quark-auth
     ports:
       - "${BACKEND_WEB_PORT:-8089}:8089"
     networks:

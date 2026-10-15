@@ -1,0 +1,14 @@
+# Reuse the locally built backend image, including Chromium and its system libraries.
+# Build backend-web first; this image stays within the xianyu-auto-reply deployment.
+FROM xianyu-auto-reply-backend-web:latest
+
+COPY websocket /app/websocket
+
+RUN python -c "import tomllib; from pathlib import Path; data = tomllib.loads(Path('/app/websocket/pyproject.toml').read_text()); Path('/tmp/websocket-requirements.txt').write_text('\n'.join(data['project']['dependencies']))" \
+    && pip install --no-cache-dir -r /tmp/websocket-requirements.txt \
+    && rm /tmp/websocket-requirements.txt
+
+RUN mkdir -p /app/websocket/logs /app/browser_data
+
+EXPOSE 8090
+CMD ["python", "websocket/main.py"]

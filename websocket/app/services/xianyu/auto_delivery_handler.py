@@ -26,6 +26,7 @@ from app.services.xianyu.delivery_utils import (
 from app.services.xianyu.yifan_api_handler import YifanApiHandler
 from common.db.compat import db_manager
 from common.services.order_service import OrderDetailService
+from common.services.cloud_asset_delivery import CloudAssetDeliveryError, resolve_cloud_asset_delivery
 from common.utils.fish_nick_utils import get_buyer_fish_nick
 from common.utils.response_field import extract_card_api_response_content
 from common.utils.xianyu_utils import trans_cookies
@@ -2340,6 +2341,25 @@ class AutoDeliveryHandler:
                 await asyncio.sleep(delay_seconds)
                 logger.info(f"延时完成")
 
+            # Validate after the delivery delay and before any platform shipping
+            # confirmation (including the no-logistics form). A bad asset must
+            # not fall back to the card's cached text or mark the order shipped.
+            if rule['card_type'] == 'text' and order_id:
+                from common.db.session import async_session_maker
+
+                try:
+                    async with async_session_maker() as asset_session:
+                        cloud_asset_content = await resolve_cloud_asset_delivery(asset_session, card)
+                except CloudAssetDeliveryError as exc:
+                    self._last_delivery_fail_reason = f"资料发货校验失败: {exc}"
+                    logger.warning(f"卡券 {rule['card_id']} {self._last_delivery_fail_reason}")
+                    return None
+                if cloud_asset_content is not None:
+                    rule['card_text_content'] = cloud_asset_content
+                    description = rule.get('card_description') or ''
+                    if description and '{DELIVERY_CONTENT}' not in description:
+                        rule['card_description'] = description + '\n\n{DELIVERY_CONTENT}'
+
             use_no_logistics_form = rule.get('use_no_logistics_form', False)
             form_trade_text = str(rule.get('card_text_content') or '').strip()
             if use_no_logistics_form:
@@ -2523,7 +2543,8 @@ class AutoDeliveryHandler:
                         return None
 
                 elif rule['card_type'] == 'text':
-                    # 固定文字类型：直接使用文字内容
+                    # Associated assets were resolved before confirming shipment;
+                    # ordinary cards retain their original fixed text.
                     text_content = rule.get('card_text_content')
 
                 elif rule['card_type'] == 'data':

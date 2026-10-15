@@ -1,0 +1,14 @@
+# Reuse the locally built backend image, including Chromium and its system libraries.
+# Build backend-web first; this image stays within the xianyu-auto-reply deployment.
+FROM xianyu-auto-reply-backend-web:latest
+
+COPY scheduler /app/scheduler
+
+RUN python -c "import tomllib; from pathlib import Path; data = tomllib.loads(Path('/app/scheduler/pyproject.toml').read_text()); Path('/tmp/scheduler-requirements.txt').write_text('\n'.join(data['project']['dependencies']))" \
+    && pip install --no-cache-dir -r /tmp/scheduler-requirements.txt \
+    && rm /tmp/scheduler-requirements.txt
+
+RUN mkdir -p /app/scheduler/logs
+
+EXPOSE 8091
+CMD ["python", "scheduler/main.py"]

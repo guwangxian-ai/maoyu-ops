@@ -483,7 +483,7 @@ export function PersonalSettings() {
         // 延迟1秒后退出登录
         setTimeout(() => {
           clearAuth()
-          window.location.href = '/login'
+          window.location.href = `${import.meta.env.BASE_URL}login`
         }, 1000)
       } else {
         addToast({ type: 'error', message: result.message || '密码修改失败' })

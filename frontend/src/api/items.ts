@@ -114,24 +114,25 @@ export const getItemsByCardId = (
   return get(`${ITEM_PREFIX}/by-card/${cardId}`)
 }
 
-// 删除商品（账号可选）
+// 仅删除本地商品记录及其卡券关联，不调用闲鱼下架或删除接口（账号可选）
 // - 传入 cookieId：按账号删除
 // - cookieId 为空（账号已删除的孤儿商品）：后端按商品ID删除
 export const deleteItem = (cookieId: string | null | undefined, itemId: string): Promise<ApiResponse> => {
   return del(`${ITEM_PREFIX}/delete`, { data: { cookie_id: cookieId || null, item_id: itemId } })
 }
 
-// 批量删除商品
+// 批量删除本地商品记录及其卡券关联，不改变闲鱼平台商品
 export const batchDeleteItems = (ids: { cookie_id: string; item_id: string }[]): Promise<ApiResponse> => {
   return del(`${ITEM_PREFIX}/batch`, { data: { items: ids } })
 }
 
-// 批量下架商品（调用闲鱼接口，使用所选账号的Cookie）
+// 批量下架闲鱼平台商品（使用所选账号的 Cookie），保留本地商品记录及卡券关联
 export const batchOfflineItems = (cookieId: string, itemIds: string[]): Promise<ApiResponse> => {
   return post(`${ITEM_PREFIX}/batch-offline`, { cookie_id: cookieId, item_ids: itemIds })
 }
 
-// 批量删除闲鱼平台商品（本地商品记录保留）
+// 批量删除闲鱼平台商品；平台删除成功项同时清理本地商品记录及卡券关联，失败项保留
+// 本地清理可能失败，需检查返回的 local_failed_ids，不能把平台删除成功视为本地清理完成
 export const batchDeleteXianyuItems = (cookieId: string, itemIds: string[]): Promise<ApiResponse> => {
   return post(`${ITEM_PREFIX}/batch-delete-xianyu`, { cookie_id: cookieId, item_ids: itemIds })
 }
@@ -151,7 +152,7 @@ export const fetchAllItemsFromAccessibleAccounts = (): Promise<FetchItemsSummary
   return post(`${ITEM_PREFIX}/get-all-from-account`, {})
 }
 
-// 更新商品
+// 仅修改本地商品记录，不同步修改闲鱼平台商品，也不会下架或重新发布
 export const updateItem = (cookieId: string, itemId: string, data: Partial<Item>): Promise<ApiResponse> => {
   return put(`${ITEM_PREFIX}/${cookieId}/${itemId}`, data)
 }
@@ -166,7 +167,7 @@ export const updateItemMultiSpec = (cookieId: string, itemId: string, enabled: b
   return put(`${ITEM_PREFIX}/${cookieId}/${itemId}/multi-spec`, { is_multi_spec: enabled })
 }
 
-// 鱼小铺商品改价（价格与库存一并提交）
+// 直接修改鱼小铺平台原商品的价格与库存，不执行下架重发
 // 单规格：{ price, quantity }；多规格：{ skus: [{ sku_id, price, quantity }] }
 export interface UpdateItemPricePayload {
   price?: number
@@ -253,7 +254,7 @@ export const getSellerItemEditDetail = (
   return get(`${ITEM_PREFIX}/${cookieId}/${itemId}/seller-detail`)
 }
 
-// 提交鱼小铺商品编辑到闲鱼平台，成功后后端会重新同步该账号商品
+// 直接修改鱼小铺平台原商品，不执行下架重发；成功后后端会重新同步该账号商品
 export const updateSellerItem = (
   cookieId: string,
   itemId: string,

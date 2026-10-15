@@ -1,0 +1,4 @@
+#!/bin/sh
+# Project adapter: official login.sh calls this name. Never use global credentials.
+set -eu
+exec "$PROJECT_BDPAN_BIN" --config-path "$PROJECT_BDPAN_CONFIG" --no-check-update "$@"

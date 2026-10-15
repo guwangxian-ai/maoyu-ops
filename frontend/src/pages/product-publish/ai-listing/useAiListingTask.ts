@@ -1,3 +1,4 @@
+import { scopedSessionStorage } from '@/utils/scopedStorage'
 /**
  * AI 铺货任务轮询 Hook
  *
@@ -35,7 +36,7 @@ export function useAiListingTask({ onFinished }: UseAiListingTaskOptions = {}) {
 
   const readStoredTaskId = (): string | null => {
     try {
-      return sessionStorage.getItem(STORAGE_KEY)
+      return scopedSessionStorage.getItem(STORAGE_KEY)
     } catch {
       return null
     }
@@ -43,7 +44,7 @@ export function useAiListingTask({ onFinished }: UseAiListingTaskOptions = {}) {
 
   const storeTaskId = (taskId: string) => {
     try {
-      sessionStorage.setItem(STORAGE_KEY, taskId)
+      scopedSessionStorage.setItem(STORAGE_KEY, taskId)
     } catch {
       // 隐私模式下写入失败不影响主流程
     }
@@ -51,7 +52,7 @@ export function useAiListingTask({ onFinished }: UseAiListingTaskOptions = {}) {
 
   const clearStoredTaskId = () => {
     try {
-      sessionStorage.removeItem(STORAGE_KEY)
+      scopedSessionStorage.removeItem(STORAGE_KEY)
     } catch {
       // 忽略
     }

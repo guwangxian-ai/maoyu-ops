@@ -183,16 +183,11 @@ class ItemSearchService:
             except Exception:
                 pass
 
-            # 处理滑块验证
-            slider_result = await self.slider_handler.handle_verification(
-                page=self.browser.page,
-                context=self.browser.context,
-                max_retries=5
-            )
-
-            if not slider_result:
-                logger.error("❌ 滑块验证失败")
-                return {'items': [], 'total': 0, 'error': '滑块验证失败'}
+            # 搜索接口遇到平台验证时交还用户，不自动操作验证码。
+            has_captcha, _ = await self.slider_handler.detect_slider(self.browser.page)
+            if has_captcha:
+                return {'items': [], 'total': 0, 'error': '闲鱼要求人工验证，请在闲鱼完成验证后重试',
+                        'error_code': 'verification_required'}
 
             await asyncio.sleep(3)
 
@@ -207,7 +202,7 @@ class ItemSearchService:
             logger.info(f"搜索完成，获取到 {len(sorted_items)} 条数据")
 
             return {
-                'items': sorted_items,
+                'items': sorted_items[:page_size],
                 'total': len(sorted_items),
                 'is_real_data': True,
                 'source': 'playwright'
@@ -280,14 +275,10 @@ class ItemSearchService:
             except Exception:
                 pass
 
-            slider_result = await self.slider_handler.handle_verification(
-                page=self.browser.page,
-                context=self.browser.context,
-                max_retries=5
-            )
-
-            if not slider_result:
-                return {'items': [], 'total': 0, 'error': '滑块验证失败'}
+            has_captcha, _ = await self.slider_handler.detect_slider(self.browser.page)
+            if has_captcha:
+                return {'items': [], 'total': 0, 'error': '闲鱼要求人工验证，请在闲鱼完成验证后重试',
+                        'error_code': 'verification_required'}
 
             await asyncio.sleep(3)
 
@@ -413,7 +404,8 @@ async def search_xianyu_items(
     keyword: str,
     page: int = 1,
     page_size: int = 20,
-    db_session: Optional[AsyncSession] = None
+    db_session: Optional[AsyncSession] = None,
+    user_id: str = "default",
 ) -> Dict[str, Any]:
     """搜索闲鱼商品的便捷函数"""
     max_retries = 2
@@ -421,12 +413,13 @@ async def search_xianyu_items(
 
     for attempt in range(max_retries + 1):
         try:
-            service = ItemSearchService(db_session)
+            service = ItemSearchService(db_session, user_id=user_id)
             logger.info(f"搜索尝试: {attempt + 1}/{max_retries + 1}")
             result = await service.search_items(keyword, page, page_size)
 
-            if result.get('items') or not result.get('error'):
-                return result
+            # search_items 已处理并格式化业务失败。原样返回可让调用方区分
+            # 依赖缺失、登录失效、人工验证与真实空结果，避免三次重开浏览器。
+            return result
 
         except Exception as e:
             logger.error(f"搜索失败 (尝试 {attempt + 1}): {str(e)}")

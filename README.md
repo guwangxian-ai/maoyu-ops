@@ -4,6 +4,10 @@
 
 主系统负责账号管理、消息收发、自动回复、自动发货、商品发布与后台管理；`promotion` 子项目负责返佣账号、选品规则、素材库、发布规则、删除规则和相关修复任务。
 
+AI 接入已提供闲鱼与网盘 MCP（Streamable HTTP + stdio 适配），当前验证目标为云端本项目。接入、工具范围、令牌权限与调用示例见 [MCP 文档](docs/mcp-api.md)。
+
+选品、上架、多网盘同步分享和卡券发货流程已封装为 [闲鱼运营 Skill](skills/xianyu-operations/SKILL.md)，服务器技能包接入、回执恢复和验证范围见 [运营技能文档](docs/skills-operations.md)。
+
 ## 🔴 说明
 
 > **🔴 诚邀各位开发者提交pr，完善系统**
@@ -351,6 +355,7 @@ npm run dev
 |------|------|
 | `MYSQL_HOST` / `MYSQL_PORT` / `MYSQL_USER` / `MYSQL_PASSWORD` / `MYSQL_DATABASE` | MySQL 连接 |
 | `REDIS_HOST` / `REDIS_PORT` / `REDIS_PASSWORD` / `REDIS_DB` | Redis 连接 |
+| `REDIS_POOL_SIZE` / `REDIS_SOCKET_TIMEOUT` / `REDIS_SOCKET_CONNECT_TIMEOUT` / `REDIS_SOCKET_KEEPALIVE` / `REDIS_SOCKET_KEEPALIVE_IDLE` / `REDIS_SOCKET_KEEPALIVE_INTERVAL` / `REDIS_SOCKET_KEEPALIVE_COUNT` / `REDIS_HEALTH_CHECK_INTERVAL` / `REDIS_PROTOCOL` / `REDIS_STARTUP_MAX_RETRIES` / `REDIS_STARTUP_RETRY_BASE_DELAY` / `REDIS_STARTUP_RETRY_CAP_DELAY` | Redis 连接池、超时、Keepalive、健康检查和启动重试配置 |
 | `JWT_SECRET_KEY` | JWT 密钥，由数据库统一托管（首次启动自动生成并持久化），无需手动配置 |
 | `INTERNAL_API_TOKEN` | 服务间 `/internal` API 共享令牌，可留空；首次启动自动生成并持久化到数据库 |
 | `BACKEND_WEB_PORT` / `WEBSOCKET_PORT` / `SCHEDULER_PORT` | 各服务端口 |

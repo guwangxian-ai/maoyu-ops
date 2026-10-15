@@ -66,6 +66,7 @@ class BrowserManager:
         self.context: Optional[BrowserContext] = None
         self.page: Optional[Page] = None
         self._user_data_dir: Optional[str] = None
+        self._profile: Optional[tempfile.TemporaryDirectory] = None
 
     @property
     def is_available(self) -> bool:
@@ -89,12 +90,10 @@ class BrowserManager:
             ensure_playwright_browser_path()
             self.playwright = await async_playwright().start()
 
-            # 设置持久化数据目录
-            self._user_data_dir = os.path.join(
-                tempfile.gettempdir(), 'xianyu_browser_cache'
-            )
-            os.makedirs(self._user_data_dir, exist_ok=True)
-            logger.info(f"使用持久化数据目录: {self._user_data_dir}")
+            # 每次搜索只使用本次注入的账号，避免并发争抢 profile 或继承
+            # 其他用户的登录状态。上下文在本次搜索期间保持持久化。
+            self._profile = tempfile.TemporaryDirectory(prefix='xianyu_search_')
+            self._user_data_dir = self._profile.name
 
             # 构建浏览器参数
             browser_args = self.DEFAULT_BROWSER_ARGS.copy()
@@ -153,6 +152,11 @@ class BrowserManager:
 
         except Exception as e:
             logger.warning(f"关闭浏览器时出错: {e}")
+        finally:
+            if self._profile:
+                self._profile.cleanup()
+                self._profile = None
+                self._user_data_dir = None
 
     async def set_cookies(self, cookie_value: str) -> bool:
         """设置浏览器cookies"""

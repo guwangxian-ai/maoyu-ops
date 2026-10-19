@@ -1,37 +1,27 @@
-# 闲鱼自动回复系统
+# MaoYuOps · 猫鱼运营
 
-基于 FastAPI + React + MySQL + Redis + Playwright 的闲鱼多账号自动化系统。
+面向闲鱼卖家的 AI 运营工作台，支持商品管理、AI 回复、网盘资料与卡券自动交付，并通过 MCP 和 Skills 接入 AI 客户端。
 
-主系统负责账号管理、消息收发、自动回复、自动发货、商品发布与后台管理；`promotion` 子项目负责返佣账号、选品规则、素材库、发布规则、删除规则和相关修复任务。
+项目仓库：[guwangxian-ai/maoyu-ops](https://github.com/guwangxian-ai/maoyu-ops)。本项目基于 [zhinianboke/xianyu-auto-reply](https://github.com/zhinianboke/xianyu-auto-reply) 二次开发，保留上游历史、贡献者信息和 [AGPL-3.0 许可证](LICENSE)。各第三方组件的许可证与来源保留在对应目录。
 
-AI 接入已提供闲鱼与网盘 MCP（Streamable HTTP + stdio 适配），当前验证目标为云端本项目。接入、工具范围、令牌权限与调用示例见 [MCP 文档](docs/mcp-api.md)。
+## 二开能力
 
-选品、上架、多网盘同步分享和卡券发货流程已封装为 [闲鱼运营 Skill](skills/xianyu-operations/SKILL.md)，服务器技能包接入、回执恢复和验证范围见 [运营技能文档](docs/skills-operations.md)。
+- **AI 接入与权限**：远程 MCP、客户端独立密钥、细分业务权限、账号归属校验，以及可下载的完整运营 Skill。
+- **操作回执与恢复**：稳定操作编号、服务端回执、结果重放与中断后查询，避免结果未知时重复提交。
+- **网盘与交付**：百度、夸克授权隔离，资料同步与分享、版本校验、商品专属卡券和付款后交付规则。
+- **AI 销售回复**：账号与商品话术、明确的议价限制、商品专属固定回复，沿用既有消息与订单流程。
 
-## 🔴 说明
+业务写入受实例权限和经营授权约束；接入 MCP 或安装 Skill 不会自动启动无人值守运营。
 
-> **🔴 诚邀各位开发者提交pr，完善系统**
->
-> **🔴 承接各类项目定制，各类项目均可，有需要可联系，另外我菜，不一定都会**
+## 文档入口
 
-## 🔴 最新源码地址(建议转存)
+- [AI 接入中心](docs/ai-access-center.md)与 [MCP 接口](docs/mcp-api.md)
+- [运营 Skill](skills/xianyu-operations/SKILL.md)与[接入验证记录](docs/skills-operations.md)
+- [网盘资料与卡券交付](docs/cloud-assets-api.md)
+- [腾讯云部署与回滚](deploy/tencent-hermes/README.md)
+- [项目更名说明](docs/maoyu-ops-branding.md)
 
-> 🔴 我用夸克网盘给你分享了「自动发货」，点击链接或复制整段内容，打开「夸克网盘APP」即可获取。
-> 
-> 🔴 /~79313YhCQU~:/
-> 
-> 🔴 **链接：https://pan.quark.cn/s/af567356cba7**
-
-## 交流群
-
-| 微信群 | QQ群 | 微信公众号 | Telegram | 赞赏支持 |
-|:---:|:---:|:---:|:---:|:---:|
-| ![微信群](https://xy.zhinianboke.com/static/qrcode/wechat-group.png) | ![QQ群](https://xy.zhinianboke.com/static/qrcode/qq-group.jpg) | ![微信公众号](https://xy.zhinianboke.com/static/qrcode/wechat-official-group.jpg) | ![Telegram](https://xy.zhinianboke.com/static/qrcode/telegram-group.png) | ![赞赏支持](https://xy.zhinianboke.com/static/qrcode/reward-group.png) |
-| 扫码加好友拉微信交流群 | 扫码加入QQ交流群 | 关注公众号发送"最新源码"获取最新代码 | 扫码加入Telegram群 | 如果觉得好用，请作者喝杯咖啡 |
-
-如群二维码过期，请关注公众号获取最新群链接。
-
----
+后端沿用 FastAPI、MySQL、Redis 与 Playwright，前端为 React、TypeScript 与 Vite。`promotion` 子项目承接上游返佣功能；当前二开能力集中在主系统。
 
 ## 功能概览
 
@@ -111,7 +101,7 @@ AI 接入已提供闲鱼与网盘 MCP（Streamable HTTP + stdio 适配），当�
 ## 项目结构
 
 ```text
-xianyu-auto-reply/
+maoyu-ops/
 ├── backend-web/          # 主 Web API 服务（端口 8089）
 ├── websocket/            # 闲鱼连接与消息处理服务（端口 8090）
 ├── scheduler/            # 定时任务服务（端口 8091）
@@ -160,73 +150,18 @@ xianyu-auto-reply/
 - 主系统三个后端服务都提供 `/health` 健康检查接口
 - Docker 依赖链：mysql/redis → backend-web → websocket → scheduler；frontend → backend-web
 
-## 快速开始
-
-### 方式一：服务器一键部署（推荐）
-
-服务器已安装 Docker 与 Docker Compose 后，直接执行一键部署脚本即可：
+## 获取源码与部署
 
 ```bash
-curl -fsSL https://xy-update.zhinianboke.com/deploy.sh | sed 's/\r$//' | bash
+git clone https://github.com/guwangxian-ai/maoyu-ops.git
+cd maoyu-ops
 ```
 
-该脚本会自动完成部署所需的配置生成、镜像拉取、旧容器清理与服务启动。
+使用下方源码构建或源码开发方式运行二开版本。已有腾讯云实例遵循[项目专属部署说明](deploy/tencent-hermes/README.md)，发布前先备份，保留业务数据和授权卷。原作者的预编译镜像、Windows 下载和更新服务属于上游版本。
 
-更新版本，直接执行一键更新脚本即可：
+既有实例可以继续使用 `/xianyu-auto-reply/` 路径和 `xianyu-operations` Skill；产品更名不要求迁移数据库、数据卷或重新授权。已有系统名称自定义设置继续生效，新安装使用猫鱼运营默认名称。
 
-```bash
-curl -fsSL https://xy-update.zhinianboke.com/update.sh | sed 's/\r$//' | bash
-```
-
-### 方式二：克隆仓库部署
-
-```bash
-git clone https://github.com/zhinianboke/xianyu-auto-reply.git
-cd xianyu-auto-reply
-bash deploy.sh
-```
-
-- 首次运行会自动生成 `.env` 配置文件和 `docker-compose.deploy.yml`
-- 从阿里云镜像仓库拉取预构建镜像并启动
-- 如果检测到加密版容器会自动清理（保留数据卷）
-- 部署完成后默认访问地址：
-  - 前端：`http://服务器IP:9000`
-  - API 文档：`http://服务器IP:8089/docs`
-  - 默认账号：`admin` / `admin123`
-
-后续更新：
-
-```bash
-bash update.sh
-```
-
-### 方式三：使用远程 MySQL / Redis 部署
-
-当 MySQL 和 Redis 由外部（如云数据库 RDS、独立服务器或已有实例）提供时，可使用 `deploy_remote.sh`。
-该脚本**不内置 mysql/redis 容器**，仅拉取并启动 4 个应用服务（frontend / backend-web / websocket / scheduler），
-数据库连接信息通过 `.env.remote` 配置。与方式一相同，直接远程拉取脚本执行即可：
-
-```bash
-# 1) 首次运行：自动生成 .env.remote 后退出，提示填写远程连接信息
-curl -fsSL https://xy-update.zhinianboke.com/deploy_remote.sh | sed 's/\r$//' | bash
-
-# 2) 编辑 .env.remote，填写真实的远程地址（勿填 localhost）
-#    MYSQL_HOST / REDIS_HOST 等
-vim .env.remote
-
-# 3) 再次运行：校验配置 → 自动生成 docker-compose.remote.yml → 拉取镜像 → 启动
-curl -fsSL https://xy-update.zhinianboke.com/deploy_remote.sh | sed 's/\r$//' | bash
-```
-
-> 已克隆仓库的也可改用本地脚本：`bash deploy_remote.sh`（首次生成配置后退出，填好 `.env.remote` 再次执行）。
-
-- 首次运行自动生成 `.env.remote`，每次运行自动生成 `docker-compose.remote.yml`，均不影响根目录原有的 `.env` / `docker-compose.yml` / `docker-compose.deploy.yml`
-- 容器名与主套保持一致（`xianyu-backend-web` / `xianyu-websocket` / `xianyu-scheduler` / `xianyu-frontend`），与方式二/方式四属于同一套部署，二者只需选其一，不要同时启动
-- 远程 MySQL 需提前创建好数据库（默认 `xianyu_data`）并授权部署机 IP 远程访问，应用启动时会自动建表与补齐字段
-- 建议远程 MySQL 持久设置 `max_connect_errors=100000`；若出现错误码 1129，需在数据库服务器执行 `FLUSH HOSTS` 解除主机封锁
-- 若远程库/缓存就在宿主机上，请使用 `host.docker.internal` 或宿主机内网 IP，**不要填 `localhost` / `127.0.0.1`**
-
-### 方式四：本地源码 Docker 构建
+### 源码 Docker 构建
 
 ```bash
 bash build.sh rebuild
@@ -252,7 +187,7 @@ bash build_websocket.sh     # 重建 WebSocket
 bash build_scheduler.sh     # 重建 Scheduler
 ```
 
-### 方式五：源码本地开发
+### 源码本地开发
 
 #### 1. 准备基础服务
 
@@ -1178,11 +1113,11 @@ GET /api/v1/external/message-logs?secret_key=your-secret-key&item_id=商品ID&me
 }
 ```
 
-## Star History
+## MaoYuOps Star History
 
-[![Star History Chart](https://star-history.dera.page/svg?repos=zhinianboke/xianyu-auto-reply&type=Date)](https://star-history.dera.page/#zhinianboke/xianyu-auto-reply&Date)
+[![Star History Chart](https://star-history.dera.page/svg?repos=guwangxian-ai/maoyu-ops&type=Date)](https://star-history.dera.page/#guwangxian-ai/maoyu-ops&Date)
 
-## 移动端 App (xianyu-mobile)
+## 上游移动端 App (xianyu-mobile)
 
 本仓库包含一个 Android 移动端客户端，位于 `xianyu-mobile/` 目录。
 

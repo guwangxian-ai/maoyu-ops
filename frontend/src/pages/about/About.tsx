@@ -91,7 +91,7 @@ export function About() {
         if (!silent) {
           addToast({
             type: 'success',
-            message: `当前已是最新版本 v${data.current_version}`,
+            message: `当前基础版本已与上游同步 v${data.current_version}`,
           })
         }
       }
@@ -155,17 +155,17 @@ export function About() {
           <MessageSquare className="w-8 h-8 text-white" />
         </div>
         <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
-          闲鱼自动回复管理系统
+          猫鱼运营 MaoYuOps
         </h1>
         <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-          智能管理您的闲鱼店铺，提升客服效率
+          闲鱼 AI 运营工作台：商品、网盘资料与卡券交付
         </p>
         {/* 版本和使用人数 */}
         <div className="flex items-center justify-center gap-3 mt-3 flex-wrap">
           {currentVersion && (
             <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-gradient-to-r from-emerald-500/10 to-teal-500/10 text-emerald-600 dark:from-emerald-500/20 dark:to-teal-500/20 dark:text-emerald-400 border border-emerald-200/50 dark:border-emerald-500/30">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              <span>v{currentVersion}</span>
+              <span>基础版本 v{currentVersion}</span>
             </div>
           )}
           {hasUpdate && updateInfo && (
@@ -175,13 +175,13 @@ export function About() {
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-gradient-to-r from-amber-500/10 to-orange-500/10 text-amber-600 dark:from-amber-500/20 dark:to-orange-500/20 dark:text-amber-400 border border-amber-200/50 dark:border-amber-500/30 hover:from-amber-500/20 hover:to-orange-500/20 transition-all cursor-pointer"
             >
               <ArrowUpCircle className="w-3.5 h-3.5" />
-              <span>有更新 v{updateInfo.remote_version}</span>
+              <span>上游更新 v{updateInfo.remote_version}</span>
             </button>
           )}
           {totalUsers > 0 && (
             <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-gradient-to-r from-blue-500/10 to-cyan-500/10 text-blue-600 dark:from-blue-500/20 dark:to-cyan-500/20 dark:text-blue-400 border border-blue-200/50 dark:border-blue-500/30">
               <Globe className="w-3.5 h-3.5" />
-              <span>{totalUsers.toLocaleString()} 人使用</span>
+              <span>上游项目 {totalUsers.toLocaleString()} 人使用</span>
             </div>
           )}
         </div>
@@ -198,7 +198,7 @@ export function About() {
             ) : (
               <RefreshCw className="w-3.5 h-3.5" />
             )}
-            <span>{checkingUpdate ? '检查中...' : '检查更新'}</span>
+            <span>{checkingUpdate ? '检查中...' : '检查上游更新'}</span>
           </button>
         </div>
       </div>
@@ -209,7 +209,7 @@ export function About() {
           <div className="vben-card-header">
             <h2 className="vben-card-title">
               <MessageCircle className="w-4 h-4 text-green-500" />
-              微信群
+              上游微信群
             </h2>
           </div>
           <div className="vben-card-body text-center">
@@ -241,7 +241,7 @@ export function About() {
           <div className="vben-card-header">
             <h2 className="vben-card-title">
               <Users className="w-4 h-4 text-blue-500" />
-              QQ群
+              上游QQ群
             </h2>
           </div>
           <div className="vben-card-body text-center">
@@ -273,7 +273,7 @@ export function About() {
           <div className="vben-card-header">
             <h2 className="vben-card-title">
               <MessageCircle className="w-4 h-4 text-green-600" />
-              微信公众号
+              上游公众号
             </h2>
           </div>
           <div className="vben-card-body text-center">
@@ -305,7 +305,7 @@ export function About() {
           <div className="vben-card-header">
             <h2 className="vben-card-title">
               <MessageCircle className="w-4 h-4 text-blue-400" />
-              Telegram
+              上游 Telegram
             </h2>
           </div>
           <div className="vben-card-body text-center">
@@ -337,7 +337,7 @@ export function About() {
           <div className="vben-card-header">
             <h2 className="vben-card-title">
               <Gift className="w-4 h-4 text-red-500" />
-              赞赏支持
+              赞赏上游作者
             </h2>
           </div>
           <div className="vben-card-body text-center">
@@ -410,6 +410,16 @@ export function About() {
         <div className="vben-card-body">
           <div className="flex flex-wrap gap-3">
             <a
+              href="https://github.com/guwangxian-ai/maoyu-ops"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+            >
+              <Github className="w-4 h-4 text-slate-600 dark:text-slate-300" />
+              <span className="text-sm font-medium text-slate-700 dark:text-slate-200">guwangxian-ai</span>
+              <span className="text-xs text-slate-500 dark:text-slate-400">MaoYuOps 二开维护</span>
+            </a>
+            <a
               href="https://github.com/zhinianboke"
               target="_blank"
               rel="noopener noreferrer"
@@ -417,7 +427,7 @@ export function About() {
             >
               <Github className="w-4 h-4 text-slate-600 dark:text-slate-300" />
               <span className="text-sm font-medium text-slate-700 dark:text-slate-200">zhinianboke</span>
-              <span className="text-xs text-slate-500 dark:text-slate-400">项目作者</span>
+              <span className="text-xs text-slate-500 dark:text-slate-400">上游作者</span>
             </a>
             <a
               href="https://github.com/legeling"
@@ -427,7 +437,7 @@ export function About() {
             >
               <Github className="w-4 h-4 text-slate-600 dark:text-slate-300" />
               <span className="text-sm font-medium text-slate-700 dark:text-slate-200">legeling</span>
-              <span className="text-xs text-slate-500 dark:text-slate-400">前端重构</span>
+              <span className="text-xs text-slate-500 dark:text-slate-400">上游前端重构</span>
             </a>
           </div>
         </div>
@@ -447,16 +457,16 @@ export function About() {
               className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition-colors text-sm"
             >
               <Cloud className="w-4 h-4" />
-              <span>Windows本地版</span>
+              <span>上游 Windows 版</span>
             </a>
             <a
-              href="https://github.com/zhinianboke/xianyu-auto-reply"
+              href="https://github.com/guwangxian-ai/maoyu-ops"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-900 text-white hover:bg-gray-800 transition-colors text-sm"
             >
               <Github className="w-4 h-4" />
-              <span>GitHub</span>
+              <span>MaoYuOps GitHub</span>
             </a>
           </div>
         </div>

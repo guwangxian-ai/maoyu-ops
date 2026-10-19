@@ -1,0 +1,77 @@
+{
+  "url": "https://43.136.91.22/xianyu-auto-reply/",
+  "ai_access_url": "https://43.136.91.22/xianyu-auto-reply/ai-access",
+  "ai_guide_url": "https://43.136.91.22/xianyu-auto-reply/ai",
+  "mcp_url": "https://43.136.91.22/xianyu-auto-reply/mcp",
+  "skill_version": "2026.10.14.1",
+  "skill_sha256": "36a04d3aad1f5ef0ee41a8563d0113124fb027dd278cd5b098f5c7f15c75c9b4",
+  "release_id": "20261016T040500Z-ai-zero",
+  "deployed_at": "2026-10-16T04:13:58.050718+00:00",
+  "status": "deployed_and_verified",
+  "previous_release_id": "20261014T153000Z",
+  "previous_record": "docs/deployment-history/20261014T153000Z.json",
+  "changes": [
+    "Preserve explicit zero values for bargaining rounds, percentage discounts and amount discounts in the WebSocket AI settings reader",
+    "Existing DeepSeek sales configuration and automatic replies verified on the server; credentials and business content remain private"
+  ],
+  "source_scope": "Only the WebSocket AI engine, its regression tests and deployment documentation synchronized; backend, frontend and Skills remain on previous production versions. The full pending GitHub merge was not deployed.",
+  "backup_directory": "/srv/xianyu-auto-reply/releases/20261016T040500Z-ai-zero/backup",
+  "backup_full_read_verified": true,
+  "rollback_script": "/srv/xianyu-auto-reply/releases/20261016T040500Z-ai-zero/rollback.py",
+  "rollback_preserves_business_database_and_operation_history": true,
+  "build_strategy": "One-file image layer on the existing WebSocket image; no new dependencies; only websocket recreated.",
+  "images": {
+    "backend-web": "sha256:cb11c1d4432a6912ff1c61ecf55fecc9df175e524eef6f5c3a36fe9b3a283636",
+    "scheduler": "sha256:a1146df4b5dacb62b6da961b99e66b2ad8e91fa62c497f9b0bdcf84411288447",
+    "websocket": "sha256:9b4a67871bfe787b98a9600b3faeeb89999933de3fef22115367dde88e80e092",
+    "redis": "sha256:6ab0b6e7381779332f97b8ca76193e45b0756f38d4c0dcda72dbb3c32061ab99",
+    "mysql": "sha256:7dcddc01f13bab2f15cde676d44d01f61fc9f99fe7785e86196dfc07d358ae2b"
+  },
+  "final_image_tag": "xianyu-auto-reply-websocket:20261016T040500Z-ai-zero",
+  "verification": {
+    "isolated_server_tests_passed": 3,
+    "old_image_reproduced_zero_value_failure": true,
+    "isolation": "network none; no production credentials or data volumes",
+    "local_functional_tests_run": false,
+    "websocket_healthy": true,
+    "database_connected": true,
+    "other_xianyu_services_unchanged": true,
+    "account_enabled_and_online": true,
+    "effective_ai_enabled": true,
+    "effective_discount_percent": 0,
+    "effective_discount_amount": 0,
+    "real_provider_sales_cases_passed": 3,
+    "dual_drive_card_and_binding_verified": true,
+    "live_buyer_messages_sent_for_testing": 0,
+    "actual_order_delivery_tested": false,
+    "frontend_rebuild_required": false,
+    "skill_version_unchanged": true,
+    "other_project_entries_checked": false,
+    "other_project_check_note": "Excluded from this task following automatic approval review; no changes made to other projects."
+  },
+  "credential_management": {
+    "existing_mcp_secret_preserved": true,
+    "added_scopes": [
+      "messages:settings:write",
+      "xianyu:items:write"
+    ],
+    "expires_at": "2027-01-12T12:31:53Z",
+    "business_credentials_in_source": false
+  },
+  "private_evidence": "data/ops-runs/silkroad-deepseek-20261016/",
+  "cost": {
+    "new_subscription_or_infrastructure_cny": 0,
+    "provider_test_calls": 4,
+    "test_usage": {
+      "prompt_tokens": 2074,
+      "completion_tokens": 691,
+      "total_tokens": 2765
+    },
+    "actual_provider_charge_cny": null,
+    "note": "Token usage is the actual API receipt; invoice amount was not queried."
+  },
+  "limitations": [
+    "Provider response tests used synthetic questions; no messages were sent to buyers and no real order was delivered for testing.",
+    "Only the WebSocket hotfix was deployed; this record does not claim the pending GitHub merge is live."
+  ]
+}

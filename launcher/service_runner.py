@@ -321,7 +321,7 @@ def run_service(service_name: str) -> None:
 
 def main():
     """解析命令行参数并启动对应服务"""
-    parser = argparse.ArgumentParser(description="闲鱼自动回复系统 - 子服务运行器")
+    parser = argparse.ArgumentParser(description="猫鱼运营 MaoYuOps - 子服务运行器")
     parser.add_argument(
         "--service",
         required=True,

@@ -21,4 +21,4 @@
 
 完整测试证据保存在私有目录 `data/local-dev/github-sync-20261015/`；云端记录位于 `/srv/xianyu-auto-reply/releases/github-sync-20261015-b11857d/verification.json`。
 
-本次仅更新 GitHub 源码，未重新部署生产服务。线上发布记录仍以 `docs/tencent-hermes-deployment.json` 为准。本次未执行真实买家消息、订单发货或浏览器交互验收，新增费用为 0。
+当时已准备好本地提交，但尚未推送到 GitHub；2026-10-19 核对远端仍为 `7951b21`。后续以 MaoYuOps 更名后的实际推送回执为准。该次合并未重新部署生产服务，线上发布记录仍以 `docs/tencent-hermes-deployment.json` 为准。该次未执行真实买家消息、订单发货或浏览器交互验收，新增费用为 0。

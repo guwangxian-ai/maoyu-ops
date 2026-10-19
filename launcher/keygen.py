@@ -71,7 +71,7 @@ def _input_time_unit_and_amount():
 def main():
     """交互式生成激活码或续期码，按提示逐步输入"""
     print("=" * 50)
-    print("  闲鱼自动回复系统 - 激活码生成工具")
+    print("  猫鱼运营 MaoYuOps - 激活码生成工具")
     print("=" * 50)
     print()
 

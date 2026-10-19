@@ -27,13 +27,19 @@
 
 商品操作的工具映射、账号限制与失败恢复见 [商品编辑、下架和删除](../skills/xianyu-operations/references/listing.md)。`items_update_item` 是本地修改；`items_delete_item_unified` / `items_delete_item` / `items_batch_delete_items` 是本地删除并清理卡券关联，均不会修改闲鱼商品状态。平台下架与平台删除是不同工具；后者还清理平台成功项的本地记录。鱼小铺平台原商品编辑与“下架后发布新商品”也不能混用。
 
+## AI 话术与问价兜底
+
+`ai_update_ai_reply_settings` 可通过 `custom_prompts` JSON 字符串配置 `default`、`tech`、`price` 三类提示词；`items_save_item_ai_prompt` 配置商品说明。修改聊天规则时需保持两处一致。当前引擎只读取商品说明前 800 个字符。
+
+达到 `max_bargain_rounds` 后不会再调用模型。可在同一 `custom_prompts` 对象加入 `price_limit_replies`，以真实商品 ID 为键、固定回复文本为值，为免费领取或固定价格商品设置准确的兜底说明。只对键匹配的商品生效，缺失、空白或非法值保留原默认拒绝回复，不改变其他商品的议价限制。领取条件、网盘链接等经营内容只写入私有配置，不放进公开文档或 Skills。
+
 ## 当前 AI 客户端接入
 
 本机 Codex 已配置名为 `xianyu` 的 MCP，通过 stdio 适配连接上述云端 HTTPS 地址。服务器发布版 `xianyu-operations` 已安装，当前会话原生 MCP 调用也已验证成功。
 
 - 私有配置：`~/.codex/private/xianyu-cloud/mcp-client.json`，权限 `0600`，保存云端地址及独立令牌；不要提交或分享文件内容。
 - stdio 适配：`~/.codex/private/xianyu-cloud/xianyu_mcp_client.py`，由 Codex 拉起，使用项目既有 Python 环境；不同客户端也可使用接入中心提供的配置模板。
-- 当前令牌仅有 `xianyu:read`、`drive:read`、`delivery:read`、`messages:read`，有效至 2026-11-12 15:23:41（北京时间）。实际发现 101 个只读工具，写入请求由服务端拒绝。增加业务权限必须有相应授权。
+- 当前会话的既有权限与有效期见[项目规则](../AGENTS.md)；实时 scopes 和工具目录以 `mcp_capabilities`、`tools/list` 为准。修改 AI 规则需要 `messages:settings:write`，商品话术需要 `xianyu:items:write`；沿用已批准范围，不为同一操作重复确认。
 
 历史 `data/local-dev/mcp-client.json` 和 `mcp-stdio.json` 指向本地开发环境，不用于当前云端验收。历史本地验证记录保留在 `mcp-verification.md`，当前结果见 [运营技能文档](skills-operations.md)。
 

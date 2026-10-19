@@ -53,7 +53,7 @@ def render_about_page(app):
         anchor=tk.W, padx=20, pady=(16, 4))
 
     # 系统名称和版本
-    tk.Label(inner, text="闲鱼自动回复管理系统",
+    tk.Label(inner, text="猫鱼运营 MaoYuOps",
              font=("微软雅黑", 12),
              fg=COLORS["text"], bg=COLORS["card_bg"]).pack(
         anchor=tk.W, padx=20)

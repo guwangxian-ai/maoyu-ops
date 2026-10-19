@@ -39,9 +39,9 @@ const DEFAULT_DISCLAIMER_SETTINGS: DisclaimerSettings = {
 }
 
 const DEFAULT_LOGIN_BRANDING_SETTINGS: LoginBrandingSettings = {
-  'login.system_name': '闲鱼管理系统',
-  'login.system_title': '高效专业的\n闲鱼自动化管理平台',
-  'login.system_description': '自动回复、智能客服、订单管理、数据分析，一站式解决闲鱼运营难题',
+  'login.system_name': '猫鱼运营',
+  'login.system_title': '闲鱼 AI 运营工作台',
+  'login.system_description': '商品管理、AI 回复、网盘资料与卡券交付，支持 MCP 和 Skills 接入。',
 }
 
 const DEFAULT_AUTH_FOOTER_AD_SETTINGS: AuthFooterAdSettings = {

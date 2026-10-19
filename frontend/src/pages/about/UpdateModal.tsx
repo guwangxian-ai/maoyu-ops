@@ -48,7 +48,7 @@ export function UpdateModal({ info, onClose }: UpdateModalProps) {
         <div className="modal-header">
           <h2 className="modal-title flex items-center gap-2">
             <ArrowUpCircle className="w-5 h-5 text-amber-500" />
-            发现新版本
+            上游版本信息
           </h2>
           <button
             type="button"
@@ -61,14 +61,14 @@ export function UpdateModal({ info, onClose }: UpdateModalProps) {
         <div className="modal-body space-y-4">
           <div className="flex items-center justify-between p-4 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-lg">
             <div>
-              <p className="text-sm text-slate-500 dark:text-slate-400">当前版本</p>
+              <p className="text-sm text-slate-500 dark:text-slate-400">当前基础版本</p>
               <p className="text-lg font-bold text-slate-700 dark:text-slate-200">
                 v{info.current_version}
               </p>
             </div>
             <div className="text-2xl text-slate-400">→</div>
             <div>
-              <p className="text-sm text-slate-500 dark:text-slate-400">最新版本</p>
+              <p className="text-sm text-slate-500 dark:text-slate-400">上游最新版本</p>
               <p className="text-lg font-bold text-emerald-600 dark:text-emerald-400">
                 v{info.remote_version}
               </p>
@@ -96,7 +96,7 @@ export function UpdateModal({ info, onClose }: UpdateModalProps) {
 
           <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
             <p className="text-xs text-blue-600 dark:text-blue-400">
-              <strong>提示：</strong>点击「前往 GitHub」跳转到项目仓库，可查看最新源码、Release 说明或 Docker 镜像信息。
+              此处展示上游项目更新。MaoYuOps 应先合并上游变更、验证后重新部署；「查看上游」可查看原作者的发布说明。
             </p>
           </div>
         </div>
@@ -115,7 +115,7 @@ export function UpdateModal({ info, onClose }: UpdateModalProps) {
             className="btn-ios-primary"
           >
             <Github className="w-4 h-4" />
-            前往 GitHub
+            查看上游
           </a>
         </div>
       </div>

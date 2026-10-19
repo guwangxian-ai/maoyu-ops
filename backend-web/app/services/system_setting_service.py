@@ -48,8 +48,8 @@ DEFAULT_DISCLAIMER_CONTENT = (
     "2. 使用本系统即表示您已充分理解并接受相关风险，并愿意自行承担相应责任。"
 )
 
-DEFAULT_LOGIN_SYSTEM_TITLE = "高效专业的\n闲鱼自动化管理平台"
-DEFAULT_LOGIN_SYSTEM_DESCRIPTION = "自动回复、智能客服、订单管理、数据分析，一站式解决闲鱼运营难题"
+DEFAULT_LOGIN_SYSTEM_TITLE = "闲鱼 AI 运营工作台"
+DEFAULT_LOGIN_SYSTEM_DESCRIPTION = "商品管理、AI 回复、网盘资料与卡券交付，支持 MCP 和 Skills 接入。"
 DEFAULT_AUTH_FOOTER_AD_HTML = "© 2026 划算云服务器 ·<a href=\"http://www.hsykj.com\" target=\"_BLANK\">www.hsykj.com</a>"
 
 DEFAULT_SYSTEM_SETTINGS: dict[str, tuple[str, str | None]] = {
@@ -58,7 +58,7 @@ DEFAULT_SYSTEM_SETTINGS: dict[str, tuple[str, str | None]] = {
     "disclaimer.checkbox_text": ("我已阅读并同意以上免责声明", "免责声明勾选提示文案"),
     "disclaimer.agree_button_text": ("同意并继续", "免责声明同意按钮文案"),
     "disclaimer.disagree_button_text": ("不同意", "免责声明不同意按钮文案"),
-    "login.system_name": ("闲鱼管理系统", "登录页系统名称"),
+    "login.system_name": ("猫鱼运营", "登录页系统名称"),
     "login.system_title": (DEFAULT_LOGIN_SYSTEM_TITLE, "登录页系统标题"),
     "login.system_description": (DEFAULT_LOGIN_SYSTEM_DESCRIPTION, "登录页系统描述"),
     "auth.footer_ad_html": (DEFAULT_AUTH_FOOTER_AD_HTML, "登录页和注册页底部广告 HTML"),

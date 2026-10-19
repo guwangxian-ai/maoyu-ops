@@ -53,7 +53,7 @@ class LauncherApp:
     def __init__(self):
         """初始化启动器界面"""
         self.root = tk.Tk()
-        self.root.title("闲鱼自动回复系统")
+        self.root.title("猫鱼运营 MaoYuOps")
         self.root.resizable(True, True)
         self.root.configure(bg=_COLORS["bg"])
         
@@ -167,7 +167,7 @@ class LauncherApp:
         container.pack(fill=tk.BOTH, expand=True)
         
         # 页面标题
-        make_header(container, "闲鱼自动回复系统", "请先完成软件激活")
+        make_header(container, "猫鱼运营 MaoYuOps", "请先完成软件激活")
         
         # 提示信息
         if hint_message:
@@ -542,7 +542,7 @@ class LauncherApp:
         container = tk.Frame(self.root, bg=_COLORS["bg"])
         container.pack(fill=tk.BOTH, expand=True)
 
-        make_header(container, "闲鱼自动回复系统", "正在检查内置浏览器环境")
+        make_header(container, "猫鱼运营 MaoYuOps", "正在检查内置浏览器环境")
 
         # 安装状态卡片
         card = make_card(container)

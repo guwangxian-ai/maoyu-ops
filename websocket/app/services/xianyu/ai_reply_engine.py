@@ -433,9 +433,9 @@ class AIReplyEngine:
         payload["api_key"] = clean_ai_text(payload.get("api_key"))
         payload["base_url"] = clean_ai_text(payload.get("base_url"))
         payload["model_name"] = clean_ai_text(payload.get("model_name"))
-        payload["max_bargain_rounds"] = int(payload.get("max_bargain_rounds") or 3)
-        payload["max_discount_percent"] = int(payload.get("max_discount_percent") or 10)
-        payload["max_discount_amount"] = int(payload.get("max_discount_amount") or 100)
+        payload["max_bargain_rounds"] = int(payload.get("max_bargain_rounds", 3) or 0)
+        payload["max_discount_percent"] = int(payload.get("max_discount_percent", 10) or 0)
+        payload["max_discount_amount"] = int(payload.get("max_discount_amount", 100) or 0)
         payload["custom_prompts"] = payload.get("custom_prompts") or ""
         payload["ai_time_range_start"] = payload.get("ai_time_range_start") or ""
         payload["ai_time_range_end"] = payload.get("ai_time_range_end") or ""
@@ -832,12 +832,26 @@ class AIReplyEngine:
                 bargain_result = await db_session.execute(bargain_stmt)
                 bargain_count = bargain_result.scalar() or 0
                 
-                # 检查议价轮数限制
+                custom_prompts = settings.get("custom_prompts", "")
+                if isinstance(custom_prompts, str) and custom_prompts:
+                    try:
+                        custom_prompts = json.loads(custom_prompts)
+                    except Exception:
+                        custom_prompts = {}
+                if not isinstance(custom_prompts, dict):
+                    custom_prompts = {}
+
+                # 检查议价轮数限制；商品可配置符合自身领取规则的固定回复。
                 if intent == "price":
                     max_bargain_rounds = settings.get("max_bargain_rounds", 3)
                     if bargain_count >= max_bargain_rounds:
                         logger.info(f"【{cookie_id}】议价次数已达上限 ({bargain_count}/{max_bargain_rounds})")
                         refuse_reply = "抱歉，这个价格已经是最优惠的了，不能再便宜了哦！"
+                        limit_replies = custom_prompts.get("price_limit_replies", {})
+                        if isinstance(limit_replies, dict):
+                            item_reply = limit_replies.get(str(item_id))
+                            if isinstance(item_reply, str) and item_reply.strip():
+                                refuse_reply = item_reply.strip()
                         
                         # 保存拒绝回复
                         refuse_message = AIChatMessage(
@@ -856,15 +870,6 @@ class AIReplyEngine:
                         return refuse_reply
                 
                 # 构建提示词
-                custom_prompts = settings.get("custom_prompts", "")
-                if isinstance(custom_prompts, str) and custom_prompts:
-                    try:
-                        custom_prompts = json.loads(custom_prompts)
-                    except Exception:
-                        custom_prompts = {}
-                elif not isinstance(custom_prompts, dict):
-                    custom_prompts = {}
-                
                 system_prompt = custom_prompts.get(
                     intent, self.default_prompts.get(intent, self.default_prompts["default"])
                 )

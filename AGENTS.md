@@ -1,6 +1,11 @@
-# 闲鱼项目协作规则
+# MaoYuOps（猫鱼运营）项目协作规则
 
 适用于本仓库。用户当前任务的明确要求优先；保留已有和无关修改。
+
+## 项目名称与兼容
+
+- 产品名为 MaoYuOps（猫鱼运营），GitHub 仓库为 `guwangxian-ai/maoyu-ops`，基于 `zhinianboke/xianyu-auto-reply` 二开。保留上游来源、提交历史和现有许可证。
+- 现有本地目录、服务器 `/srv/xianyu-auto-reply`、URL 子路径、Compose 标识、数据卷、数据库、MCP 配置和 `xianyu-operations` Skill 名称保持兼容；不能全局替换技术标识或迁移运行数据。详见[更名说明](docs/maoyu-ops-branding.md)。
 
 ## 开发与验证
 
@@ -32,3 +37,6 @@
 - 使用 Skill 脚本时显式传 `--config /Users/maowangxian/.codex/private/xianyu-cloud/mcp-client.json`。原生工具未加载时可用该脚本连接云端，不能回退到历史本地默认配置。只读接入结果与平台账号是否就绪分别报告。
 
 - 2026-10-14 已部署 Skills `2026.10.14.1` 并同步本机。MCP 写入必填稳定 `operation_id`；断线先用 `resume` / `mcp_operation_get`，不能换号重发。服务端 `observed` 只表示响应已保存，异步任务仍要核验；历史操作查原本地 ledger。
+
+- 2026-10-16 按用户的自动销售聊天配置授权，为既有云端密钥增加 `messages:settings:write` 和 `xianyu:items:write`，用于 AI 规则及商品话术配置；原密钥和到期时间保持不变。AI 服务商凭证不进入 MCP 参数、源码或运营文档，按明确授权通过既有 SSH 和配置服务私有保存；开关、话术、网盘分享及卡券仍通过 MCP 留存回执。
+- 自动回复引擎必须保留明确配置的数值 `0`，不能用 `value or default` 把零优惠、零议价轮数恢复成默认额度。对应云端隔离回归入口为 `websocket/tests/test_ai_reply_settings.py`；本地仍只做语法检查，发布与结果见部署记录。

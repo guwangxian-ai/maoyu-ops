@@ -121,7 +121,7 @@ def guide() -> str:
     base = public_base()
     return f"""# 闲鱼与网盘 AI 接入说明
 
-这是用户部署的 xianyu-auto-reply 项目。此公开文档仅描述接入方法，不包含凭证或经营授权。
+这是用户部署的 MaoYuOps（猫鱼运营，基于 xianyu-auto-reply 二开）实例。此公开文档仅描述接入方法，不包含凭证或经营授权。
 
 ## 当前服务
 

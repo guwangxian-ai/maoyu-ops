@@ -2,11 +2,13 @@
 
 ## 当前实现
 
-当前使用云端 `https://43.136.91.22/xianyu-auto-reply/mcp`，使用官方 Python MCP SDK 的 **Streamable HTTP**。MCP 与云端网页调用相同的业务接口、数据库、网盘授权和任务实现。网页入口为 `https://43.136.91.22/xianyu-auto-reply/`。本地开发、备份后部署和云端验证流程见 [项目规则](../AGENTS.md)。
+当前使用云端 `https://43.136.91.22/maoyu-ops/mcp`，使用官方 Python MCP SDK 的 **Streamable HTTP**。MCP 与云端网页调用相同的业务接口、数据库、网盘授权和任务实现。网页入口为 `https://43.136.91.22/maoyu-ops/`。本地开发、备份后部署和云端验证流程见 [项目规则](../AGENTS.md)。
 
 完整业务权限下共 **245 个业务工具和 3 个 MCP 辅助工具**。`tools/list` 按令牌权限过滤；实际名称、参数和说明以发现结果为准。新增 HTTP 路由不会自动加入 MCP，需要在 `backend-web/app/mcp/catalog.py` 中明确登记。
 
 已提供 [AI 接入中心](ai-access-center.md) 和可下载的运营 Skills，服务器版本与验证状态见 [部署回执](tencent-hermes-deployment.json)。MCP 负责执行能力；[闲鱼运营 Skill](skills-operations.md) 提供同步、选品、上架、资料同步分享和卡券发货流程；连接本身不会启用定时运营、自动消费或无人值守发布。
+
+商品准入与处罚处理按 [Skill 合规流程](../skills/xianyu-operations/references/compliance.md) 执行，简要约束由同一来源供公开接入说明和 MCP 提示使用。它不新增品牌关键词硬拦截或改变权限；客户端须读取最新说明，不能把 MCP 请求通过解释成商品合规或允许销售。
 
 ## 已封装的业务范围
 
@@ -24,6 +26,8 @@
 不向 MCP 暴露系统管理、数据库管理、原始 Cookie/密码、AI 供应商密钥管理、MCP 令牌管理和返佣子系统等接口。卡券关联限制为本人卡券和本人商品；涉及对接卡券的关联继续使用现有页面。平台本身不支持的能力不会用模拟结果补齐：夸克目前不能删除云端文件，也不能枚举全部历史分享；先读取对应 `capabilities`。
 
 **商品查询的新旧数据边界：** `items_list_items*` 和 `items_get_item_detail` 读取本项目数据库。查询闲鱼当前情况时，先用 `items_fetch_all_items_from_account` 同步相应账号并检查完成结果；传 `body.cookie_id` 是「获取商品」，省略则是「获取所有账号商品」。这类同步属 `xianyu:read`，会更新系统副本，不改写闲鱼平台商品。同步只覆盖在售，未返回的本地旧记录可能保留；`success=true` 也可能包含跳过或部分账号失败。不能仅凭本地存在/缺失判断平台状态，详细顺序见 [技能同步规则](../skills/xianyu-operations/references/catalog-sync.md)。
+
+**选品查询：** `search_search_items` 搜索其他卖家的市场商品；先取得真实样本并核对“人想要”标签，再按 [选品与需求验证](../skills/xianyu-operations/references/selection.md) 处理缺失值、样本偏差、历史增量和试卖收益。`wantNum` 可能为 0，`want_count` 缺标签时也可能是默认值；查询成功不代表存在销量证据。该指引已接入源码中的公开说明、技能包及 MCP 提示，线上发布状态见[运营技能文档](skills-operations.md)。
 
 商品操作的工具映射、账号限制与失败恢复见 [商品编辑、下架和删除](../skills/xianyu-operations/references/listing.md)。`items_update_item` 是本地修改；`items_delete_item_unified` / `items_delete_item` / `items_batch_delete_items` 是本地删除并清理卡券关联，均不会修改闲鱼商品状态。平台下架与平台删除是不同工具；后者还清理平台成功项的本地记录。鱼小铺平台原商品编辑与“下架后发布新商品”也不能混用。
 
@@ -68,7 +72,7 @@ Codex 配置使用 Python、脚本和私有配置的绝对路径，不依赖工�
 支持 Streamable HTTP 且能设置请求头的客户端，也可以直接连接：
 
 ```text
-URL: https://43.136.91.22/xianyu-auto-reply/mcp
+URL: https://43.136.91.22/maoyu-ops/mcp
 Authorization: Bearer <从私有配置读取的 MCP 令牌>
 ```
 
@@ -76,12 +80,12 @@ Authorization: Bearer <从私有配置读取的 MCP 令牌>
 
 ## 创建和管理令牌
 
-为新的 AI 客户端单独生成令牌；优先在云端 [AI 接入中心](https://43.136.91.22/xianyu-auto-reply/ai-access) 创建、验证和管理。默认仅有四个域的读取权限。CLI 也支持交互初始化：
+为新的 AI 客户端单独生成令牌；优先在云端 [AI 接入中心](https://43.136.91.22/maoyu-ops/ai-access) 创建、验证和管理。默认仅有四个域的读取权限。CLI 也支持交互初始化：
 
 ```bash
 data/local-dev/venv/bin/python scripts/xianyu_mcp_client.py \
   --config ~/.codex/private/xianyu-cloud/another-mcp-client.json init \
-  --url https://43.136.91.22/xianyu-auto-reply --username admin --name "AI client" --days 30
+  --url https://43.136.91.22/maoyu-ops --username admin --name "AI client" --days 30
 ```
 
 CLI 交互输入网站密码，不将密码放在命令参数、标准输出或配置中。若本站登录需要验证码，先在网页完成人工登录，再通过 `--website-token-file` 提供一个仅包含本人网站 JWT 的私有文件。CLI 不会查找浏览器或其他工具的认证材料。
@@ -189,3 +193,10 @@ mcp_upload_file / HTTP 上传
 `running → observed/uncertain`：先持久占用，后派发一次；连接取消不会取消已派发任务；心跳失效只标未知，不接管执行。`mcp_operation_get`、`mcp_operations_list` 按本人及当前权限提供只读恢复，撤销/过期的密钥不能查询。`observed` 包含成功或失败响应；异步任务另查状态。未知响应、5xx、持久化失败不应触发重试。相同编号返回原响应，不同参数返回冲突。
 
 这是 MCP 调用去重，不覆盖不同编号、网站请求、原有自动任务或平台内部重试。升级前历史仍查本地 ledger；大响应文件句柄保留原有效期。回执不自动删除，备份和回滚应保留新增历史，不能用旧库覆盖后再重放请求。部署验证及备份路径以部署记录为准。
+
+
+## 商品在售快照（2026-10-23）
+
+2026-10-23 的 `2026.10.23.2` 已同步[虚拟商品售后与发货承诺](../skills/xianyu-operations/references/listing.md#虚拟商品售后与发货承诺)。当前版本、后续全账号发布约定与验证结果统一见[运营技能文档](skills-operations.md)；以下保留该轮商品快照功能的历史验证记录。完整成功同步后一次更新账号的在售快照，未返回的历史商品标记待核实；失败、锁被跳过或范围不完整不改检查状态。卡券、AI 回复与历史记录保留。分页列表新增 `sale_status` 筛选，返回最近完整检查时间与最近确认在售时间；详情与操作规则统一见 [账号商品同步与查询](../skills/xianyu-operations/references/catalog-sync.md)。
+
+已完成前端子路径构建、48 项云端隔离回归、真实 MCP 完整/截断同步及状态筛选验证；公开包、源码与本机文件一致。页面筛选、空结果、同步反馈及布局使用云端已部署前端配合浏览器内隔离 API/存储数据验证，未冒充生产后台登录验收。既有密钥、权限、授权卷和运营设置保持，未执行平台发布、下架或订单发货。本次用户明确不备份，部署信息见 [当前记录](tencent-hermes-deployment.json)。

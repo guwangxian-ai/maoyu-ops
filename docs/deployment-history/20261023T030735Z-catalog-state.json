@@ -1,0 +1,270 @@
+{
+  "product": "MaoYuOps（猫鱼运营）",
+  "repository": "https://github.com/guwangxian-ai/maoyu-ops",
+  "source_commit": "3d34088b9ad53711d91159392d497cfe47bd5cc5",
+  "source_revision_note": "Current shared-service, frontend and Skills patch over the existing deployed images; no Git commit or push in this task.",
+  "source_patch_files": [
+    "AGENTS.md",
+    "backend-web/app/api/routes/items.py",
+    "backend-web/app/mcp/onboarding.py",
+    "backend-web/app/mcp/server.py",
+    "backend-web/tests/test_catalog_snapshot.py",
+    "common/services/auto_relist_task.py",
+    "common/services/item_service.py",
+    "common/services/xianyu_seller_item_client.py",
+    "common/utils/item_info_manager.py",
+    "deploy/tencent-hermes/README.md",
+    "deploy/tencent-hermes/compose.yaml",
+    "deploy/tencent-hermes/nginx-location.conf",
+    "docs/ai-access-center.md",
+    "docs/deployment-history/20261016T055818Z-free-chat.json",
+    "docs/deployment-history/20261019T051339Z-maoyu-3d34088.json",
+    "docs/deployment-history/20261019T095600Z-maoyu-url.json",
+    "docs/deployment-history/20261020T085906Z-skills-20261020.json",
+    "docs/deployment-history/20261022T021123Z-skills-20261022.json",
+    "docs/deployment-history/20261022T061318Z-skills-compliance-20261022.json",
+    "docs/maoyu-ops-branding.md",
+    "docs/mcp-api.md",
+    "docs/skills-operations.md",
+    "docs/tencent-hermes-deployment.json",
+    "frontend/index.html",
+    "frontend/src/api/items.ts",
+    "frontend/src/pages/items/Items.tsx",
+    "frontend/src/types/index.ts",
+    "frontend/src/utils/scopedStorage.ts",
+    "frontend/vite.config.ts",
+    "skills/xianyu-operations/SKILL.md",
+    "skills/xianyu-operations/references/catalog-sync.md",
+    "skills/xianyu-operations/references/compliance.md",
+    "skills/xianyu-operations/references/listing.md",
+    "skills/xianyu-operations/references/selection.md"
+  ],
+  "url": "https://43.136.91.22/maoyu-ops/",
+  "ai_access_url": "https://43.136.91.22/maoyu-ops/ai-access",
+  "mcp_url": "https://43.136.91.22/maoyu-ops/mcp",
+  "skill_url": "https://43.136.91.22/maoyu-ops/ai/skills/xianyu-operations.zip",
+  "skill_version": "2026.10.23.1",
+  "skill_sha256": "3aedc629df36b9e13afbbc83f2acdf4cd85913e0d95f0a31531c841f4bae8eef",
+  "release_id": "20261023T030735Z-catalog-state",
+  "previous_release_id": "20261022T061318Z-skills-compliance-20261022",
+  "previous_record": "docs/deployment-history/20261022T061318Z-skills-compliance-20261022.json",
+  "deployed_at": "2026-10-23T03:14:20.485010+00:00",
+  "verified_at": "2026-10-23T03:29:15.881480+00:00",
+  "status": "deployed_and_verified",
+  "changes": [
+    "Complete account snapshots atomically mark returned items on_sale and missing historical records pending_verification; no local deletion.",
+    "Failed/skipped/truncated sync keeps previous check state and timestamps; malformed pages and duplicates fail closed.",
+    "Preserve item IDs, AI replies, delivery card relations and order history; expose status filters and check times.",
+    "Synchronize the shared implementation across backend, websocket and scheduler; update deployed frontend and public/local Skills."
+  ],
+  "deployed_patch_files": {
+    "common/services/item_service.py": "b144b9ac853941d54a8b43e1a6f55bfcbbf593c35d0f443da81c0ab91751caf5",
+    "common/services/xianyu_seller_item_client.py": "246e7774bbca29019705f0c3b48bf364430fc0482a3557de351272c952802a94",
+    "common/utils/item_info_manager.py": "f9709c959ea94b57c4b831ff9e19fefc1f858a4f8ac6ac7fd78bf6efb73bdb99",
+    "common/services/auto_relist_task.py": "5ebc6a4f42867642970c34af220915769985f913140feffaa481ef71d4f8dd44",
+    "backend-web/app/api/routes/items.py": "f0046a686af422c265d0b5728cb496d91a7503f573df8b5a2c244096c4ea3e66",
+    "backend-web/app/mcp/onboarding.py": "3d3e2ab7f2a49d66554b3766cdeabfc419e8d4757bce117114e229f40d30ffa6",
+    "backend-web/app/mcp/server.py": "3ac8aa5ca3648a6709c5869039c2bc2523a1e0a5fa66488b9a04a8a1661fbe68",
+    "backend-web/tests/test_catalog_snapshot.py": "5bc8d3232e2314f7e02f05c3ccfb7a019ec9d73f9b64449c90f3cb086856610f",
+    "frontend/src/pages/items/Items.tsx": "1b284efc0f34673c44ae48e26d19459c1b0d0f94d5801749eca5e1bfc45afc8e",
+    "frontend/src/api/items.ts": "d57d686e05898e580c8ce85969214fe3c9adaba2f7c11df4f213e36f81ac9c09",
+    "frontend/src/types/index.ts": "59991685bf0644bef2d6db5e43a836a910305ad08623fdb9f9bda10ef8f91a7a",
+    "skills/xianyu-operations/SKILL.md": "06c84e5e9ecd6f0122c9b17a9c2892fac9eb2f1931d3d66a7866c01ca6f2548a",
+    "skills/xianyu-operations/references/catalog-sync.md": "75fa96bf31e1b7f493b3ff427146caf2ecfd898eda38846260adf7f51b7245c6",
+    "AGENTS.md": "6267238469db68e5852e589275febadfb2b17d7964d3f16363ab20814d96ec15"
+  },
+  "database_migration": false,
+  "state_storage": "Existing catalog metadata JSON sale_snapshot; additive fields only.",
+  "backup_choice": "explicit_no_backup",
+  "backup_created": false,
+  "backup_available": false,
+  "backup_directory": null,
+  "rollback_script": null,
+  "rollback_available": false,
+  "backup_policy": "Ask once before a future deployment unless the user has already chosen backup or no backup; no automatic backup or rollback tags.",
+  "recovery_options": {
+    "previous_images": {
+      "backend-web": "sha256:febf6152d3a51d84d5cc93e7a17944763a87958a178ee928ee5f30d544ebc15e",
+      "websocket": "sha256:f262359555adfb4dcd472c140ed735fc9e6ade687b07da0cb249f8f79413a77c",
+      "scheduler": "sha256:321a9dc462ecdc80505639e31f41ee2bc885fe43ebfcca10d7dc64ab41048142"
+    },
+    "note": "No backup or rollback tags created; inspect existing source/images before any code-only recovery. No database or authorization-volume recovery promised."
+  },
+  "images": {
+    "scheduler": "sha256:21a1d4d70351bedf62816fcf643afaf16c08315746fb39622d9484e4237ab6da",
+    "websocket": "sha256:7921c37a526ae19978cf8af9e0e6684e80026f5445ce4b5a44d84d5276e91815",
+    "backend-web": "sha256:aac790185093c2b07e6ce79823665a3aace908e4fbd03e602c9ccec14cf83814",
+    "redis": "sha256:6ab0b6e7381779332f97b8ca76193e45b0756f38d4c0dcda72dbb3c32061ab99",
+    "mysql": "sha256:7dcddc01f13bab2f15cde676d44d01f61fc9f99fe7785e86196dfc07d358ae2b"
+  },
+  "http_ready_seconds": 22.03,
+  "all_services_healthy_seconds": 55.66,
+  "verification": {
+    "cloud_isolated_tests": {
+      "passed": true,
+      "catalog_snapshot": 21,
+      "public_and_mcp": 27,
+      "total": 48,
+      "network": "none",
+      "production_credentials_or_volumes": false
+    },
+    "frontend_types_and_build_passed": true,
+    "live_mcp": {
+      "passed": true,
+      "tool_count": 213,
+      "fresh_schema": true,
+      "guide_consistent": true,
+      "scopes_unchanged": true,
+      "cloud_authorizations_preserved": true,
+      "accounts": {
+        "1769522882": {
+          "local_count": 4,
+          "platform_count": 4,
+          "filters": {
+            "on_sale": 4,
+            "pending_verification": 0,
+            "unchecked": 0
+          },
+          "checked_at": "2026-10-23T03:16:11.730610+00:00",
+          "sync_ms": 656.5,
+          "bindings_and_ai_preserved": true
+        },
+        "2221435078843": {
+          "local_count": 7,
+          "platform_count": 7,
+          "filters": {
+            "on_sale": 7,
+            "pending_verification": 0,
+            "unchecked": 0
+          },
+          "checked_at": "2026-10-23T03:16:13.310103+00:00",
+          "sync_ms": 638.9,
+          "bindings_and_ai_preserved": true
+        }
+      }
+    },
+    "live_truncated_sync_preserves_states_and_times": true,
+    "all_five_services_healthy": true,
+    "new_container_restarts": 0,
+    "environments_and_data_mounts_unchanged": true,
+    "mysql_and_redis_containers_unchanged": true,
+    "other_project_entries_unchanged": true,
+    "nginx_and_compose_unchanged": true,
+    "account_settings_and_online_status_preserved": true,
+    "cloud_authorizations_preserved": true,
+    "catalog_ids_ai_prompts_card_relations_and_default_replies_preserved": true,
+    "historical_orders_preserved_in_isolated_regression": true,
+    "public_and_installed_skill": {
+      "passed": true,
+      "skill_version": "2026.10.23.1",
+      "skill_sha256": "3aedc629df36b9e13afbbc83f2acdf4cd85913e0d95f0a31531c841f4bae8eef",
+      "package_bytes": 43333,
+      "package_files": 15,
+      "source_and_public_files_match": true,
+      "frontend_index_and_item_assets_match": true,
+      "private_404": true,
+      "mcp_unauthorized_401": true,
+      "etag_304": true,
+      "version": "2026.10.23.1",
+      "files_match_public_package": 15,
+      "changed_files": 3,
+      "private_mcp_config_preserved": true,
+      "doctor_ok": true,
+      "tool_count": 213
+    },
+    "ui": {
+      "passed": true,
+      "checks": [
+        "pending filter",
+        "legacy cache is unchecked",
+        "keyboard focus and Tab",
+        "on-sale filter",
+        "combined search empty",
+        "failed feedback",
+        "partial feedback",
+        "skipped feedback",
+        "complete feedback"
+      ],
+      "mode": "deployed frontend with page-local isolated API/storage fixtures; live business verified separately through MCP",
+      "real_production_ui_login_tested": false,
+      "console_errors": 0
+    },
+    "performance": {
+      "sample": "two accounts, 11 in-sale items; no load test",
+      "sync_ms": {
+        "1769522882": 656.5,
+        "2221435078843": 638.9
+      },
+      "health_median_ms_before": 3.2,
+      "health_median_ms_after": 3.25,
+      "container_stats": [
+        {
+          "BlockIO": "1.22MB / 3.45MB",
+          "CPUPerc": "0.09%",
+          "Container": "b71c3eabf563cf370c087fdec0738ff55c89d760fe95d811f531c9480fc0a9c5",
+          "ID": "b71c3eabf563",
+          "MemPerc": "14.05%",
+          "MemUsage": "107.9MiB / 768MiB",
+          "Name": "xianyu-auto-reply-scheduler-1",
+          "NetIO": "6.75MB / 2.43MB",
+          "PIDs": "7"
+        },
+        {
+          "BlockIO": "8.14MB / 3.38MB",
+          "CPUPerc": "0.11%",
+          "Container": "792ce048b0d8837cc278318cce44c8e9b7adb244b8cd3a9fd6130064a79400e9",
+          "ID": "792ce048b0d8",
+          "MemPerc": "9.52%",
+          "MemUsage": "119MiB / 1.221GiB",
+          "Name": "xianyu-auto-reply-websocket-1",
+          "NetIO": "425kB / 180kB",
+          "PIDs": "7"
+        },
+        {
+          "BlockIO": "31.7MB / 6.86MB",
+          "CPUPerc": "0.09%",
+          "Container": "cbf6d954d077635bb4a8ab7707f114c504facfacd113509abc3dca3c182d364c",
+          "ID": "cbf6d954d077",
+          "MemPerc": "16.23%",
+          "MemUsage": "202.9MiB / 1.221GiB",
+          "Name": "xianyu-auto-reply-backend-web-1",
+          "NetIO": "1.46MB / 7.04MB",
+          "PIDs": "8"
+        },
+        {
+          "BlockIO": "3.74GB / 3.8GB",
+          "CPUPerc": "0.41%",
+          "Container": "4e4f3819b48cc8c90d26db350c0e5111438ed80998f273d0fe48bda90fb9c07b",
+          "ID": "4e4f3819b48c",
+          "MemPerc": "1.35%",
+          "MemUsage": "4.332MiB / 320MiB",
+          "Name": "xianyu-auto-reply-redis-1",
+          "NetIO": "517MB / 109MB",
+          "PIDs": "7"
+        },
+        {
+          "BlockIO": "1.55GB / 36.8GB",
+          "CPUPerc": "0.33%",
+          "Container": "b24b6da1bc05d8527baa7979a519e897d63bac92f1fde491a7c72a0f8fdc2ec7",
+          "ID": "b24b6da1bc05",
+          "MemPerc": "17.47%",
+          "MemUsage": "134.2MiB / 768MiB",
+          "Name": "xianyu-auto-reply-mysql-1",
+          "NetIO": "5.65GB / 11.9GB",
+          "PIDs": "56"
+        }
+      ]
+    },
+    "cost": {
+      "new_paid_service_calls": 0
+    }
+  },
+  "limits": [
+    "A missing in-sale item does not establish punishment, manual offlining, sale-out or deletion; the reason stays unverified.",
+    "State is the latest complete check, not a real-time platform push feed.",
+    "UI was tested with page-local fixtures against the deployed frontend; actual business endpoints were checked through authenticated MCP.",
+    "No live platform offlining/deletion/publication or buyer-message/order-delivery test was performed."
+  ],
+  "private_evidence_directory": "data/ops-runs/catalog-state-fix-20261023",
+  "temporary_resources": "The finalization receipt records deletion of the task build staging, uploaded archive and redundant candidate tags; production data and active images are retained."
+}

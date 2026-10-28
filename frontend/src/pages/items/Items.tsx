@@ -37,6 +37,7 @@ export function Items() {
   const [searchKeyword, setSearchKeyword] = useState('')
   const [selectedIds, setSelectedIds] = useState<Set<string | number>>(new Set())
   const [fetchingType, setFetchingType] = useState<'single' | 'all' | null>(null)
+  const [syncMessage, setSyncMessage] = useState('')
   
   // 分页状态
   const [pagination, setPagination] = useState({
@@ -49,6 +50,7 @@ export function Items() {
   
   // 筛选状态
   const [filters, setFilters] = useState<ItemFilterParams>({
+    sale_status: null,
     is_polished: null,
     is_multi_spec: null,
     multi_quantity_delivery: null,
@@ -206,6 +208,7 @@ export function Items() {
   // 重置筛选条件
   const handleResetFilters = () => {
     const emptyFilters: ItemFilterParams = {
+      sale_status: null,
       is_polished: null,
       is_multi_spec: null,
       multi_quantity_delivery: null,
@@ -226,21 +229,28 @@ export function Items() {
     }
 
     setFetchingType('single')
+    setSyncMessage('正在完整检查该账号的在售列表…')
 
     try {
       // 使用获取所有页的接口，后端会自动遍历所有页
       const result = await fetchAllItemsFromAccount(selectedAccount)
 
       if (result.success) {
-        const totalCount = (result as { total_count?: number }).total_count || 0
-        const savedCount = (result as { saved_count?: number }).saved_count || 0
-        addToast({ type: 'success', message: `成功获取商品，共 ${totalCount} 件，保存 ${savedCount} 件` })
+        const complete = result.snapshot_complete === true && result.state_updated === true
+        const message = result.message || (complete ? '完整检查完成' : '本次未完整检查，原状态未更改')
+        setSyncMessage(message)
+        addToast({ type: complete ? 'success' : 'warning', message })
         await loadItems()
       } else {
-        addToast({ type: 'error', message: result.message || '获取商品失败' })
+        const message = result.message || '获取商品失败，原在售状态未更改'
+        setSyncMessage(message)
+        addToast({ type: 'error', message })
       }
     } catch {
-      addToast({ type: 'error', message: '获取商品失败' })
+      // 请求中断不代表服务器未完成；刷新本地快照核对，避免凭连接错误猜状态。
+      setSyncMessage('获取请求中断，正在读取已保存的检查结果；请以最近检查时间为准。')
+      addToast({ type: 'error', message: '获取请求中断，请核对最近检查时间' })
+      await loadItems()
     } finally {
       setFetchingType(null)
     }
@@ -248,30 +258,29 @@ export function Items() {
 
   const handleFetchAllItems = async () => {
     setFetchingType('all')
+    setSyncMessage('正在逐个完整检查账号的在售列表…')
 
     try {
       const result = await fetchAllItemsFromAccessibleAccounts()
 
       if (result.success) {
-        const totalCount = result.total_count || 0
-        const savedCount = result.saved_count || 0
-        const accountCount = result.account_count || 0
-        const successAccountCount = result.success_account_count || 0
-        const failedAccountCount = result.failed_account_count || 0
-        const firstFailedAccount = result.failed_accounts?.[0]
-        const message = failedAccountCount > 0
-          ? `已获取 ${successAccountCount}/${accountCount} 个账号商品，共 ${totalCount} 件，保存 ${savedCount} 件；失败 ${failedAccountCount} 个账号${firstFailedAccount ? `，例如：${firstFailedAccount}` : ''}`
-          : `成功获取 ${accountCount} 个账号商品，共 ${totalCount} 件，保存 ${savedCount} 件`
+        const complete = result.snapshot_complete === true
+        const message = result.message || '请核对各账号的完整检查结果'
+        setSyncMessage(message)
         addToast({
-          type: failedAccountCount > 0 ? 'warning' : 'success',
+          type: complete ? 'success' : 'warning',
           message,
         })
         await loadItems()
       } else {
-        addToast({ type: 'error', message: result.message || '获取所有账号商品失败' })
+        const message = result.message || '获取所有账号商品失败，原在售状态未更改'
+        setSyncMessage(message)
+        addToast({ type: 'error', message })
       }
     } catch {
-      addToast({ type: 'error', message: '获取所有账号商品失败' })
+      setSyncMessage('批量获取请求中断，已完成的账号可能已更新；请以最近检查时间为准。')
+      addToast({ type: 'error', message: '获取请求中断，请核对各账号最近检查时间' })
+      await loadItems()
     } finally {
       setFetchingType(null)
     }
@@ -1301,7 +1310,7 @@ export function Items() {
       <div className="page-header flex-between flex-wrap gap-4">
         <div>
           <h1 className="page-title">商品管理</h1>
-          <p className="page-description">列表展示本地商品记录，查看闲鱼最新商品请先同步。</p>
+          <p className="page-description">状态以最近完整检查为准。待核实表示本次在售列表未返回，不能判断下架原因。</p>
         </div>
         <div className="flex flex-wrap gap-1.5">
           {selectedIds.size > 0 && (
@@ -1391,6 +1400,8 @@ export function Items() {
         </div>
       </div>
 
+      {syncMessage && <p role="status" className="text-sm text-gray-600 dark:text-gray-300">{syncMessage}</p>}
+
       {/* Filters */}
       <div className="vben-card">
         <div className="vben-card-body">
@@ -1428,6 +1439,24 @@ export function Items() {
                   className="input-ios pl-9"
                 />
               </div>
+            </div>
+            <div className="input-group min-w-[140px]">
+              <label htmlFor="sale-status-filter" className="input-label">在售状态</label>
+              <select
+                id="sale-status-filter"
+                value={filters.sale_status || ''}
+                onChange={(e) => {
+                  const next = { ...filters, sale_status: (e.target.value || null) as ItemFilterParams['sale_status'] }
+                  setFilters(next)
+                  loadItems(1, pagination.pageSize, next)
+                }}
+                className="input-ios"
+              >
+                <option value="">全部状态</option>
+                <option value="on_sale">确认在售</option>
+                <option value="pending_verification">待核实</option>
+                <option value="unchecked">未检查</option>
+              </select>
             </div>
             <div className="input-group min-w-[140px]">
               <label className="input-label">是否擦亮</label>
@@ -1521,7 +1550,8 @@ export function Items() {
                   <th className="min-w-[260px]">商品标题</th>
                   <th className="min-w-[80px]">价格</th>
                   <th className="min-w-[80px] text-center">库存</th>
-                  <th className="min-w-[100px] text-center">状态</th>
+                  <th className="min-w-[110px] text-center">在售状态</th>
+                  <th className="min-w-[170px]">最近检查时间</th>
                   <th className="min-w-[170px]">上架时间</th>
                   <th className="min-w-[100px] text-center">是否擦亮</th>
                   <th className="min-w-[120px] text-center">规格数</th>
@@ -1538,7 +1568,7 @@ export function Items() {
             <tbody>
               {filteredItems.length === 0 ? (
                 <tr>
-                  <td colSpan={18}>
+                  <td colSpan={19}>
                     <div className="empty-state py-8">
                       <Package className="empty-state-icon" />
                       <p className="text-gray-500">暂无商品数据</p>
@@ -1594,7 +1624,13 @@ export function Items() {
                         : '-'}
                     </td>
                     <td className="text-center text-gray-600 dark:text-gray-300">
-                      {item.item_status_desc || '-'}
+                      <span className={item.sale_status === 'on_sale' ? 'text-green-700 dark:text-green-400' : item.sale_status === 'pending_verification' ? 'text-amber-700 dark:text-amber-400' : 'text-gray-500'}
+                        title={item.sale_status === 'pending_verification' ? `本次在售列表未返回，原因待核实。最近确认在售：${item.sale_last_seen_at ? new Date(item.sale_last_seen_at).toLocaleString('zh-CN', { hour12: false }) : '无记录'}` : '最近完整检查的结果，不代表持续实时监测'}>
+                        {item.sale_status_desc || '未检查'}
+                      </span>
+                    </td>
+                    <td className="text-gray-500 text-xs whitespace-nowrap">
+                      {item.sale_checked_at ? <time dateTime={item.sale_checked_at}>{new Date(item.sale_checked_at).toLocaleString('zh-CN', { hour12: false })}</time> : '尚未完整检查'}
                     </td>
                     <td className="text-gray-500 text-xs">
                       {item.item_shelf_time || '-'}

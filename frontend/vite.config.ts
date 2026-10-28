@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite'
+import { defineConfig, loadEnv } from 'vite'
 import type { Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
 import path from 'path'
@@ -58,10 +58,16 @@ function rejectUnsafeDevServerPaths(): Plugin {
 }
 
 // https://vitejs.dev/config/
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   // 生产环境可部署在共享域名/IP 的独立路径下；本地开发仍使用根路径。
   base: process.env.PUBLIC_BASE_PATH || '/',
-  plugins: [rejectUnsafeDevServerPaths(), react()],
+  plugins: [rejectUnsafeDevServerPaths(), react(), {
+    name: 'storage-namespace-bootstrap',
+    transformIndexHtml(html) {
+      const namespace = loadEnv(mode, process.cwd(), 'VITE_').VITE_STORAGE_NAMESPACE?.trim() || ''
+      return html.replace('__MAOYU_STORAGE_NAMESPACE__', JSON.stringify(namespace).replace(/</g, '\\u003c'))
+    },
+  }],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
@@ -105,4 +111,4 @@ export default defineConfig({
     outDir: 'dist',
     assetsDir: 'assets',
   },
-})
+}))

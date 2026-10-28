@@ -1,0 +1,232 @@
+{
+  "product": "MaoYuOps（猫鱼运营）",
+  "repository": "https://github.com/guwangxian-ai/maoyu-ops",
+  "source_commit": "3d34088b9ad53711d91159392d497cfe47bd5cc5",
+  "source_revision_note": "Focused Skills and MCP guide patch over the deployed catalog-state version; no Git commit or push in this task.",
+  "source_patch_files": [
+    "AGENTS.md",
+    "backend-web/app/api/routes/items.py",
+    "backend-web/app/mcp/onboarding.py",
+    "backend-web/app/mcp/server.py",
+    "backend-web/tests/test_catalog_snapshot.py",
+    "common/services/auto_relist_task.py",
+    "common/services/item_service.py",
+    "common/services/xianyu_seller_item_client.py",
+    "common/utils/item_info_manager.py",
+    "deploy/tencent-hermes/README.md",
+    "deploy/tencent-hermes/compose.yaml",
+    "deploy/tencent-hermes/nginx-location.conf",
+    "docs/ai-access-center.md",
+    "docs/deployment-history/20261016T055818Z-free-chat.json",
+    "docs/deployment-history/20261019T051339Z-maoyu-3d34088.json",
+    "docs/deployment-history/20261019T095600Z-maoyu-url.json",
+    "docs/deployment-history/20261020T085906Z-skills-20261020.json",
+    "docs/deployment-history/20261022T021123Z-skills-20261022.json",
+    "docs/deployment-history/20261022T061318Z-skills-compliance-20261022.json",
+    "docs/deployment-history/20261023T030735Z-catalog-state.json",
+    "docs/maoyu-ops-branding.md",
+    "docs/mcp-api.md",
+    "docs/skills-operations.md",
+    "docs/tencent-hermes-deployment.json",
+    "frontend/index.html",
+    "frontend/src/api/items.ts",
+    "frontend/src/pages/items/Items.tsx",
+    "frontend/src/types/index.ts",
+    "frontend/src/utils/scopedStorage.ts",
+    "frontend/vite.config.ts",
+    "skills/xianyu-operations/SKILL.md",
+    "skills/xianyu-operations/references/catalog-sync.md",
+    "skills/xianyu-operations/references/compliance.md",
+    "skills/xianyu-operations/references/listing.md",
+    "skills/xianyu-operations/references/orders.md",
+    "skills/xianyu-operations/references/selection.md"
+  ],
+  "url": "https://43.136.91.22/maoyu-ops/",
+  "ai_access_url": "https://43.136.91.22/maoyu-ops/ai-access",
+  "mcp_url": "https://43.136.91.22/maoyu-ops/mcp",
+  "skill_url": "https://43.136.91.22/maoyu-ops/ai/skills/xianyu-operations.zip",
+  "skill_version": "2026.10.23.2",
+  "skill_sha256": "8340181c1401569808fe7f327e4b5349f05e3e0a3ab4bc67ef17d4db8ea76636",
+  "release_id": "20261023T075715Z-virtual-service",
+  "previous_release_id": "20261023T030735Z-catalog-state",
+  "previous_record": "docs/deployment-history/20261023T030735Z-catalog-state.json",
+  "deployed_at": "2026-10-23T08:01:26.423771+00:00",
+  "verified_at": "2026-10-23T08:06:14.665605+00:00",
+  "status": "deployed_and_verified",
+  "changes": [
+    "Add the owner-approved virtual-product refund and paid automatic-delivery convention to the canonical Skill reference and MCP onboarding guide.",
+    "Keep payment confirmation and actual delivery readiness as prerequisites; do not promise instant delivery for products missing assets/cards.",
+    "Synchronize repository, installed Skill, public package and fresh MCP session guidance."
+  ],
+  "deployed_patch_files": {
+    "backend-web/app/mcp/onboarding.py": "ecd3530cf06d535e4c5794fe83d00502c5c55f4b85801d1093f92f67cbadf3f3",
+    "skills/xianyu-operations/SKILL.md": "814205f65b7f166e28981a2655a5c87a65f6b233d89b7c4eafd0e68ef99f55aa",
+    "skills/xianyu-operations/references/listing.md": "2df545a2ee19a7af0c445bc27ff90c4112ab8543cd44a596d64c3f5edca27597",
+    "skills/xianyu-operations/references/orders.md": "859480eb3c091cba24b2c81e784850ebbcc82c46e90388f11a6b47e7b7167ea2",
+    "AGENTS.md": "f2c0a1f0725a3bf93a3a821f2ea26ed73960d0e5c71fa45a4aec4d77a1b9b887"
+  },
+  "database_migration": false,
+  "backup_choice": "explicit_no_backup",
+  "backup_created": false,
+  "backup_available": false,
+  "backup_directory": null,
+  "rollback_script": null,
+  "rollback_available": false,
+  "backup_policy": "Ask once before a future deployment unless the user has already chosen backup or no backup; no automatic backup or rollback tags.",
+  "recovery_options": {
+    "previous_backend_image": "sha256:aac790185093c2b07e6ce79823665a3aace908e4fbd03e602c9ccec14cf83814",
+    "note": "No backup or rollback tag created. Inspect still-existing source/images before code-only recovery; no database or authorization-volume recovery promised."
+  },
+  "images": {
+    "backend-web": "sha256:c7360f95189d72319b57fb7fb387f3ad6f326f0b04d711bcb30df52c84e676cc",
+    "scheduler": "sha256:21a1d4d70351bedf62816fcf643afaf16c08315746fb39622d9484e4237ab6da",
+    "websocket": "sha256:7921c37a526ae19978cf8af9e0e6684e80026f5445ce4b5a44d84d5276e91815",
+    "redis": "sha256:6ab0b6e7381779332f97b8ca76193e45b0756f38d4c0dcda72dbb3c32061ab99",
+    "mysql": "sha256:7dcddc01f13bab2f15cde676d44d01f61fc9f99fe7785e86196dfc07d358ae2b"
+  },
+  "http_ready_seconds": 18.47,
+  "verification": {
+    "cloud_isolated_tests": {
+      "passed": true,
+      "total": 27,
+      "network": "none",
+      "production_credentials_or_volumes": false
+    },
+    "only_backend_recreated": true,
+    "other_four_containers_unchanged": true,
+    "all_five_services_healthy": true,
+    "environments_and_data_mounts_unchanged": true,
+    "other_project_entries_unchanged": true,
+    "nginx_and_compose_unchanged": true,
+    "public_and_installed_skill": {
+      "passed": true,
+      "skill_version": "2026.10.23.2",
+      "skill_sha256": "8340181c1401569808fe7f327e4b5349f05e3e0a3ab4bc67ef17d4db8ea76636",
+      "package_bytes": 44674,
+      "package_files": 15,
+      "source_and_public_files_match": true,
+      "frontend_index_unchanged": true,
+      "virtual_service_guide_present": true,
+      "private_404": true,
+      "mcp_unauthorized_401": true,
+      "etag_304": true,
+      "version": "2026.10.23.2",
+      "files_match_public_package": 15,
+      "changed_files": [
+        "CONNECT.md"
+      ],
+      "private_mcp_config_preserved": true,
+      "server_sync_pending_backup_choice": false,
+      "backup_created": false
+    },
+    "live_mcp": {
+      "passed": true,
+      "checked_at": "2026-10-23T08:02:28.070856+00:00",
+      "tool_count": 213,
+      "scopes_and_tools_unchanged": true,
+      "private_config_unchanged": true,
+      "fresh_initialize_resource_capabilities_guide_match": true,
+      "virtual_service_policy_visible": true,
+      "doctor_passed": true,
+      "account_settings_and_online_states_preserved": true,
+      "quark_baidu_authorized": true,
+      "real_order_refund_or_message_test": false,
+      "paid_ai_calls": 0
+    },
+    "error_counts_since_cutover": {
+      "backend-web": 0,
+      "websocket": 0,
+      "scheduler": 0
+    },
+    "business": {
+      "verified_products": 13,
+      "refund_policy_updated": 13,
+      "paid_auto_delivery_ready": 7,
+      "missing_card_refund_only": 6,
+      "restored_original_bindings": 5,
+      "materials_updated": 3,
+      "account_prompts_updated": 2,
+      "price_stock_and_delivery_content_preserved": true,
+      "real_order_refund_or_message_test": false
+    },
+    "local": {
+      "repository_and_installed_skill_validation": true,
+      "python_syntax": true,
+      "diff_whitespace_check": true,
+      "local_functional_tests_or_server_started": false
+    },
+    "performance": {
+      "sample": "Three health probes and one container resource sample during verification; no load test.",
+      "health_median_ms_before": 3.57,
+      "health_median_ms_after": 3.63,
+      "backend_image_added_bytes": 27559,
+      "container_stats": [
+        {
+          "BlockIO": "836kB / 6.69MB",
+          "CPUPerc": "5.71%",
+          "Container": "75f3aa01d6609724c016e5502a1089cccf5d7fbb7b9adf915935ac31f65aa8d7",
+          "ID": "75f3aa01d660",
+          "MemPerc": "14.22%",
+          "MemUsage": "177.7MiB / 1.221GiB",
+          "Name": "xianyu-auto-reply-backend-web-1",
+          "NetIO": "120kB / 432kB",
+          "PIDs": "13"
+        },
+        {
+          "BlockIO": "1.83MB / 47.5MB",
+          "CPUPerc": "0.92%",
+          "Container": "b71c3eabf563cf370c087fdec0738ff55c89d760fe95d811f531c9480fc0a9c5",
+          "ID": "b71c3eabf563",
+          "MemPerc": "9.84%",
+          "MemUsage": "75.58MiB / 768MiB",
+          "Name": "xianyu-auto-reply-scheduler-1",
+          "NetIO": "144MB / 56.3MB",
+          "PIDs": "7"
+        },
+        {
+          "BlockIO": "17MB / 23.5MB",
+          "CPUPerc": "0.28%",
+          "Container": "792ce048b0d8837cc278318cce44c8e9b7adb244b8cd3a9fd6130064a79400e9",
+          "ID": "792ce048b0d8",
+          "MemPerc": "10.53%",
+          "MemUsage": "131.6MiB / 1.221GiB",
+          "Name": "xianyu-auto-reply-websocket-1",
+          "NetIO": "5.93MB / 4.11MB",
+          "PIDs": "9"
+        },
+        {
+          "BlockIO": "3.78GB / 3.83GB",
+          "CPUPerc": "0.47%",
+          "Container": "4e4f3819b48cc8c90d26db350c0e5111438ed80998f273d0fe48bda90fb9c07b",
+          "ID": "4e4f3819b48c",
+          "MemPerc": "1.21%",
+          "MemUsage": "3.867MiB / 320MiB",
+          "Name": "xianyu-auto-reply-redis-1",
+          "NetIO": "522MB / 109MB",
+          "PIDs": "7"
+        },
+        {
+          "BlockIO": "1.64GB / 37.3GB",
+          "CPUPerc": "0.56%",
+          "Container": "b24b6da1bc05d8527baa7979a519e897d63bac92f1fde491a7c72a0f8fdc2ec7",
+          "ID": "b24b6da1bc05",
+          "MemPerc": "18.08%",
+          "MemUsage": "138.9MiB / 768MiB",
+          "Name": "xianyu-auto-reply-mysql-1",
+          "NetIO": "5.71GB / 12GB",
+          "PIDs": "54"
+        }
+      ]
+    },
+    "cost": {
+      "new_paid_service_calls": 0
+    }
+  },
+  "limits": [
+    "No live purchase, delivery latency, refund or buyer-message test was performed.",
+    "Six legacy products have refund copy only until their matching deliverables/cards are ready.",
+    "Existing downloaded Skills on other devices require refresh; new MCP sessions receive the updated server guidance."
+  ],
+  "private_evidence_directory": "data/ops-runs/virtual-service-20261023",
+  "temporary_resources": "See the release completion receipt for removal of this task build context, upload and redundant candidate tag; active images and data are retained."
+}

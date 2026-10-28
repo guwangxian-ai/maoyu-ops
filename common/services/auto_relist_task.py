@@ -262,7 +262,7 @@ class AutoRelistTask(AutoRelistLifecycleMixin, AutoRelistDiscoveryMixin):
             if fetch_result.get("skipped"):
                 await self._schedule_retry(session, event, rule, "确认商品状态时账号同步锁被占用")
                 return
-            if not fetch_result.get("success"):
+            if not fetch_result.get("success") or not fetch_result.get("snapshot_complete") or not fetch_result.get("state_updated"):
                 await self._schedule_retry(session, event, rule, f"确认商品状态失败：{fetch_result.get('message') or '未知错误'}")
                 return
         else:

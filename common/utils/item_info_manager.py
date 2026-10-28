@@ -151,7 +151,6 @@ class ItemInfoManager:
             logger.info(f"【{self.cookie_id}】请求参数 params: {params}")
             logger.info(f"【{self.cookie_id}】请求数据 data: {data}")
             logger.info(f"【{self.cookie_id}】请求数据 data_val: {data_val}")
-            logger.info(f"【{self.cookie_id}】请求头 headers: {dict(headers)}")
             
             async with self.session.post(
                 'https://h5api.m.goofish.com/h5/mtop.idle.web.xyh.item.list/1.0/',
@@ -177,8 +176,13 @@ class ItemInfoManager:
 
                 # 检查响应是否成功
                 if res_json.get('ret') and res_json['ret'][0] == 'SUCCESS::调用成功':
-                    items_data = res_json.get('data', {})
-                    card_list = items_data.get('cardList', [])
+                    items_data = res_json.get('data')
+                    if not isinstance(items_data, dict) or not isinstance(items_data.get('cardList'), list):
+                        return {"success": False, "error": "个人商品列表结构异常，不能作为空列表"}
+                    card_list = items_data['cardList']
+                    if any(not isinstance(card, dict) or not isinstance(card.get('cardData'), dict)
+                           or not card['cardData'].get('id') for card in card_list):
+                        return {"success": False, "error": "个人商品卡片缺少 ID，无法确认完整范围"}
 
                     # 解析cardList中的商品信息
                     items_list = []
@@ -210,6 +214,7 @@ class ItemInfoManager:
                         "page_size": page_size,
                         "current_count": len(items_list),
                         "items": items_list,
+                        "has_more": len(card_list) >= page_size,
                         "raw_data": items_data
                     }
                 else:

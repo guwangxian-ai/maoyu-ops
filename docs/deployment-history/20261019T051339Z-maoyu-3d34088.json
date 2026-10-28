@@ -1,0 +1,102 @@
+{
+  "product": "MaoYuOps（猫鱼运营）",
+  "repository": "https://github.com/guwangxian-ai/maoyu-ops",
+  "source_commit": "3d34088b9ad53711d91159392d497cfe47bd5cc5",
+  "url": "https://43.136.91.22/xianyu-auto-reply/",
+  "ai_access_url": "https://43.136.91.22/xianyu-auto-reply/ai-access",
+  "ai_guide_url": "https://43.136.91.22/xianyu-auto-reply/ai",
+  "mcp_url": "https://43.136.91.22/xianyu-auto-reply/mcp",
+  "skill_version": "2026.10.14.1",
+  "skill_sha256": "36a04d3aad1f5ef0ee41a8563d0113124fb027dd278cd5b098f5c7f15c75c9b4",
+  "release_id": "20261019T051339Z-maoyu-3d34088",
+  "deployed_at": "2026-10-19T05:26:18.997476+00:00",
+  "verified_at": "2026-10-19T05:33:40.540969+00:00",
+  "status": "deployed_and_verified",
+  "previous_release_id": "20261016T055818Z-free-chat",
+  "previous_record": "docs/deployment-history/20261016T055818Z-free-chat.json",
+  "changes": [
+    "Deploy the published MaoYuOps main commit to all three application services and the frontend",
+    "Include previously pending chat history/reconnection and database retry changes while preserving server pool limits",
+    "Keep existing account authorizations, AI provider settings, paid-only delivery configuration, cards, orders and persistent MCP operation receipts"
+  ],
+  "source_scope": "Full tracked source synchronized; backend-web, websocket, scheduler and frontend updated. MySQL, Redis, Nginx routes and persistent volumes were retained.",
+  "backup_directory": "/srv/xianyu-auto-reply/releases/20261019T051339Z-maoyu-3d34088/backup",
+  "backup_full_read_verified": true,
+  "backup_initial_bytes": 810268879,
+  "backup_additional_cutover_checkpoint": [
+    "database-cutover.sql.gz",
+    "auth-cutover.tar.gz"
+  ],
+  "rollback_script": "/srv/xianyu-auto-reply/releases/20261019T051339Z-maoyu-3d34088/rollback-remote.py",
+  "rollback_preserves_business_database_and_operation_history": true,
+  "build_strategy": "Serial network-disabled layers on verified existing service images; requirements checked without installing dependencies. Each build limited to 1 CPU and 768 MiB; tests limited to 1 CPU and 640 MiB.",
+  "images": {
+    "scheduler": "sha256:321a9dc462ecdc80505639e31f41ee2bc885fe43ebfcca10d7dc64ab41048142",
+    "websocket": "sha256:f262359555adfb4dcd472c140ed735fc9e6ade687b07da0cb249f8f79413a77c",
+    "backend-web": "sha256:2e87028d036aa88a437ca898fe0ede0d9e630a7533157ee9c8ad984f9caa11c9",
+    "redis": "sha256:6ab0b6e7381779332f97b8ca76193e45b0756f38d4c0dcda72dbb3c32061ab99",
+    "mysql": "sha256:7dcddc01f13bab2f15cde676d44d01f61fc9f99fe7785e86196dfc07d358ae2b"
+  },
+  "image_tags": {
+    "backend-web": "xianyu-auto-reply-backend-web:20261019T051339Z-maoyu-3d34088",
+    "websocket": "xianyu-auto-reply-websocket:20261019T051339Z-maoyu-3d34088",
+    "scheduler": "xianyu-auto-reply-scheduler:20261019T051339Z-maoyu-3d34088"
+  },
+  "cutover_seconds": 35.06,
+  "verification": {
+    "isolated_backend_tests_passed": 71,
+    "isolated_ai_tests_passed": 7,
+    "isolation": "Disposable containers with no network, production credentials or data volumes",
+    "all_five_services_healthy": true,
+    "unexpected_container_restarts": 0,
+    "mysql_and_redis_containers_unchanged": true,
+    "data_volumes_unchanged": true,
+    "private_environment_preserved": true,
+    "protected_configuration_and_secret_hashes_unchanged": true,
+    "business_row_counts_preserved": true,
+    "existing_mcp_secret_scopes_and_expiry_preserved": true,
+    "mcp_tool_count": 213,
+    "drive_authorizations_valid": true,
+    "account_online_and_ai_delivery_settings_preserved": true,
+    "cards_and_item_bindings_preserved": true,
+    "paid_only_delivery_rules_preserved": true,
+    "frontend_matches_reviewed_build": true,
+    "public_skill_archive_digest_verified": true,
+    "unauthorized_mcp_status": 401,
+    "private_skill_path_status": 404,
+    "other_project_entries_unchanged": [
+      "/douyin-leads/",
+      "/weixin-bot-notification-platform/",
+      "/hermes/"
+    ],
+    "login_and_about_pages_rendered": true,
+    "about_desktop_and_mobile_checked": true,
+    "failed_browser_resources": 0,
+    "error_level_service_logs_since_cutover": 0,
+    "local_functional_tests_run": false,
+    "authenticated_ui_tested": false,
+    "live_buyer_messages_sent_for_testing": 0,
+    "actual_order_delivery_tested": false
+  },
+  "performance": {
+    "health_probe_samples_before": 5,
+    "health_probe_samples_after": 5,
+    "health_median_ms_before": 4.09,
+    "health_median_ms_after": 3.34,
+    "db_pool_size": 5,
+    "db_max_overflow": 10,
+    "memory_available_mib": 2085,
+    "disk_free_gib": 9.76,
+    "note": "Short localhost health and resource snapshots only; not a load test or a claimed speed improvement."
+  },
+  "private_evidence": "data/ops-runs/maoyu-deploy-20261019/",
+  "cost": {
+    "new_subscription_or_infrastructure_cny": 0,
+    "paid_ai_provider_test_calls": 0
+  },
+  "limitations": [
+    "Verification used read-only MCP business checks and isolated tests; no real buyer message or paid-order delivery was triggered.",
+    "Saved login-page branding remains unchanged; browser title and About page use MaoYuOps.",
+    "This release deploys the fork commit listed above; the About page reports upstream updates separately."
+  ]
+}

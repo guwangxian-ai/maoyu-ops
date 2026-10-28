@@ -89,11 +89,13 @@ services:
     environment:
       <<: *common-env
       BACKEND_WEB_PORT: "8089"
+      # 已核验的本项目网桥网关，Nginx 会覆盖 X-Real-IP。
+      TRUSTED_PROXY_IPS: ${TRUSTED_PROXY_IPS:-127.0.0.1,::1,172.18.0.1}
       WEBSOCKET_SERVICE_URL: http://websocket:8090
       SCHEDULER_SERVICE_URL: http://scheduler:8091
       CORS_ORIGINS: https://43.136.91.22
-      FRONTEND_PUBLIC_URL: https://43.136.91.22/xianyu-auto-reply
-      MCP_PUBLIC_BASE_URL: https://43.136.91.22/xianyu-auto-reply
+      FRONTEND_PUBLIC_URL: https://43.136.91.22/maoyu-ops
+      MCP_PUBLIC_BASE_URL: https://43.136.91.22/maoyu-ops
       MCP_ALLOWED_HOSTS: 43.136.91.22,127.0.0.1,127.0.0.1:*,localhost,localhost:*
       MCP_ALLOWED_ORIGINS: https://43.136.91.22
       MCP_FILE_DIR: /app/mcp-files

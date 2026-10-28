@@ -9,7 +9,8 @@
     <script>
       (function() {
         var basePath = '%BASE_URL%'.replace(/^\/+|\/+$/g, '').replace(/\//g, ':');
-        var theme = localStorage.getItem((basePath ? basePath + ':' : '') + 'theme');
+        var namespace = __MAOYU_STORAGE_NAMESPACE__ || basePath;
+        var theme = localStorage.getItem((namespace ? namespace + ':' : '') + 'theme');
         var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
         if (theme === 'dark' || (!theme && prefersDark)) {
           document.documentElement.classList.add('dark');

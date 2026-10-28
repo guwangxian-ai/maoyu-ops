@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Any, Awaitable, Callable, Dict, List
+from typing import Any, Awaitable, Callable, Dict, List, Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -112,6 +112,8 @@ async def list_items_paginated(
     is_polished: bool | None = Query(default=None, description="是否擦亮筛选"),
     is_multi_spec: bool | None = Query(default=None, description="多规格筛选"),
     multi_quantity_delivery: bool | None = Query(default=None, description="多数量发货筛选"),
+    sale_status: Literal["on_sale", "pending_verification", "unchecked"] | None = Query(
+        default=None, description="最近完整检查的在售状态：确认在售/待核实/未检查"),
     current_user: User = Depends(deps.get_current_active_user),
     item_service: ItemService = Depends(deps.get_item_service),
 ):
@@ -124,6 +126,7 @@ async def list_items_paginated(
     - is_polished: 是否擦亮（true/false）
     - is_multi_spec: 多规格（true/false）
     - multi_quantity_delivery: 多数量发货（true/false）
+    - sale_status: on_sale / pending_verification / unchecked；缓存的平台文案不代表最新状态
     """
     owner_id, _ = resolve_owner_scope(current_user)
     items, total = await item_service.list_items_paginated(
@@ -135,6 +138,7 @@ async def list_items_paginated(
         is_polished=is_polished,
         is_multi_spec=is_multi_spec,
         multi_quantity_delivery=multi_quantity_delivery,
+        sale_status=sale_status,
     )
     
     return {
@@ -1309,7 +1313,11 @@ async def fetch_all_items_from_account(
     account_service: AccountService = Depends(deps.get_account_service),
     item_service: ItemService = Depends(deps.get_item_service),
 ) -> Dict[str, Any]:
-    """获取账号所有商品（自动遍历所有页）"""
+    """完整获取在售列表后更新快照；未返回的本地商品保留并标记待核实。
+
+    检查 snapshot_complete 和 state_updated；失败、跳过或分页截断不改原状态。
+    多账号按 results 逐项判断，不能只看顶层 success。
+    """
     # 管理员可以操作所有账号，普通用户只能操作自己的账号
     owner_id, _ = resolve_owner_scope(current_user)
 

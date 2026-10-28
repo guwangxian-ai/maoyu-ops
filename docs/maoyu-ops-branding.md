@@ -19,6 +19,12 @@
 
 ## 保留的运行标识
 
-现有本地目录 `xianyu-auto-reply`、服务器目录 `/srv/xianyu-auto-reply`、站点 `/xianyu-auto-reply/`、Compose 项目与数据卷、数据库、Python 虚拟环境、授权目录和客户端配置继续沿用。保持 `xianyu-operations` Skill 和 `xianyu` MCP 连接名称，避免影响正在使用的开发环境和授权。
+现有本地目录 `xianyu-auto-reply`、服务器目录 `/srv/xianyu-auto-reply`、Compose 项目与数据卷、数据库、Python 虚拟环境、授权目录继续沿用。保持 `xianyu-operations` Skill 和 `xianyu` MCP 连接名称，避免影响正在使用的开发环境和授权。
 
 新克隆的目录可以使用 `maoyu-ops`。更名不会迁移或删除数据库、网盘凭证、卡券、运营回执、依赖或缓存。公开 Git 提交仅包含源码和项目文档，私有配置与运行数据继续通过 `.gitignore` 排除。
+
+## 公网入口（2026-10-19）
+
+按用户要求，公网地址调整为 `https://43.136.91.22/maoyu-ops/`，与仓库名一致。MCP 为 `/maoyu-ops/mcp`，公开接入说明为 `/maoyu-ops/ai`。旧页面地址保留 308 跳转，旧 MCP/API 地址继续代理至同一服务，方便已有客户端和历史交付链接继续使用。服务器数据目录、Compose 和数据卷名称不变；客户端仅更新 URL，不更换密钥或扩大权限。
+
+浏览器 Storage 命名空间使用构建参数 `VITE_STORAGE_NAMESPACE=xianyu-auto-reply`，与原站点保持一致，保留已有登录态和偏好；新路径不会读取其他项目的 Storage。未配置该参数时仍按部署路径隔离。

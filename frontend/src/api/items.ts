@@ -18,6 +18,14 @@ export interface FetchItemsSummaryResponse extends ApiResponse {
   success_account_count?: number
   failed_account_count?: number
   failed_accounts?: string[]
+  snapshot_complete?: boolean
+  state_updated?: boolean
+  skipped?: boolean
+  checked_at?: string | null
+  complete_account_count?: number
+  skipped_account_count?: number
+  on_sale_count?: number
+  pending_count?: number
 }
 
 // 获取商品列表
@@ -34,6 +42,7 @@ export const getItems = async (cookieId?: string): Promise<{ success: boolean; d
 
 // 商品筛选参数
 export interface ItemFilterParams {
+  sale_status?: Item['sale_status'] | null
   keyword?: string | null            // 搜索关键字（商品ID/标题/详情）
   is_polished?: boolean | null      // 是否擦亮
   is_multi_spec?: boolean | null    // 多规格
@@ -63,6 +72,9 @@ export const getItemsPaginated = async (
   }
   
   if (filters) {
+    if (filters.sale_status) {
+      params.append('sale_status', filters.sale_status)
+    }
     if (filters.keyword && filters.keyword.trim()) {
       params.append('keyword', filters.keyword.trim())
     }

@@ -13,7 +13,8 @@ import asyncio
 import json
 from datetime import datetime, timezone
 from decimal import Decimal, ROUND_HALF_UP, InvalidOperation
-from typing import Any, Dict, Optional, Set
+from typing import Any, Awaitable, Callable, Dict, Optional, Set
+from uuid import uuid4
 
 from loguru import logger
 from sqlalchemy import select
@@ -203,6 +204,7 @@ class ItemService:
         is_polished: bool | None = None,
         is_multi_spec: bool | None = None,
         multi_quantity_delivery: bool | None = None,
+        sale_status: str | None = None,
     ) -> tuple[list[dict], int]:
         """获取商品列表（分页），支持多条件筛选
         
@@ -231,6 +233,13 @@ class ItemService:
             conditions.append(XYCatalogItem.owner_id == owner_id)
         if account_id:
             conditions.append(XYAccount.account_id == account_id)
+        if sale_status:
+            # 历史记录没有快照时为未检查，不能把缓存的“在卖”当成本次确认。
+            stored_status = XYCatalogItem.metadata_json["sale_snapshot"]["status"].as_string()
+            if sale_status == "unchecked":
+                conditions.append(or_(stored_status.is_(None), stored_status.not_in(("on_sale", "pending_verification"))))
+            else:
+                conditions.append(stored_status == sale_status)
         if keyword and keyword.strip():
             keyword_like = f"%{keyword.strip()}%"
             conditions.append(
@@ -343,6 +352,9 @@ class ItemService:
             "current_count": count,
             "has_more": len(items) >= page_size,
             "saved_count": saved_count,
+            "snapshot_complete": False,
+            "state_updated": False,
+            "termination_reason": "single_page",
         }
 
     async def fetch_all_items_from_account(
@@ -354,14 +366,12 @@ class ItemService:
         required_title_keyword: str | None = None,
         fail_on_lock_error: bool = False,
     ) -> dict[str, Any]:
-        """抓取指定账号全部商品并入库（账号级加锁入口）。
+        """账号级互斥同步。锁失败不再无锁降级，避免旧快照覆盖新状态。
 
-        通过 Redis 账号级互斥锁，保证同一账号同一时刻只有一个商品同步流程在
-        拉取 + 落库，避免「定时获取闲鱼商品任务」与「商品管理页手动触发同步」
-        并发 upsert 同一商品。``fail_on_lock_error=False`` 时保持普通同步任务的
-        无锁兼容降级；自动续售确认链路传入 True，Redis 锁不可用时返回可见失败。
+        fail_on_lock_error 保留参数兼容；所有调用方现均在锁失败时保留原状态。
         """
         lock_name = f"item_sync:{account.account_id}"
+        account_id = account.account_id
         execution_started = False
         try:
             async with distributed_lock(
@@ -375,6 +385,9 @@ class ItemService:
                     return {
                         "success": True,
                         "skipped": True,
+                        "snapshot_complete": False,
+                        "state_updated": False,
+                        "termination_reason": "lock_busy",
                         "message": "账号商品同步锁被占用，已跳过",
                         "items": [],
                         "total_count": 0,
@@ -383,41 +396,28 @@ class ItemService:
                         "saved_count": 0,
                     }
                 execution_started = True
-                return await self._fetch_all_items_from_account_impl(
+                return await asyncio.wait_for(self._fetch_all_items_from_account_impl(
                     account=account,
                     page_size=page_size,
                     max_pages=max_pages,
                     stop_when_page_all_existing=stop_when_page_all_existing,
                     required_title_keyword=required_title_keyword,
-                )
+                    lease_check=lock.extend,
+                ), timeout=240)
         except Exception as exc:
+            await self.session.rollback()
             if execution_started:
-                logger.error(f"账号[{account.account_id}]商品同步执行失败: {exc}")
-                return {"success": False, "message": f"账号商品同步失败: {exc}"}
-            if fail_on_lock_error:
-                logger.error(f"账号[{account.account_id}]商品同步锁不可用，自动续售本轮暂停: {exc}")
-                return {
-                    "success": False,
-                    "lock_error": True,
-                    "message": "账号商品同步锁不可用，稍后重试",
-                    "items": [],
-                    "total_count": 0,
-                    "total_pages": 0,
-                    "page_size": page_size,
-                    "saved_count": 0,
-                }
-            # Redis 不可用等异常时降级为无锁执行，靠唯一约束兜底防止重复入库
-            logger.warning(
-                f"账号[{account.account_id}]商品同步获取锁异常，降级无锁执行"
-                f"（依赖唯一约束兜底）: {exc}"
-            )
-            return await self._fetch_all_items_from_account_impl(
-                account=account,
-                page_size=page_size,
-                max_pages=max_pages,
-                stop_when_page_all_existing=stop_when_page_all_existing,
-                required_title_keyword=required_title_keyword,
-            )
+                logger.error(f"账号[{account_id}]商品同步执行失败: {exc}")
+            return {
+                "success": False, "snapshot_complete": False, "state_updated": False,
+                "lock_error": not execution_started,
+                "termination_reason": "timeout" if isinstance(exc, TimeoutError) else "sync_error",
+                "message": ("商品同步超时，原在售状态未更改" if isinstance(exc, TimeoutError)
+                            else "商品同步失败，原在售状态未更改" if execution_started
+                            else "账号商品同步锁不可用，原在售状态未更改"),
+                "items": [], "total_count": 0, "saved_count": 0, "total_pages": 0,
+                "page_size": page_size,
+            }
 
     async def _fetch_all_items_from_account_impl(
         self,
@@ -426,108 +426,154 @@ class ItemService:
         max_pages: int | None = None,
         stop_when_page_all_existing: bool = False,
         required_title_keyword: str | None = None,
+        lease_check: Callable[[], Awaitable[bool]] | None = None,
     ) -> dict[str, Any]:
-        """抓取指定账号全部商品并入库（实际实现，调用方需已持有账号锁）"""
-        myid = self._resolve_account_fetch_user_id(account)
-        normalized_required_title_keyword = str(required_title_keyword or "").strip()
-
-        manager = await self._resolve_item_fetch_manager(account)
+        """先获取/校验全部页，再一次提交；失败期间不产生半份在售快照。"""
+        started_at = datetime.now(timezone.utc)
+        sync_id = str(uuid4())
+        manager = None
         fetched_items: list[dict] = []
-        total_saved_count = 0
+        seen: set[str] = set()
         fetched_pages = 0
-        matched_required_title_keyword = False
+        complete = False
+        termination = "page_limit"
+        keyword = str(required_title_keyword or "").strip()
+        matched_keyword = False
         try:
-            page_number = 1
-            while True:
-                if max_pages and page_number > max_pages:
-                    logger.info(f"账号[{account.account_id}]商品同步达到最大页数限制 {max_pages}，停止获取")
+            myid = self._resolve_account_fetch_user_id(account)
+            manager = await self._resolve_item_fetch_manager(account)
+            # 限制单次抓取和内存占用；触及上限不能认定查全。
+            for page_number in range(1, 501):
+                if max_pages is not None and page_number > max_pages:
                     break
-
-                logger.info(f"账号[{account.account_id}]商品同步正在获取第 {page_number} 页")
+                if lease_check and not await lease_check():
+                    raise ValueError("商品同步锁已失效")
                 result = await manager.get_item_list_info(page_number, page_size, myid=myid)
-
-                if not result or not result.get("success"):
-                    message = ""
-                    if isinstance(result, dict):
-                        message = result.get("message") or result.get("error") or ""
-                    logger.error(f"账号[{account.account_id}]商品同步获取第 {page_number} 页失败: {result}")
-                    return {"success": False, "message": message or f"获取第 {page_number} 页商品失败"}
-
-                items = result.get("items") or []
-                if not items:
-                    logger.info(f"账号[{account.account_id}]商品同步第 {page_number} 页无数据，结束获取")
+                if not isinstance(result, dict) or not result.get("success"):
+                    raise ValueError((result or {}).get("message") or (result or {}).get("error") or "平台商品获取失败")
+                items = result.get("items")
+                if not isinstance(items, list) or any(not isinstance(item, dict) for item in items):
+                    raise ValueError("平台商品列表格式异常")
+                valid, skipped = self._collect_valid_item_entries(items)
+                ids = [item_id for item_id, _ in valid]
+                if skipped or len(set(ids)) != len(ids) or seen.intersection(ids):
+                    raise ValueError("平台商品存在无效或重复 ID，无法确认完整范围")
+                has_more = result.get("has_more")
+                if has_more is not None and not isinstance(has_more, bool):
+                    raise ValueError("平台分页标记格式异常")
+                if not items and has_more is True:
+                    raise ValueError("平台返回空页但声明仍有下一页")
+                if len(seen) + len(ids) > 10000:
+                    termination = "item_limit"
                     break
-
-                valid_items, skipped_count = self._collect_valid_item_entries(items)
-                unique_item_ids = list(dict.fromkeys(item_id for item_id, _ in valid_items))
-                existing_map = await self._get_existing_item_map(account, unique_item_ids)
-                page_matches_required_title = (
-                    bool(normalized_required_title_keyword)
-                    and any(
-                        normalized_required_title_keyword in str(item.get("title") or "")
-                        for _, item in valid_items
-                    )
-                )
-                if page_matches_required_title:
-                    matched_required_title_keyword = True
-                page_all_existing = (
-                    skipped_count == 0
-                    and bool(unique_item_ids)
-                    and len(existing_map) == len(unique_item_ids)
-                )
-
-                try:
-                    saved_count, page_changed_count = await self.save_fetched_items(
-                        account,
-                        items,
-                    )
-                except Exception as exc:
-                    await self.session.rollback()
-                    return {"success": False, "message": f"保存商品失败: {exc}"}
+                seen.update(ids)
                 fetched_items.extend(items)
-                total_saved_count += saved_count
                 fetched_pages = page_number
-
-                logger.info(
-                    f"账号[{account.account_id}]商品同步第{page_number}页完成，本页{len(items)}件，"
-                    f"累计抓取{len(fetched_items)}件，整页已存在={page_all_existing}，"
-                    f"命中目标商品={page_matches_required_title}"
-                )
-
-                # 仅当本页全部商品已存在且无实际字段变更（如价格/标题变化）时才停止翻页；
-                # 若有商品被更新（如卖家在闲鱼改价），需继续翻页以免遗漏更早商品的变更。
-                if (
-                    stop_when_page_all_existing
-                    and page_all_existing
-                    and page_changed_count == 0
-                    and (
-                        not normalized_required_title_keyword
-                        or matched_required_title_keyword
-                    )
-                ):
-                    logger.info(f"账号[{account.account_id}]商品同步命中整页已存在且无字段变更，停止继续获取后续页面")
+                matched_keyword = matched_keyword or any(keyword in str(item.get("title") or "") for item in items)
+                # has_more 优先于短页推断；卖家和个人抓取器都校验原始列表结构。
+                if has_more is False or (has_more is None and len(items) < page_size):
+                    complete = True
+                    termination = "end_of_list"
                     break
-
-                if len(items) < page_size:
-                    logger.info(f"账号[{account.account_id}]商品同步第 {page_number} 页数量少于页大小，结束获取")
+                if stop_when_page_all_existing and items:
+                    existing = await self._get_existing_item_map(account, ids)
+                    if len(existing) == len(ids) and all(
+                        not self._item_fields_changed(existing[item_id], item)
+                        for item_id, item in valid
+                    ) and (not keyword or matched_keyword):
+                        termination = "existing_page"
+                        break
+                if max_pages is not None and page_number >= max_pages:
                     break
-
-                page_number += 1
                 await asyncio.sleep(1)
-        except Exception as exc:
-            return {"success": False, "message": f"获取商品失败: {exc}"}
-        finally:
+            # close 失败也不提交检查结果。
             await manager.close()
+            manager = None
+            checked_at = datetime.now(timezone.utc).isoformat()
+            counts = await self._save_catalog_snapshot(
+                account, fetched_items, complete=complete, started_at=started_at,
+                checked_at=checked_at, sync_id=sync_id, lease_check=lease_check,
+            )
+            return {
+                "success": True, "skipped": False, "snapshot_complete": complete,
+                "state_updated": complete, "termination_reason": termination,
+                "sync_id": sync_id, "checked_at": checked_at if complete else None,
+                "message": (f"完整检查完成：确认在售 {counts['on_sale_count']} 件，待核实 {counts['pending_count']} 件"
+                            if complete else "仅获取部分商品，原在售状态和检查时间未更改"),
+                "items": fetched_items, "total_count": len(fetched_items),
+                "total_pages": fetched_pages, "page_size": page_size,
+                **counts,
+            }
+        except Exception as exc:
+            await self.session.rollback()
+            return {
+                "success": False, "snapshot_complete": False, "state_updated": False,
+                "termination_reason": "sync_error", "sync_id": sync_id,
+                "message": f"商品同步失败，原在售状态未更改：{exc}",
+                "items": [], "total_count": 0, "saved_count": 0,
+                "total_pages": fetched_pages, "page_size": page_size,
+            }
+        finally:
+            if manager is not None:
+                try:
+                    await manager.close()
+                except Exception:
+                    logger.warning("关闭商品抓取连接失败")
 
-        return {
-            "success": True,
-            "message": f"获取到 {len(fetched_items)} 个商品",
-            "items": fetched_items,
-            "total_count": len(fetched_items),
-            "total_pages": fetched_pages,
-            "page_size": page_size,
-            "saved_count": total_saved_count,
-        }
+    @staticmethod
+    def _item_fields_changed(row: XYCatalogItem, item: dict) -> bool:
+        metadata = row.metadata_json or {}
+        return (
+            row.title != item.get("title", "") or row.price != item.get("price_text", "")
+            or metadata.get("category") != str(item.get("category_id", ""))
+            or metadata.get("detail") != json.dumps(item, ensure_ascii=False)
+            or (len(item.get("idle_item_sku_list") or []) > 1 and metadata.get("is_multi_spec") is not True)
+        )
+
+    async def _save_catalog_snapshot(
+        self, account: XYAccount, items: list[dict], *, complete: bool,
+        started_at: datetime, checked_at: str, sync_id: str,
+        lease_check: Callable[[], Awaitable[bool]] | None,
+    ) -> dict[str, int]:
+        # 锁定并刷新当前记录，保留抓取期间新增的配置；不删除或重建历史行。
+        stmt = select(XYCatalogItem).where(
+            XYCatalogItem.owner_id == account.owner_id,
+            XYCatalogItem.account_pk == account.id,
+        ).with_for_update().execution_options(populate_existing=True)
+        rows = (await self.session.execute(stmt)).scalars().all()
+        by_id = {row.item_id: row for row in rows}
+        ids = {str(item["id"]).strip() for item in items}
+        for item in items:
+            item_id = str(item["id"]).strip()
+            _, row = self._apply_item_fields(account, item_id, item, by_id.get(item_id))
+            if item_id not in by_id:
+                rows.append(row)
+                by_id[item_id] = row
+        on_sale = pending = 0
+        if complete:
+            for row in rows:
+                present = row.item_id in ids
+                # 抓取期间别的发布流程刚新增的商品不能因未落入快照被误标。
+                created_at = row.created_at
+                if not present and created_at and created_at.replace(tzinfo=timezone.utc) > started_at:
+                    continue
+                metadata = dict(row.metadata_json or {})
+                previous = metadata.get("sale_snapshot") or {}
+                metadata["sale_snapshot"] = {
+                    "status": "on_sale" if present else "pending_verification",
+                    "checked_at": checked_at,
+                    "last_seen_at": checked_at if present else previous.get("last_seen_at"),
+                    "sync_id": sync_id,
+                }
+                row.metadata_json = metadata
+                flag_modified(row, "metadata_json")
+                on_sale += int(present)
+                pending += int(not present)
+        await self.session.flush()
+        if lease_check and not await lease_check():
+            raise ValueError("提交前商品同步锁已失效")
+        await self.session.commit()
+        return {"saved_count": len(items), "on_sale_count": on_sale, "pending_count": pending}
 
     async def fetch_all_items_from_accounts(
         self,
@@ -551,11 +597,17 @@ class ItemService:
 
         account_results: list[dict[str, Any]] = []
         failed_accounts: list[str] = []
+        complete_account_count = 0
+        skipped_account_count = 0
         total_count = 0
         saved_count = 0
         success_account_count = 0
 
         for account in accounts:
+            # 前一个账号失败回滚会使 ORM 对象过期，先显式异步刷新。
+            await self.session.refresh(account)
+            account_id = account.account_id
+            result: dict[str, Any] = {}
             try:
                 result = await self.fetch_all_items_from_account(
                     account=account,
@@ -575,18 +627,28 @@ class ItemService:
 
             if account_success:
                 success_account_count += 1
+                complete_account_count += int(bool(result.get("snapshot_complete") and result.get("state_updated")))
+                skipped_account_count += int(bool(result.get("skipped")))
                 total_count += account_total_count
                 saved_count += account_saved_count
             else:
-                failed_accounts.append(f"{account.account_id}: {account_message or '获取商品失败'}")
+                failed_accounts.append(f"{account_id}: {account_message or '获取商品失败'}")
 
             account_results.append(
                 {
-                    "cookie_id": account.account_id,
+                    "cookie_id": account_id,
                     "success": account_success,
                     "message": account_message,
                     "total_count": account_total_count,
                     "saved_count": account_saved_count,
+                    "snapshot_complete": bool(result.get("snapshot_complete")),
+                    "state_updated": bool(result.get("state_updated")),
+                    "skipped": bool(result.get("skipped")),
+                    "termination_reason": result.get("termination_reason"),
+                    "checked_at": result.get("checked_at"),
+                    "sync_id": result.get("sync_id"),
+                    "on_sale_count": result.get("on_sale_count", 0),
+                    "pending_count": result.get("pending_count", 0),
                 }
             )
 
@@ -601,12 +663,17 @@ class ItemService:
             message = f"已获取 {success_account_count} 个账号商品，共 {total_count} 件，保存 {saved_count} 件；失败 {failed_account_count} 个账号"
             success = True
 
+        message = (f"完整检查 {complete_account_count}/{len(accounts)} 个账号，共获取 {total_count} 件；"
+                   f"失败 {failed_account_count} 个，跳过 {skipped_account_count} 个。未完整检查的账号保留原状态。")
         return {
             "success": success,
             "message": message,
             "account_count": len(accounts),
             "success_account_count": success_account_count,
             "failed_account_count": failed_account_count,
+            "complete_account_count": complete_account_count,
+            "skipped_account_count": skipped_account_count,
+            "snapshot_complete": complete_account_count == len(accounts),
             "total_count": total_count,
             "saved_count": saved_count,
             "failed_accounts": failed_accounts,
@@ -687,17 +754,23 @@ class ItemService:
         每次都在当前事务内实时查询已存在记录，保证拿到的是当前事务可用的对象。
         返回 True 表示有实际变更（新增或字段值变化），False 表示无需更新。
         """
-        category = str(item.get("category_id", ""))
-        # 多规格商品（卖家平台 idleItemSkuList 多于一项）同步时自动开启「多规格」开关
-        sku_list = item.get("idle_item_sku_list")
-        is_multi_spec = isinstance(sku_list, list) and len(sku_list) > 1
-
         stmt = select(XYCatalogItem).where(
             XYCatalogItem.owner_id == account.owner_id,
             XYCatalogItem.account_pk == account.id,
             XYCatalogItem.item_id == item_id,
         )
         existing_item = (await self.session.execute(stmt)).scalars().first()
+
+        changed, _ = self._apply_item_fields(account, item_id, item, existing_item)
+        return changed
+
+    def _apply_item_fields(
+        self, account: XYAccount, item_id: str, item: dict,
+        existing_item: XYCatalogItem | None,
+    ) -> tuple[bool, XYCatalogItem]:
+        category = str(item.get("category_id", ""))
+        sku_list = item.get("idle_item_sku_list")
+        is_multi_spec = isinstance(sku_list, list) and len(sku_list) > 1
 
         if existing_item:
             new_title = item.get("title", "")
@@ -709,7 +782,7 @@ class ItemService:
             if existing_item.price != new_price:
                 existing_item.price = new_price
                 changed = True
-            metadata_json = existing_item.metadata_json or {}
+            metadata_json = dict(existing_item.metadata_json or {})
             if metadata_json.get("category") != category:
                 metadata_json["category"] = category
                 existing_item.metadata_json = metadata_json
@@ -728,7 +801,7 @@ class ItemService:
                 existing_item.metadata_json = metadata_json
                 flag_modified(existing_item, "metadata_json")
                 changed = True
-            return changed
+            return changed, existing_item
 
         new_metadata = {
             "description": "",
@@ -749,7 +822,7 @@ class ItemService:
             created_at=datetime.now(timezone.utc),
         )
         self.session.add(new_item)
-        return True
+        return True, new_item
 
     @staticmethod
     def _normalize_price_yuan(value: Any) -> Decimal:
@@ -1178,6 +1251,11 @@ class ItemService:
 
     def _serialize_item(self, item: XYCatalogItem, account_id: str, default_reply_info: dict | None = None, has_card: bool = False) -> dict:
         metadata = item.metadata_json or {}
+        snapshot = metadata.get("sale_snapshot") or {}
+        sale_status = snapshot.get("status", "unchecked")
+        status_labels = {"on_sale": "确认在售", "pending_verification": "待核实", "unchecked": "未检查"}
+        if sale_status not in status_labels:
+            sale_status = "unchecked"
         # 从 detail(整块商品JSON) 解析鱼小铺特有字段供界面展示；普通账号无此字段时返回空
         detail_raw = metadata.get("detail")
         detail_obj: dict = {}
@@ -1202,6 +1280,11 @@ class ItemService:
             "item_quantity": detail_obj.get("quantity", ""),
             "item_shelf_time": detail_obj.get("gmt_shelf", ""),
             "item_status_desc": detail_obj.get("item_status_desc", ""),
+            "sale_status": sale_status,
+            "sale_status_desc": status_labels[sale_status],
+            "sale_checked_at": snapshot.get("checked_at"),
+            "sale_last_seen_at": snapshot.get("last_seen_at"),
+            "sale_sync_id": snapshot.get("sync_id"),
             # 多规格明细：供前端「规格数」列与规格详情弹窗展示
             "item_sku_list": detail_obj.get("idle_item_sku_list") or [],
             "item_sku_count": len(detail_obj.get("idle_item_sku_list") or []),

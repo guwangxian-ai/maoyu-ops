@@ -135,6 +135,11 @@ export interface Item {
   item_quantity?: string | number   // 库存（鱼小铺）
   item_shelf_time?: string          // 上架时间（鱼小铺）
   item_status_desc?: string         // 商品状态文案（鱼小铺）
+  sale_status?: 'on_sale' | 'pending_verification' | 'unchecked'
+  sale_status_desc?: string
+  sale_checked_at?: string | null   // 最近完整检查时间（UTC ISO，显示时转本地时区）
+  sale_last_seen_at?: string | null  // 最近确认在售时间
+  sale_sync_id?: string | null
   item_sku_list?: ItemSku[]         // 多规格明细（鱼小铺）
   item_sku_count?: number           // 规格数（鱼小铺）
   is_seller_item?: boolean          // 是否鱼小铺商品（仅鱼小铺可改价）

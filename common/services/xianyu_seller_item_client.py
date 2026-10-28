@@ -106,11 +106,19 @@ class SellerItemInfoManager:
             return {"success": False, "error": error_msg, "message": error_msg}
 
         # mtop 原始返回：res.data.data.itemSearchResponseList
-        biz = ((response.get("res") or {}).get("data") or {}).get("data") or {}
-        item_list = biz.get("itemSearchResponseList") or []
-
-        items_list = [self._map_item(raw) for raw in item_list if isinstance(raw, dict)]
-        has_more = bool(biz.get("hasNextPage"))
+        envelope = (response.get("res") or {}).get("data")
+        biz = envelope.get("data") if isinstance(envelope, dict) else None
+        if not isinstance(biz, dict) or not isinstance(biz.get("itemSearchResponseList"), list):
+            return {"success": False, "message": "卖家商品列表结构异常，不能作为空列表"}
+        item_list = biz["itemSearchResponseList"]
+        has_more = biz.get("hasNextPage")
+        if isinstance(has_more, str) and has_more.lower() in {"true", "false"}:
+            has_more = has_more.lower() == "true"
+        if not isinstance(has_more, bool) or any(not isinstance(raw, dict) or not raw.get("itemId") for raw in item_list):
+            return {"success": False, "message": "卖家商品分页或 ID 异常，无法确认完整范围"}
+        if isinstance(envelope, dict) and envelope.get("code") not in (None, "", "success"):
+            return {"success": False, "message": "卖家商品列表业务返回失败"}
+        items_list = [self._map_item(raw) for raw in item_list]
 
         logger.info(
             f"【{self.account_id}】卖家平台第 {page_number} 页获取到 {len(items_list)} 个商品，"

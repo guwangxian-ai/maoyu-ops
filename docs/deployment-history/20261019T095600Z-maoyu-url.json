@@ -1,0 +1,138 @@
+{
+  "product": "MaoYuOps（猫鱼运营）",
+  "repository": "https://github.com/guwangxian-ai/maoyu-ops",
+  "source_commit": "3d34088b9ad53711d91159392d497cfe47bd5cc5",
+  "source_revision_note": "Base commit plus the reviewed working-tree URL/storage compatibility patch; no new GitHub push in this task.",
+  "source_patch_files": [
+    "AGENTS.md",
+    "deploy/tencent-hermes/README.md",
+    "deploy/tencent-hermes/compose.yaml",
+    "deploy/tencent-hermes/nginx-location.conf",
+    "docs/ai-access-center.md",
+    "docs/maoyu-ops-branding.md",
+    "docs/mcp-api.md",
+    "docs/skills-operations.md",
+    "docs/deployment-history/20261019T051339Z-maoyu-3d34088.json",
+    "docs/deployment-history/20261016T055818Z-free-chat.json",
+    "frontend/src/utils/scopedStorage.ts",
+    "frontend/index.html",
+    "frontend/vite.config.ts"
+  ],
+  "url": "https://43.136.91.22/maoyu-ops/",
+  "ai_access_url": "https://43.136.91.22/maoyu-ops/ai-access",
+  "ai_guide_url": "https://43.136.91.22/maoyu-ops/ai",
+  "mcp_url": "https://43.136.91.22/maoyu-ops/mcp",
+  "legacy_url": "https://43.136.91.22/xianyu-auto-reply/",
+  "legacy_behavior": "Browser pages redirect with HTTP 308 preserving the path and query; legacy MCP/API and hashed assets remain directly accessible.",
+  "frontend_storage_namespace": "xianyu-auto-reply",
+  "skill_version": "2026.10.14.1",
+  "skill_sha256": "62a81d76e96aaa5240ea3978a2f686ffb64aa54bfc8df60e8c31ad8352556457",
+  "release_id": "20261019T095600Z-maoyu-url",
+  "deployed_at": "2026-10-19T10:01:12.568074+00:00",
+  "verified_at": "2026-10-19T10:18:33.103845+00:00",
+  "status": "deployed_and_verified",
+  "previous_release_id": "20261019T051339Z-maoyu-3d34088",
+  "previous_record": "docs/deployment-history/20261019T051339Z-maoyu-3d34088.json",
+  "changes": [
+    "Make /maoyu-ops the canonical frontend, AI onboarding and MCP base.",
+    "Preserve legacy protocol endpoints and browser storage namespace.",
+    "Update local MCP configuration and installed instance-specific Skill files, keeping the same credentials, scopes and expiry."
+  ],
+  "source_scope": "Project Nginx include, deployment public URLs, frontend storage configuration, static build and documentation. Only backend-web was recreated, using its existing image; all data volumes retained.",
+  "backup_directory": null,
+  "backup_full_read_verified": true,
+  "backup_initial_bytes": 815094083,
+  "backup_artifacts_verified": 14,
+  "rollback_script": null,
+  "rollback_preserves_business_database_and_operation_history": true,
+  "images": {
+    "backend-web": "sha256:2e87028d036aa88a437ca898fe0ede0d9e630a7533157ee9c8ad984f9caa11c9",
+    "scheduler": "sha256:321a9dc462ecdc80505639e31f41ee2bc885fe43ebfcca10d7dc64ab41048142",
+    "websocket": "sha256:f262359555adfb4dcd472c140ed735fc9e6ade687b07da0cb249f8f79413a77c",
+    "redis": "sha256:6ab0b6e7381779332f97b8ca76193e45b0756f38d4c0dcda72dbb3c32061ab99",
+    "mysql": "sha256:7dcddc01f13bab2f15cde676d44d01f61fc9f99fe7785e86196dfc07d358ae2b"
+  },
+  "cutover_seconds": 9.14,
+  "verification": {
+    "typescript_and_vite_build": true,
+    "cloud_isolated_storage_cases": 4,
+    "storage_types_tested": [
+      "localStorage",
+      "sessionStorage"
+    ],
+    "actual_html_theme_bootstrap_tested": true,
+    "all_five_services_healthy": true,
+    "only_backend_recreated": true,
+    "all_application_images_unchanged": true,
+    "data_volumes_unchanged": true,
+    "protected_configuration_and_secret_hashes_unchanged": true,
+    "business_row_counts_preserved": true,
+    "mcp_endpoints_and_stdio_tool_counts": {
+      "new": 213,
+      "legacy": 213,
+      "configured_stdio": 213
+    },
+    "historical_operation_receipt_same_on_both_paths": true,
+    "existing_mcp_secret_scopes_and_expiry_preserved": true,
+    "two_accounts_online": true,
+    "quark_and_baidu_authorizations_verified": true,
+    "cards_and_item_bindings_preserved": true,
+    "browser_login_about_navigation_refresh_and_legacy_redirect_passed": true,
+    "browser_actual_storage_namespace_verified": true,
+    "desktop_and_mobile_no_horizontal_overflow": true,
+    "public_skill_archive_digest_verified": true,
+    "http_redirect_cases": 8,
+    "unauthorized_mcp_status": 401,
+    "private_skill_path_status": 404,
+    "other_project_entries_unchanged": [
+      "/douyin-leads/",
+      "/weixin-bot-notification-platform/",
+      "/hermes/",
+      "/libretv/"
+    ],
+    "error_level_service_logs_since_cutover": {
+      "backend-web": 0,
+      "websocket": 0,
+      "scheduler": 0
+    },
+    "local_functional_tests_run": false,
+    "authenticated_ui_tested": false,
+    "live_buyer_messages_sent_for_testing": 0,
+    "actual_order_delivery_tested": false
+  },
+  "performance": {
+    "health_probe_samples_before": 5,
+    "health_probe_samples_after": 5,
+    "health_median_ms_before": 2.98,
+    "health_median_ms_after": 3.48,
+    "memory_available_mib": 1936,
+    "disk_free_gib": 8.93,
+    "note": "Bounded connectivity and resource snapshots, not a load test or claimed speed improvement. Only one temporary 0.5 CPU / 128 MiB test container ran at a time; removed after checks."
+  },
+  "private_evidence": "data/ops-runs/maoyu-url-20261019/",
+  "cost": {
+    "new_subscription_or_infrastructure_cny": 0,
+    "paid_ai_provider_test_calls": 0
+  },
+  "limitations": [
+    "Read-only live business verification; no buyer messages or order deliveries triggered.",
+    "Existing login-page branding settings retained. Authenticated UI interactions were not tested.",
+    "Local operation-ledger fingerprints include the endpoint URL; recover old operation IDs with resume / mcp_operation_get rather than resending or rewriting the ledger."
+  ],
+  "backup_available": false,
+  "backup_retention": {
+    "status": "deleted_at_user_request",
+    "deleted_at": "2026-10-20T00:50:32.258685+00:00",
+    "former_directory": "/srv/xianyu-auto-reply/releases/20261019T095600Z-maoyu-url/backup",
+    "removed_logical_bytes": 815100204,
+    "removed_allocated_bytes": 815153152,
+    "removed_rollback_tags": [
+      "xianyu-auto-reply-backend-web:rollback-20261019T095600Z-maoyu-url",
+      "xianyu-auto-reply-websocket:rollback-20261019T095600Z-maoyu-url",
+      "xianyu-auto-reply-scheduler:rollback-20261019T095600Z-maoyu-url"
+    ],
+    "policy": "Ask once before each deployment unless the user has already chosen backup or no backup."
+  },
+  "unavailable_rollback_script": "/srv/xianyu-auto-reply/releases/20261019T095600Z-maoyu-url/rollback-remote.py",
+  "rollback_available": false
+}

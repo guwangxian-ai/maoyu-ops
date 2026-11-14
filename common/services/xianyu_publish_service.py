@@ -8,6 +8,7 @@
 """
 from __future__ import annotations
 
+from importlib import import_module
 from pathlib import Path
 from typing import Any
 
@@ -30,30 +31,18 @@ def create_xianyu_publisher(static_root: str | Path | None = None) -> Any:
 
 
 def get_xianyu_direct_publisher_class() -> type[Any]:
-    """动态加载单品接口发布器，避免批量浏览器模块被接口流程引入。"""
-    return load_backend_web_class(
-        module_name="common.services._shared_xianyu_direct_publisher",
-        relative_path="backend-web/app/services/xianyu_direct_publisher.py",
-        class_name="XianyuDirectPublisher",
-    )
+    """延迟加载公共模块，Scheduler 无需 backend-web 源码或包路径修改。"""
+    return import_module("common.services.xianyu_direct_publisher").XianyuDirectPublisher
 
 
 def get_xianyu_personal_publisher_class() -> type[Any]:
-    """动态加载普通卖家单品发布器。"""
-    return load_backend_web_class(
-        module_name="common.services._shared_xianyu_personal_publisher",
-        relative_path="backend-web/app/services/xianyu_personal_publisher.py",
-        class_name="XianyuPersonalPublisher",
-    )
+    """延迟加载公共普通卖家发布器。"""
+    return import_module("common.services.xianyu_personal_publisher").XianyuPersonalPublisher
 
 
 def get_publish_account_capability_service_class() -> type[Any]:
-    """动态加载发布账号能力检测服务。"""
-    return load_backend_web_class(
-        module_name="common.services._shared_publish_account_capability_service",
-        relative_path="backend-web/app/services/publish_account_capability_service.py",
-        class_name="PublishAccountCapabilityService",
-    )
+    """延迟加载公共账号能力检测，不改变调用方 app 包搜索路径。"""
+    return import_module("common.services.publish_account_capability_service").PublishAccountCapabilityService
 
 
 async def publish_single_item(

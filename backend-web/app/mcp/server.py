@@ -19,7 +19,7 @@ from starlette.middleware.authentication import AuthenticationMiddleware
 
 from app.mcp.auth import PersonalTokenVerifier, owner_user
 from app.mcp.operations import OperationStore, OPERATION_SCHEMA
-from app.mcp.onboarding import CATALOG_SYNC_GUIDE, LISTING_COMPLIANCE_GUIDE, LISTING_COPY_GUIDE, SELECTION_GUIDE
+from app.mcp.onboarding import DELIVERY_TEXT_GUIDE, CAPABILITY_GUIDE, CATALOG_SYNC_GUIDE, LISTING_COMPLIANCE_GUIDE, LISTING_COPY_GUIDE, SELECTION_GUIDE
 from app.mcp.permissions import can_upload, scope_options
 from app.mcp.bridge import BusinessBridge
 from app.mcp.catalog import build_catalog, object_schema
@@ -53,7 +53,7 @@ items_update_seller_item/items_update_item_price 是鱼小铺平台原商品编�
 卡券关联仅支持本人卡券和本人商品；涉及对接卡券的关联继续在现有页面管理。
 当前接入为私有 Bearer 令牌，未实现 OAuth 授权发现；只适用于支持配置 Authorization 的 MCP 客户端。
 MCP 提供执行能力，本轮没有启用无人值守经营、定时上架或自动消费。
-""" + "\n" + LISTING_COPY_GUIDE + "\n" + LISTING_COMPLIANCE_GUIDE + "\n" + CATALOG_SYNC_GUIDE + "\n" + SELECTION_GUIDE + "\n"
+""" + "\n" + LISTING_COPY_GUIDE + "\n" + LISTING_COMPLIANCE_GUIDE + "\n" + CATALOG_SYNC_GUIDE + "\n" + SELECTION_GUIDE + "\n" + CAPABILITY_GUIDE + "\n" + DELIVERY_TEXT_GUIDE + "\n"
 
 
 def result(data: dict, error: bool = False):

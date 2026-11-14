@@ -106,6 +106,28 @@
 4. 若取得 `item_id` 但 `sync_status` 失败，商品可能已经上架，只补查/同步该商品，不要再次 publish。
 5. `items_get_item_detail`（`path.cookie_id`、`path.item_id`）读取本地库。先确认发布后的同步实际完成，再用本次平台列表核对归属、标题、价格、`quantity` 及在售状态；鱼小铺可再用 `items_get_seller_item_edit_detail` 核对实际库存。保存请求数量与平台回读数量；只回读到 1 件或未取得库存时，不能宣称最大库存发布完成。缓存中暂无商品时只补同步，不能把本地同步失败说成外部未发布。
 6. 商品真实存在且交付内容已验证后，按已批准范围绑定卡券、配置商品回复，再读取关联与配置结果；重发按上节恢复原有规则。
+7. 按下节核验该账号自动擦亮和目标商品结果，分别报告开关、资格及实际擦亮，不能把发布成功视为擦亮成功。
+
+## 发布后擦亮核验
+
+自动擦亮是账号级开关 `auto_polish`，不是 `publish_publish_single` 的商品参数。已有开启授权时直接沿用；新任务只核验现状，不把发布授权扩大为开启账号所有商品的后台任务。
+
+1. 读取 `account_list_cookie_details_paginated` 的 `enabled/online/auto_polish`。已获准开启时用 `account_update_account_auto_polish` 写 `body.auto_polish=true`，保存稳定操作回执并回读。不要为了“核验”关闭再开启，也不要改动发货、AI 或密钥期限。
+2. 发布后做完整成功同步，检查 `snapshot_complete/state_updated`。仅 `sale_status=on_sale` 且 `is_polished=false/null` 的商品进入任务；`unchecked/pending_verification` 保留但不擦亮。局部详情和发布自动保存不一定完成全账号快照，不能据此认为已经具备资格。
+3. 用 `items_list_items_paginated` 的账号、商品关键字和状态筛选，或本地详情读取 `is_polished/polish_status/polish_checked_at`。`polish_status=success` 表示平台擦亮成功或平台确认今日已擦亮；结合时间和当日 `is_polished` 判断。北京时间跨日会重置标志，旧时间不是今日成功证明。
+4. `auto_polish=true` 只证明配置；需要等实际 Scheduler 周期，短时有界查询。缺少当次结果时报告“已开启，等待执行/实际结果未确认”，不能编造完成时间。持续失败时检查平台登录、调度与管理员擦亮日志；MCP 不提供管理员日志/强制触发工具，不能伪造调用。没有长期监控授权时不无限轮询。
+5. 平台返回 `UNSUPPORTED_ITEM_STATUS` 或“已下架商品不支持该操作”时，任务保留原商品、卡券、AI/默认回复与历史，标为 `pending_verification`，原因 `sale_verification_reason=polish_unsupported_status`；`polish_checked_at` 记录本次证据，`sale_checked_at/last_seen_at/sync_id` 仍是原完整同步时间。网络/登录失败不改变在售快照。请求期间出现更新的完整同步时不以旧失败覆盖新快照。待核实不能直接判为违规/售罄或据此重发。
+6. 后续完整同步重新返回商品会恢复 `on_sale`；未返回仍待核实。修复或启用擦亮不要求删除本地商品、解绑卡券、重建 AI 回复，也不自动重新上架旧商品。
+
+## 素材、地址、AI 上架与自动重发
+
+素材通过 `publish_list_materials/get_material/create_material/update_material` 维护；删除/批量删除另有权限和范围，不能因发布失败清空原素材。图/视频使用各自业务上传工具，素材 ID 与平台商品 ID 分开记录。
+
+`personal_address_*` 维护本人地址，可导入/导出；`address_*` 查询公共发布地址、账号选项和地点提示。先查已有项，修改/导入后回读，核对真实地点和所属用户。公共地址维护未开放 MCP，不将地点提示当作已保存的地址。
+
+AI 上架先 `ai_listing_list_configs` 核对已存在配置和费用范围，创建后查 `ai_listing_get_task/list_tasks`。取消任务不代表已产生的素材或商品被撤销；按任务的真实产物逐项核对。模型凭证和配置维护见[后台边界](project-admin.md)。
+
+自动重发用 `publish_get_auto_relist_rule` / `publish_save_auto_relist_rule`，事件用 `publish_list_auto_relist_events` / `publish_list_all_auto_relist_events`。规则写入、`publish_reconcile_auto_relist_event` 和 `publish_mark_auto_relist_event_failed` 需 `xianyu:automation:write` 及持续重发授权。先看原规则、事件和平台状态；状态未知先对账，不把标失败当取消平台商品，不并行手动重发和后台重发。普通账号重新上线没有通用发布补偿队列，不保证离线时失败的普通发布会自动补上。
 
 ## 批量
 

@@ -15,7 +15,9 @@ export function Register() {
 
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
-  const [registrationEnabled, setRegistrationEnabled] = useState(true)
+  const [registrationEnabled, setRegistrationEnabled] = useState<boolean | null>(null)
+  const [registrationError, setRegistrationError] = useState('')
+  const [registrationLoading, setRegistrationLoading] = useState(true)
   const [authFooterAd, setAuthFooterAd] = useState(() => getDefaultAuthFooterAdSettings())
 
   // Form states
@@ -33,26 +35,30 @@ export function Register() {
   const [countdown, setCountdown] = useState(0)
   const [verifying, setVerifying] = useState(false)
 
-  useEffect(() => {
-    getRegistrationStatus()
-      .then((result) => {
-        setRegistrationEnabled(result.enabled)
-        if (!result.enabled) {
-          addToast({ type: 'warning', message: '注册功能已关闭' })
-          // 跳转到登录页面
-          setTimeout(() => navigate('/login'), 1500)
-        }
-      })
-      .catch(() => {})
+  const loadRegistrationStatus = async () => {
+    setRegistrationLoading(true)
+    setRegistrationError('')
+    try {
+      const result = await getRegistrationStatus()
+      setRegistrationEnabled(result.enabled)
+    } catch (error) {
+      setRegistrationEnabled(null)
+      setRegistrationError(error instanceof Error ? error.message : '读取注册状态失败，请重试')
+    } finally {
+      setRegistrationLoading(false)
+    }
+  }
 
+  useEffect(() => {
+    void loadRegistrationStatus()
     getAuthFooterAdSettings()
       .then((result) => setAuthFooterAd(result))
       .catch(() => {})
-  }, [navigate, addToast])
+  }, [])
 
   useEffect(() => {
-    loadCaptcha()
-  }, [])
+    if (registrationEnabled === true) void loadCaptcha()
+  }, [registrationEnabled])
 
   useEffect(() => {
     if (countdown > 0) {
@@ -102,6 +108,7 @@ export function Register() {
   }
 
   const handleSendCode = async () => {
+    if (registrationEnabled !== true || registrationLoading) return
     // 验证表单数据
     if (!username.trim()) {
       addToast({ type: 'warning', message: '请先输入用户名' })
@@ -154,6 +161,7 @@ export function Register() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (registrationEnabled !== true || registrationLoading) return
 
     if (!username || !email || !password || !confirmPassword || !verificationCode) {
       addToast({ type: 'error', message: '请填写所有必填项' })
@@ -197,7 +205,20 @@ export function Register() {
     }
   }
 
-  if (!registrationEnabled) {
+  if (registrationLoading || registrationError) {
+    return (
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center p-4">
+        <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-8 text-center max-w-sm">
+          <h1 className="text-lg font-semibold mb-3">{registrationLoading ? '正在读取注册状态' : '注册状态读取失败'}</h1>
+          {registrationError && <p role="alert" className="text-sm text-red-600 mb-5">{registrationError}</p>}
+          {registrationError && <button type="button" className="btn-ios-primary mr-3" onClick={() => void loadRegistrationStatus()}>重新加载</button>}
+          <Link to="/login" className="text-sm text-blue-600">返回登录</Link>
+        </div>
+      </div>
+    )
+  }
+
+  if (registrationEnabled !== true) {
     return (
       <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center p-4">
         <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700 p-8 text-center max-w-sm">

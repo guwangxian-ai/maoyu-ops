@@ -5,12 +5,13 @@
 """
 from __future__ import annotations
 
+import asyncio
 import math
 import random
 import re
 import string
 import time
-from typing import Optional
+from typing import Literal, Optional
 
 from fastapi import APIRouter, Depends, Request
 from pydantic import BaseModel, EmailStr
@@ -34,6 +35,11 @@ from app.services.websocket_client import websocket_client
 from app.core.config import get_settings
 from common.db.session import async_session_maker
 from common.models.system_setting import SystemSetting
+from common.services.registration_policy import get_registration_rejection_message
+from common.services.email_verification_code_service import (
+    email_code_store, MAX_EMAIL_CODE_ATTEMPTS, generate_verification_code,
+    cleanup_expired_email_codes, check_email_code, invalidate_email_code,
+)
 from common.models.user import User
 from common.schemas.common import ApiResponse
 from common.services.email_log_service import (
@@ -65,7 +71,7 @@ class SendCodeRequest(BaseModel):
     """发送邮箱验证码请求"""
     email: EmailStr
     session_id: Optional[str] = None
-    type: str = "register"  # register, login 或 reset_password
+    type: Literal["register", "login", "reset_password"] = "register"  # register, login 或 reset_password
     # 极验滑动验证参数（仅忘记密码 reset_password 场景使用，参照登录逻辑）
     geetest_challenge: Optional[str] = None
     geetest_validate: Optional[str] = None
@@ -266,9 +272,6 @@ def generate_captcha_image(text: str) -> str:
         return ""
 
 
-def generate_verification_code(length: int = 6) -> str:
-    """生成数字验证码"""
-    return "".join(random.choices(string.digits, k=length))
 
 
 # ==================== 内存存储（简化实现，生产环境建议用Redis） ====================
@@ -277,10 +280,8 @@ def generate_verification_code(length: int = 6) -> str:
 captcha_store: dict = {}
 
 # 邮箱验证码存储: {email: {"code": str, "type": str, "expires_at": float, "fail_count": int}}
-email_code_store: dict = {}
 
 # 单个邮箱验证码最大允许尝试次数，超过即作废（防暴力枚举）
-MAX_EMAIL_CODE_ATTEMPTS = 5
 
 
 def cleanup_expired_captcha():
@@ -291,12 +292,6 @@ def cleanup_expired_captcha():
         del captcha_store[k]
 
 
-def cleanup_expired_email_codes():
-    """清理过期的邮箱验证码"""
-    current_time = time.time()
-    expired_keys = [k for k, v in email_code_store.items() if v["expires_at"] < current_time]
-    for k in expired_keys:
-        del email_code_store[k]
 
 
 # ==================== 路由 ====================
@@ -403,7 +398,19 @@ async def send_email_verification_code(
         trigger_operation = EMAIL_OPERATION_RESET_PASSWORD_VERIFICATION_CODE
     client_ip = get_client_ip(http_request)
 
+    pending_record = None
     try:
+        if request.type == "register":
+            rejection = get_registration_rejection_message(
+                await SystemSettingService(db).list_settings()
+            )
+            if rejection:
+                await record_email_log(
+                    recipient_email=request.email, trigger_operation=trigger_operation,
+                    success=False, owner_id=None, client_ip=client_ip,
+                    result_message=rejection,
+                )
+                return ApiResponse(success=False, code=403, message=rejection)
         cleanup_expired_email_codes()
         # 触发用户（用于邮件日志），先置空，后续按类型补充
         existing_user = None
@@ -494,7 +501,7 @@ async def send_email_verification_code(
         
         # 检查发送频率（1分钟内只能发送一次）
         stored = email_code_store.get(request.email)
-        if stored and stored["expires_at"] - 240 > time.time():
+        if stored and (stored.get("is_pending") or stored["expires_at"] - 240 > time.time()):
             await record_email_log(
                 recipient_email=request.email,
                 trigger_operation=trigger_operation,
@@ -511,12 +518,14 @@ async def send_email_verification_code(
         # 生成验证码
         code = generate_verification_code()
         
-        # 保存验证码（5分钟有效）
-        email_code_store[request.email] = {
+        # 发送期间不可校验；有效期从邮件实际发送成功时开始。
+        pending_record = {
             "code": code,
             "type": request.type,
-            "expires_at": time.time() + 300
+            "expires_at": time.time() + 300,
+            "is_pending": True,
         }
+        email_code_store[request.email] = pending_record
         
         # 发送邮件
         from app.services.email_service import send_verification_code_email
@@ -529,13 +538,15 @@ async def send_email_verification_code(
         )
         
         if not success:
-            # 发送失败，删除验证码
-            del email_code_store[request.email]
+            invalidate_email_code(request.email, pending_record)
             return ApiResponse(
                 success=False,
                 message=message
             )
         
+        if email_code_store.get(request.email) is not pending_record:
+            return ApiResponse(success=False, message="该验证码请求已失效，请使用最新邮件")
+        pending_record.update(expires_at=time.time() + 300, is_pending=False)
         logger.info(f"发送邮箱验证码成功: email={request.email}, type={request.type}")
         
         return ApiResponse(
@@ -543,7 +554,13 @@ async def send_email_verification_code(
             message="验证码已发送到您的邮箱，请查收"
         )
         
+    except asyncio.CancelledError:
+        if pending_record is not None:
+            invalidate_email_code(request.email, pending_record)
+        raise
     except Exception as e:
+        if pending_record is not None:
+            invalidate_email_code(request.email, pending_record)
         logger.error(f"发送邮箱验证码失败: {e}")
         # 兜底记录：异常也必须落库邮件日志，禁止静默失败
         await record_email_log(
@@ -564,68 +581,20 @@ async def send_email_verification_code(
 async def verify_email_code(
     email: str,
     code: str,
-    code_type: str = "register",
+    code_type: Literal["register", "login", "reset_password"] = "register",
+    db: AsyncSession = Depends(deps.get_db_session),
 ) -> ApiResponse:
-    """验证邮箱验证码"""
-    cleanup_expired_email_codes()
-    
-    stored = email_code_store.get(email)
-    
-    if not stored:
-        return ApiResponse(success=False, message="验证码不存在或已过期")
-    
-    if stored["expires_at"] < time.time():
-        del email_code_store[email]
-        return ApiResponse(success=False, message="验证码已过期")
-    
-    if stored["code"] != code:
-        return ApiResponse(success=False, message="验证码错误")
-    
-    if stored["type"] != code_type:
-        return ApiResponse(success=False, message="验证码类型不匹配")
-    
-    # 验证成功后删除
-    del email_code_store[email]
-    
-    return ApiResponse(success=True, message="验证码验证成功")
+    """共享校验与尝试次数上限；关闭注册后已有验证码也不能通过。"""
+    if code_type == "register":
+        rejection = get_registration_rejection_message(
+            await SystemSettingService(db).list_settings()
+        )
+        if rejection:
+            return ApiResponse(success=False, code=403, message=rejection)
+    valid, message = check_email_code(email, code, code_type)
+    return ApiResponse(success=valid, message=message)
 
 
-def check_email_code(email: str, code: str, code_type: str = "login") -> tuple[bool, str]:
-    """
-    验证邮箱验证码（供其他模块调用）
-
-    返回: (是否成功, 消息)
-
-    安全说明：单个验证码最多允许尝试 MAX_EMAIL_CODE_ATTEMPTS 次，
-    超过后立即作废，防止 6 位数字验证码被暴力枚举。
-    """
-    cleanup_expired_email_codes()
-
-    stored = email_code_store.get(email)
-
-    if not stored:
-        return False, "验证码不存在或已过期"
-
-    if stored["expires_at"] < time.time():
-        del email_code_store[email]
-        return False, "验证码已过期"
-
-    if stored["type"] != code_type:
-        return False, "验证码类型不匹配"
-
-    if stored["code"] != code:
-        # 记录失败次数，超过上限直接作废，避免暴力枚举
-        stored["fail_count"] = stored.get("fail_count", 0) + 1
-        if stored["fail_count"] >= MAX_EMAIL_CODE_ATTEMPTS:
-            del email_code_store[email]
-            return False, "验证码错误次数过多，请重新获取验证码"
-        remaining = MAX_EMAIL_CODE_ATTEMPTS - stored["fail_count"]
-        return False, f"验证码错误，还可尝试 {remaining} 次"
-
-    # 验证成功后删除
-    del email_code_store[email]
-
-    return True, "验证码验证成功"
 
 
 # ==================== 过滑块（外部接口，模式B） ====================

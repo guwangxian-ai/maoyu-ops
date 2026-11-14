@@ -28,6 +28,8 @@ from common.db.default_publish_addresses import (
     build_default_publish_addresses,
 )
 from common.db.auto_relist_schema import ensure_auto_relist_schema
+from common.db.market_schema import ensure_market_schema
+from common.db.delivery_text_schema import ensure_delivery_text_schema
 from common.db.session import async_engine, async_session_maker
 from common.utils.time_utils import get_beijing_now_naive
 from common.utils.security import generate_secret_key, get_password_hash
@@ -898,6 +900,7 @@ class DatabaseInitializer:
                 account_identifier VARCHAR(80) NOT NULL COMMENT '账号标识',
                 channel_id BIGINT NOT NULL COMMENT '渠道ID',
                 enabled TINYINT(1) DEFAULT 1 COMMENT '是否启用',
+                notify_types VARCHAR(64) NOT NULL DEFAULT 'chat,delivery,account' COMMENT '订阅的通知类型',
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
                 updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
                 INDEX idx_owner_id (owner_id),
@@ -2094,6 +2097,9 @@ class DatabaseInitializer:
     
     # 字段迁移定义：表名 -> [(字段名, 字段定义, 在哪个字段后面)]
     COLUMN_MIGRATIONS = {
+        "xy_message_notifications": [
+            ("notify_types", "VARCHAR(64) NOT NULL DEFAULT 'chat,delivery,account' COMMENT '订阅的通知类型'", "enabled"),
+        ],
         "xy_keyword_rules": [
             ("location_name", "VARCHAR(255) DEFAULT NULL COMMENT '站外联系方式定位名称'", "image_url"),
             ("location_longitude", "VARCHAR(32) DEFAULT NULL COMMENT '站外联系方式经度'", "location_name"),
@@ -2241,6 +2247,7 @@ class DatabaseInitializer:
         "xy_cards": [
             ("delivery_count", "INT DEFAULT 0 COMMENT '发货次数'", "delay_seconds"),
             ("use_no_logistics_form", "TINYINT(1) NOT NULL DEFAULT 0 COMMENT '是否通过无需邮寄表单发货'", "delay_seconds"),
+            ("send_text_after_form", "TINYINT(1) NOT NULL DEFAULT 0 COMMENT '凭证发货后补发文字'", "use_no_logistics_form"),
             ("price", "VARCHAR(32) COMMENT '对接价格'", "delivery_count"),
             ("is_dockable", "TINYINT(1) DEFAULT 0 COMMENT '是否可对接'", "price"),
             ("image_urls", "TEXT COMMENT '多图片URL列表(JSON数组，最多3张)'", "image_url"),
@@ -2338,6 +2345,10 @@ class DatabaseInitializer:
                     # 自动续售表和发布日志关联字段独立幂等迁移，避免依赖旧版本 DDL 顺序。
                     async with ddl_connection() as conn:
                         await ensure_auto_relist_schema(conn, get_beijing_now_naive())
+                        await ensure_market_schema(conn)
+                        await ensure_delivery_text_schema(conn)
+                        from common.db.item_query_indexes import ensure_item_query_indexes
+                        await ensure_item_query_indexes(conn)
 
                     # 2. 创建默认管理员用户
                     await self.create_default_admin()

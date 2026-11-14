@@ -124,8 +124,17 @@ async def _application_lifespan(app: FastAPI):
     else:
         logger.info("已禁用自动启动WebSocket连接（AUTO_START_WEBSOCKET=false）")
     
-    yield
-    
+    from app.services.xianyu.delivery_text import run_delivery_text_outbox
+    delivery_text_task = asyncio.create_task(run_delivery_text_outbox(cookie_manager))
+    try:
+        yield
+    finally:
+        delivery_text_task.cancel()
+        try:
+            await delivery_text_task
+        except asyncio.CancelledError:
+            pass
+
     logger.info(f"{settings.project_name} 关闭中...")
     
     # 停止CookieManager

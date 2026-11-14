@@ -15,9 +15,9 @@ let publicSettingsPromise: Promise<Record<string, unknown>> | null = null
  * 获取公共系统设置（带缓存）
  * 同一页面生命周期内只请求一次
  */
-const getPublicSettings = async (): Promise<Record<string, unknown>> => {
+const getPublicSettings = async (refresh = false): Promise<Record<string, unknown>> => {
   // 如果已有缓存，直接返回
-  if (publicSettingsCache) {
+  if (!refresh && publicSettingsCache) {
     return publicSettingsCache
   }
   // 如果正在请求中，等待该请求完成
@@ -27,6 +27,9 @@ const getPublicSettings = async (): Promise<Record<string, unknown>> => {
   // 发起新请求
   publicSettingsPromise = get<Record<string, unknown>>(`${SYSTEM_PREFIX}/public`)
     .then((settings) => {
+      if (!settings || typeof settings !== 'object' || Array.isArray(settings)) {
+        throw new Error('读取公共设置失败，请重试')
+      }
       publicSettingsCache = settings
       return settings
     })
@@ -53,10 +56,13 @@ export const logout = (): Promise<ApiResponse> => {
 
 // 获取注册状态 - 从系统设置获取
 export const getRegistrationStatus = async (): Promise<{ enabled: boolean }> => {
-  const settings = await getPublicSettings()
-  // 处理多种可能的值类型：true, 'true', 1, '1'
+  const settings = await getPublicSettings(true)
   const value = settings.registration_enabled
-  return { enabled: value === true || value === 'true' || value === 1 || value === '1' }
+  if (value === undefined || value === null) throw new Error('注册状态缺失，请重新加载')
+  const normalized = String(value).trim().toLowerCase()
+  if (['true', '1', 'yes', 'on'].includes(normalized)) return { enabled: true }
+  if (['false', '0', 'no', 'off'].includes(normalized)) return { enabled: false }
+  throw new Error('注册状态无效，请重新加载')
 }
 
 // 获取登录信息显示状态 - 从系统设置获取

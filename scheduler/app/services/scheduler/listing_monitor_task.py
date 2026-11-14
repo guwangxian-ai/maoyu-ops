@@ -23,6 +23,10 @@ from common.db.session import async_session_maker
 from common.models.listing_monitor_item import ListingMonitorItem
 from common.models.listing_monitor_log import ListingMonitorLog
 from common.models.listing_monitor_task import ListingMonitorTask
+from common.models.market_observation import MarketMonitorState, MarketSampleRun
+from common.services.market_research import (
+    cleanup_market_history, failure_code, finish_sample, new_sample, run_dict, update_monitor_state,
+)
 from common.models.xy_account import XYAccount
 from common.services.account_cooldown import DEFAULT_COOLDOWN_SECONDS, account_cooldown_manager
 from common.services.listing_monitor_dedup import has_owner_ordered_item
@@ -105,6 +109,7 @@ class ListingMonitorTaskService:
     def __init__(self, task_name: str = "商品监控任务"):
         self.task_name = task_name
         self._lock = asyncio.Lock()
+        self._last_market_cleanup = None
 
     async def execute(self, force: bool = False, trigger_type: str = "auto"):
         """执行商品监控任务：遍历所有启用的监控任务并采集。
@@ -128,6 +133,14 @@ class ListingMonitorTaskService:
 
         # 主动清理过期的监控日志（10天前）
         await self._cleanup_expired_logs()
+        now = get_beijing_now_naive()
+        if self._last_market_cleanup is None or now - self._last_market_cleanup >= timedelta(hours=1):
+            try:
+                async with async_session_maker() as session:
+                    await cleanup_market_history(session)
+                self._last_market_cleanup = now
+            except Exception as exc:
+                logger.warning("市场历史清理未完成：{}", type(exc).__name__)
 
         try:
             tasks = await self._get_enabled_tasks()
@@ -179,8 +192,10 @@ class ListingMonitorTaskService:
             if not task:
                 return {"success": False, "message": "监控任务不存在、已删除或未启用"}
             try:
-                await self._process_task(task, trigger_type=trigger_type)
-                return {"success": True, "message": "采集已执行"}
+                result = await self._process_task(task, trigger_type=trigger_type)
+                status = (result or {}).get("status", "success")
+                return {"success": status in {"success", "partial"}, "message": f"采集状态：{status}",
+                        "status": status, "run_id": (result or {}).get("id")}
             except Exception as exc:  # noqa: BLE001
                 logger.error(f"【{self.task_name}】手动执行任务 {task_id} 异常: {exc}")
                 return {"success": False, "message": f"采集执行失败: {exc}"}
@@ -352,6 +367,49 @@ class ListingMonitorTaskService:
         return rank
 
     async def _process_task(self, task: ListingMonitorTask, trigger_type: str = "auto"):
+        """Record evidence independently; a paused task never changes its enable switch."""
+        if task.owner_id is None:
+            return await self._collect_task(task, trigger_type)
+        async with async_session_maker() as session:
+            current = await session.get(ListingMonitorTask, task.id)
+            if not current or current.is_deleted or not current.is_enabled or current.owner_id != task.owner_id:
+                return {"status": "disabled"}
+            task = current
+            state = await session.get(MarketMonitorState, task.id)
+            if state and state.paused_until and state.paused_until > get_beijing_now_naive():
+                return {"status": "paused"}
+            filters = {"task_id": task.id, "monitor_type": task.monitor_type,
+                       "price_min": str(task.price_min) if task.price_min is not None else None,
+                       "price_max": str(task.price_max) if task.price_max is not None else None,
+                       "publish_days": task.publish_days, "pages": task.collect_pages,
+                       "personal_only": True, "account_ids": sorted(task.account_ids or [])}
+            run = new_sample(task.owner_id, task.keyword, "listing_monitor", filters,
+                             task_id=task.id, pages=task.collect_pages)
+            session.add(run)
+            await session.commit()
+            run_id = run.id
+        try:
+            result = await self._collect_task(task, trigger_type)
+        except asyncio.CancelledError:
+            async with async_session_maker() as session:
+                run = await session.get(MarketSampleRun, run_id)
+                await finish_sample(session, run, [], status="failed", pages_completed=0, error_code="interrupted")
+                await update_monitor_state(session, task, run)
+            raise
+        except Exception:
+            async with async_session_maker() as session:
+                run = await session.get(MarketSampleRun, run_id)
+                await finish_sample(session, run, [], status="failed", pages_completed=0, error_code="request_failed")
+                await update_monitor_state(session, task, run)
+            raise
+        async with async_session_maker() as session:
+            run = await session.get(MarketSampleRun, run_id)
+            await finish_sample(session, run, result["items"], status=result["status"],
+                                pages_completed=result["pages"], error_code=result["error_code"])
+            await update_monitor_state(session, task, run, collection_status=result["status"])
+            return run_dict(run)
+
+    async def _collect_task(self, task: ListingMonitorTask, trigger_type: str = "auto"):
         """处理单个监控任务：采集 + 入库 + 写日志 + 更新执行时间。"""
         sort_field, sort_value = _MONITOR_SORT_MAP.get(task.monitor_type, _MONITOR_SORT_MAP["listing"])
         accounts = await self._resolve_and_load_accounts(task)
@@ -397,6 +455,7 @@ class ListingMonitorTaskService:
         used_account_id: Optional[str] = None
         used_account_ids: set[str] = set()
         status = "success"
+        error_code = None
         message = ""
         all_items: List[dict] = []
         pages_collected = 0
@@ -408,6 +467,7 @@ class ListingMonitorTaskService:
 
         if not accounts:
             status = "failed"
+            error_code = "verification_required" if cooldown_blocked else "no_account"
             if cooldown_blocked:
                 message = "所有关联账号都在风控冷却期，本次跳过采集"
             else:
@@ -482,6 +542,7 @@ class ListingMonitorTaskService:
                         page_result = res
                         break
                     error_msg = res.get("error")
+                    error_code = failure_code(error_msg)
                     # 被挤爆/触发验证等风控：将该账号加入冷却，本次运行后续页不再使用
                     if account_cooldown_manager.is_risk_control_error(error_msg):
                         account_cooldown_manager.add(acc.account_id)
@@ -501,11 +562,15 @@ class ListingMonitorTaskService:
                     logger.warning(f"【{self.task_name}】监控任务 {task.id} {message}")
                     break
 
+                entries = page_result.get("items", [])
+                parsed_items = [item for entry in entries if (item := parse_search_item(entry))]
+                if entries and not parsed_items:
+                    page_failed = True
+                    error_code = "parse_failed"
+                    message = "搜索存在结果但无法解析，保留旧记录"
+                    break
                 pages_collected += 1
-                for entry in page_result.get("items", []):
-                    parsed = parse_search_item(entry)
-                    if parsed:
-                        all_items.append(parsed)
+                all_items.extend(parsed_items)
 
                 # 没有下一页则提前结束
                 if not page_result.get("has_next_page"):
@@ -545,6 +610,8 @@ class ListingMonitorTaskService:
             f"【{self.task_name}】任务 {task.id}({task.keyword}/{task.monitor_type}) 完成："
             f"账号={used_account_id}，页数={pages_collected}，获取={fetched_count}，新增={inserted_count}，更新={updated_count}，状态={status}"
         )
+        return {"status": status, "items": all_items, "pages": pages_collected,
+                "error_code": error_code if status != "success" else None}
 
     async def _upsert_items(self, task: ListingMonitorTask, items: List[dict]) -> tuple[int, int]:
         """将采集商品 upsert 到采集商品表，返回 (新增数, 更新数)。"""

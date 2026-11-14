@@ -24,7 +24,7 @@ export function Login() {
   const [loginType, setLoginType] = useState<LoginType>('username')
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
-  const [registrationEnabled, setRegistrationEnabled] = useState(true)
+  const [registrationEnabled, setRegistrationEnabled] = useState(false)
   const [showDefaultLogin, setShowDefaultLogin] = useState(true)
   const [loginCaptchaEnabled, setLoginCaptchaEnabled] = useState<boolean | null>(null)
   const [loginBranding, setLoginBranding] = useState(() => getDefaultLoginBrandingSettings())

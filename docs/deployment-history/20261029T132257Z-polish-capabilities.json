@@ -1,0 +1,280 @@
+{
+  "product": "MaoYuOps（猫鱼运营）",
+  "repository": "https://github.com/guwangxian-ai/maoyu-ops",
+  "upstream_repository": "https://github.com/zhinianboke/xianyu-auto-reply",
+  "upstream_base": "10fc70ebfd3c3b481cc1d6975153cc20ee746c3d",
+  "upstream_commit": "990f701fe03d7f62c3cf1fe571fc5bb6de57c778",
+  "license": "AGPL-3.0",
+  "url": "https://43.136.91.22/maoyu-ops/",
+  "ai_access_url": "https://43.136.91.22/maoyu-ops/ai-access",
+  "mcp_url": "https://43.136.91.22/maoyu-ops/mcp",
+  "skill_url": "https://43.136.91.22/maoyu-ops/ai/skills/xianyu-operations.zip",
+  "backup_policy": "Ask once before a future deployment unless the user has already chosen backup or no backup; no automatic backup or rollback tags.",
+  "source_commit": "ac03d0251e52ecc3ea94ffd35d871181672ee967",
+  "source_revision_note": "ac03d02 plus the exact working-tree patch hashes below; this task did not push a new Git commit.",
+  "source_patch_files": [
+    "AGENTS.md",
+    "backend-web/app/mcp/onboarding.py",
+    "backend-web/app/mcp/server.py",
+    "common/services/item_service.py",
+    "scheduler/app/services/scheduler/polish_task.py",
+    "skills/xianyu-operations/SKILL.md",
+    "skills/xianyu-operations/agents/openai.yaml",
+    "skills/xianyu-operations/references/catalog-sync.md",
+    "skills/xianyu-operations/references/delivery-assets.md",
+    "skills/xianyu-operations/references/listing.md",
+    "skills/xianyu-operations/references/orders.md",
+    "backend-web/tests/test_polish_task.py",
+    "backend-web/tests/test_skill_capabilities.py",
+    "skills/xianyu-operations/references/accounts-replies.md",
+    "skills/xianyu-operations/references/capabilities.md",
+    "skills/xianyu-operations/references/project-admin.md"
+  ],
+  "deployed_patch_files": {
+    "AGENTS.md": "dd7c118d7d7d3af8550e1832d83cb2435b6b3bcd8c5c13492d4507fc7ea322d9",
+    "backend-web/app/mcp/onboarding.py": "e941f8b2353ff7f060cb37d15e2c871afaef5906c9621a8230bb5c38bae10c76",
+    "backend-web/app/mcp/server.py": "db3087186e9803a41bc7a3fba77d429e8e19bf7623ae6730c9dea3bcc8c971ed",
+    "common/services/item_service.py": "a3c4752b5ab9d6fce336eeaa49310f9bd2b9f187d928dbeef050d35e679c3da0",
+    "scheduler/app/services/scheduler/polish_task.py": "3a85fa300d039e613ff13920a90d0ea416d4aef966dddd0810e181cbac555eec",
+    "skills/xianyu-operations/SKILL.md": "3fadaeca36baa6eac2b96f0cc4a22840f35662d6a15b2d50a4bc40b8dea8de7f",
+    "skills/xianyu-operations/agents/openai.yaml": "30505ae2a7e99cb280a5bbc85ef90d3c7bc327368e67adf1acf66a48d5685131",
+    "skills/xianyu-operations/references/catalog-sync.md": "3862cf75ece201e006ba17576c753ed635fd6b326928ebbfb23282cab32476de",
+    "skills/xianyu-operations/references/delivery-assets.md": "340c208dc35a86a405af567a7ac309e2186657a5d33a88d0643074fbbe350b1c",
+    "skills/xianyu-operations/references/listing.md": "192379b7e37a2ae3251b509e472ce1a9ab41221d418caccf5ac008a95f4df5d3",
+    "skills/xianyu-operations/references/orders.md": "a7efa4b2ccbaf6b5c99d7588b10a7ac8fff54d3e701e1afbde0c175f6c5015d9",
+    "backend-web/tests/test_polish_task.py": "6ae3cb85c1ba9f1cbec8920baa6e9a37fe5918bf9fbd03f8241994729330587f",
+    "backend-web/tests/test_skill_capabilities.py": "1a826846b88abe435414eaa3af084a1b556a01ac4ab094b8f6207e5706237813",
+    "skills/xianyu-operations/references/accounts-replies.md": "3ddbb40892d4b1088078f371b6232ce4545714ffe57c2280c1604cfab87d1e3f",
+    "skills/xianyu-operations/references/capabilities.md": "cfc9d971f53194cc9d7d5f22037d01b8d36f45ead757a97df5ca398987cd397d",
+    "skills/xianyu-operations/references/project-admin.md": "f7dc23fac1f17ac7e11bb3d858e15d6521b12e7590a21eb39c002ca7a8c6c4e0"
+  },
+  "carried_forward_patch_record": "docs/deployment-history/20261028T075513Z-selection-skills.json",
+  "skill_version": "2026.10.29.1",
+  "skill_sha256": "58a0c01c61c7faad388a7ad6a4e3de2ee30bdc95233ba9280855b69aab6df9aa",
+  "release_id": "20261029T132257Z-polish-capabilities",
+  "previous_release_id": "20261028T075513Z-selection-skills",
+  "previous_record": "docs/deployment-history/20261028T075513Z-selection-skills.json",
+  "deployed_at": "2026-10-29T13:31:46.061973+00:00",
+  "verified_at": "2026-10-29T14:01:17.694497+00:00",
+  "status": "deployed_and_verified",
+  "changes": [
+    "Only confirmed on-sale products are polished; recheck status before requests and preserve all records on platform rejection.",
+    "Refresh and lock item metadata after network calls; an old failure cannot override a newer complete catalog sync.",
+    "Expose separate polish status/check time and pending reason in item queries.",
+    "Document all route modules in a capability index with explicit MCP and admin boundaries; distribute 18-file Skills 2026.10.29.1.",
+    "Enable auto polishing for the two authorized accounts through durable MCP receipts; both actual results verified."
+  ],
+  "database_migration": false,
+  "backup_choice": "User explicitly selected no backup",
+  "backup_created": false,
+  "backup_available": false,
+  "backup_directory": null,
+  "rollback_script": null,
+  "rollback_available": false,
+  "recovery_options": {
+    "note": "No backup or rollback tags were created. A code-only repair requires inspecting available source/images; this deployment does not supply database or authorization-volume restoration."
+  },
+  "images": {
+    "scheduler": "sha256:cf487a29dc506ea436b9719da13d27c3cb06c5ad74f94402e3b5ff4e55ac3418",
+    "backend-web": "sha256:48394d06c1beee77ef3206239a77147fcffd5c68fb82badc62db1722b8d1700a",
+    "websocket": "sha256:06bdd488c84b38afefdfd1a6e2481b4620f69a64149119f6cf8aed836a6320fd",
+    "redis": "sha256:6ab0b6e7381779332f97b8ca76193e45b0756f38d4c0dcda72dbb3c32061ab99",
+    "mysql": "sha256:7dcddc01f13bab2f15cde676d44d01f61fc9f99fe7785e86196dfc07d358ae2b"
+  },
+  "ready_seconds": {
+    "backend-web": null,
+    "scheduler": 16.56
+  },
+  "verification": {
+    "cloud_isolated_tests": 59,
+    "test_modules": [
+      "test_ai_access.PublicAccessTests",
+      "test_mcp_gateway",
+      "test_catalog_snapshot",
+      "test_polish_task",
+      "test_skill_capabilities"
+    ],
+    "test_network": "none",
+    "test_limits": {
+      "memory": "512m",
+      "cpus": 1
+    },
+    "production_credentials_or_volumes_in_tests": false,
+    "all_capabilities_live_tested": false,
+    "capability_audit": {
+      "route_modules": 80,
+      "route_definitions": 540,
+      "mcp_allowlist_groups": 27,
+      "note": "Source/index coverage and real tool mapping, not live execution of every business action"
+    },
+    "skills_files": 18,
+    "source_local_public_packages_match": true,
+    "mcp_tools": 213,
+    "mcp_scopes_and_private_configuration_unchanged": true,
+    "fresh_mcp_guidance_verified": true,
+    "business_records_preserved": {
+      "xy_catalog_items": {
+        "before_count": 154,
+        "after_count": 154,
+        "all_original_rows_present": true,
+        "config_hashes_unchanged": true
+      },
+      "xy_cards": {
+        "before_count": 82,
+        "after_count": 82,
+        "all_original_rows_present": true,
+        "config_hashes_unchanged": true
+      },
+      "xy_card_item_relations": {
+        "before_count": 154,
+        "after_count": 154,
+        "all_original_rows_present": true,
+        "config_hashes_unchanged": true
+      },
+      "xy_default_replies": {
+        "before_count": 159,
+        "after_count": 159,
+        "all_original_rows_present": true,
+        "config_hashes_unchanged": true
+      },
+      "xy_mcp_access_tokens": {
+        "before_count": 2,
+        "after_count": 2,
+        "all_original_rows_present": true,
+        "config_hashes_unchanged": true
+      },
+      "xy_ai_listing_configs": {
+        "before_count": 0,
+        "after_count": 0,
+        "all_original_rows_present": true,
+        "config_hashes_unchanged": true
+      }
+    },
+    "account_settings_verified": "Existing enabled/auto_confirm/delivery_disabled/ai_enabled switches preserved; only authorized auto_polish flags enabled. Whole account rows contain changing runtime data and are not asserted byte-identical.",
+    "polish": {
+      "maowang": {
+        "local_items": 79,
+        "on_sale": 79,
+        "pending": 0,
+        "auto_polish": true,
+        "online": true,
+        "polished_today": 79,
+        "results_after_enable": {
+          "success": 79
+        },
+        "receipt_state": "observed"
+      },
+      "wen": {
+        "local_items": 75,
+        "on_sale": 75,
+        "pending": 0,
+        "auto_polish": true,
+        "online": true,
+        "polished_today": 75,
+        "results_after_enable": {
+          "success": 75
+        },
+        "receipt_state": "observed"
+      }
+    },
+    "all_five_services_healthy": true,
+    "other_containers_unchanged": true,
+    "environments_and_mounts_unchanged": true,
+    "frontend_unchanged": true,
+    "other_project_entries": {
+      "/douyin-leads/": {
+        "status": 303,
+        "location": "/douyin-leads/login"
+      },
+      "/weixin-bot-notification-platform/": {
+        "status": 200,
+        "location": null
+      },
+      "/hermes/": {
+        "status": 302,
+        "location": "/hermes/login?next=%2F"
+      },
+      "/libretv/": {
+        "status": 308,
+        "location": "/libretv"
+      }
+    },
+    "health_probe_ms": [
+      35.48,
+      3.44,
+      3.54
+    ],
+    "health_median_ms": 3.54,
+    "performance_note": "Health probes and resource samples only, not a load test or throughput claim.",
+    "runtime_stats": [
+      {
+        "BlockIO": "3.13MB / 4.53MB",
+        "CPUPerc": "0.44%",
+        "Container": "07415a02ea82",
+        "ID": "07415a02ea82",
+        "MemPerc": "14.60%",
+        "MemUsage": "112.2MiB / 768MiB",
+        "Name": "xianyu-auto-reply-scheduler-1",
+        "NetIO": "25.9MB / 7.2MB",
+        "PIDs": "7"
+      },
+      {
+        "BlockIO": "330MB / 3GB",
+        "CPUPerc": "0.13%",
+        "Container": "e49910bbe51f",
+        "ID": "e49910bbe51f",
+        "MemPerc": "43.31%",
+        "MemUsage": "541.3MiB / 1.221GiB",
+        "Name": "xianyu-auto-reply-backend-web-1",
+        "NetIO": "146MB / 58MB",
+        "PIDs": "156"
+      },
+      {
+        "BlockIO": "46MB / 214MB",
+        "CPUPerc": "0.28%",
+        "Container": "23a8e9339a82",
+        "ID": "23a8e9339a82",
+        "MemPerc": "3.51%",
+        "MemUsage": "43.84MiB / 1.221GiB",
+        "Name": "xianyu-auto-reply-websocket-1",
+        "NetIO": "59.2MB / 69.9MB",
+        "PIDs": "9"
+      },
+      {
+        "BlockIO": "4.85GB / 4.92GB",
+        "CPUPerc": "0.47%",
+        "Container": "4e4f3819b48c",
+        "ID": "4e4f3819b48c",
+        "MemPerc": "1.24%",
+        "MemUsage": "3.957MiB / 320MiB",
+        "Name": "xianyu-auto-reply-redis-1",
+        "NetIO": "845MB / 154MB",
+        "PIDs": "7"
+      },
+      {
+        "BlockIO": "2.6GB / 58.1GB",
+        "CPUPerc": "0.81%",
+        "Container": "b24b6da1bc05",
+        "ID": "b24b6da1bc05",
+        "MemPerc": "20.61%",
+        "MemUsage": "158.3MiB / 768MiB",
+        "Name": "xianyu-auto-reply-mysql-1",
+        "NetIO": "7.61GB / 17.8GB",
+        "PIDs": "54"
+      }
+    ],
+    "new_tracebacks": {
+      "backend-web": {
+        "traceback_count": 0
+      },
+      "scheduler": {
+        "traceback_count": 0
+      }
+    },
+    "new_restarts": 0,
+    "publication_or_buyer_message_sent": false,
+    "paid_ai_calls": 0
+  },
+  "operations_evidence": "data/ops-runs/polish-capabilities-20261029/",
+  "server_release_directory": "/srv/xianyu-auto-reply/releases/20261029T132257Z-polish-capabilities"
+}

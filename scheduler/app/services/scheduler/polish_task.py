@@ -12,7 +12,7 @@ import asyncio
 import json
 import time
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import List, Optional
 
 import aiohttp
@@ -167,6 +167,12 @@ class PolishTaskService:
             
             for item in items:
                 try:
+                    # 上一件商品处理期间可能发生完整同步或人工修改，不能继续使用旧快照。
+                    await session.refresh(item)
+                    snapshot = (item.metadata_json or {}).get("sale_snapshot") or {}
+                    if snapshot.get("status") != "on_sale" or item.is_polished:
+                        continue
+                    sync_id = snapshot.get("sync_id")
                     # 执行擦亮
                     result = await self._polish_item(current_cookie_str, item.item_id)
                     
@@ -184,6 +190,9 @@ class PolishTaskService:
                     if not is_success and ("一天只能擦亮一次" in error_msg or "POLISH_DUPLICATE" in error_msg):
                         is_success = True
                         logger.info(f"【{self.task_name}】账号 {account.account_id} 商品 {item.item_id} 今天已擦亮过，视为成功")
+
+                    unsupported = 'UNSUPPORTED_ITEM_STATUS' in error_msg or '已下架商品不支持该操作' in error_msg
+                    await self._record_polish_result(session, item, sync_id, bool(is_success), unsupported)
                     
                     if is_success:
                         # 擦亮成功，更新商品状态
@@ -227,12 +236,11 @@ class PolishTaskService:
                             )
                             break
                         
-                        # 已下架商品，直接删除商品记录
-                        if 'UNSUPPORTED_ITEM_STATUS' in error_msg or '已下架商品不支持该操作' in error_msg:
-                            await session.delete(item)
+                        # 平台拒绝擦亮不能证明具体下架原因，更不能删除商品及其运营配置。
+                        if unsupported:
                             logger.info(
                                 f"【{self.task_name}】账号 {account.account_id} 商品 {item.item_id} "
-                                f"已下架，已删除商品记录"
+                                f"状态不支持擦亮，已保留记录并记录待核实证据"
                             )
                         
                         # 记录失败日志
@@ -283,14 +291,43 @@ class PolishTaskService:
         
         条件：
         - account_pk = 指定账号ID
+        - 最近在售快照为 on_sale（未检查和待核实的历史记录不参与）
         - is_polished = False 或 NULL（未擦亮）
         """
         stmt = select(XYCatalogItem).where(
             XYCatalogItem.account_pk == account_pk,
+            XYCatalogItem.metadata_json["sale_snapshot"]["status"].as_string() == "on_sale",
             (XYCatalogItem.is_polished == False) | (XYCatalogItem.is_polished == None),
         )
         result = await session.execute(stmt)
         return list(result.scalars().all())
+
+    async def _record_polish_result(
+        self, session: AsyncSession, item: XYCatalogItem, sync_id: Optional[str],
+        success: bool, unsupported: bool,
+    ) -> None:
+        # 刷新并锁定当前行，避免擦亮网络请求期间的同步/配置被旧 JSON 覆盖。
+        row = (await session.execute(
+            select(XYCatalogItem).where(
+                XYCatalogItem.id == item.id,
+                XYCatalogItem.account_pk == item.account_pk,
+                XYCatalogItem.owner_id == item.owner_id,
+            ).with_for_update().execution_options(populate_existing=True)
+        )).scalar_one_or_none()
+        if row is None:
+            return
+        metadata = dict(row.metadata_json or {})
+        snapshot = dict(metadata.get("sale_snapshot") or {})
+        metadata["polish_check"] = {
+            "status": "success" if success else "unsupported_status" if unsupported else "failed",
+            "checked_at": datetime.now(timezone.utc).isoformat(),
+        }
+        # 新的完整同步拥有更新的证据；旧请求不得覆盖它。
+        if not success and unsupported and snapshot.get("sync_id") == sync_id:
+            snapshot.update(status="pending_verification", reason="polish_unsupported_status")
+            metadata["sale_snapshot"] = snapshot
+        row.metadata_json = metadata
+        # checked_at / last_seen_at / sync_id 仍表示完整商品同步，不伪造一次完整检查。
 
     async def _polish_item(self, cookie_str: str, item_id: str, retry_count: int = 0) -> dict:
         """

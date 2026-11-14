@@ -30,6 +30,8 @@ dependencies = [
     "bcrypt==5.0.0",
     "playwright",
     "Pillow>=10.0.0",
+    "pycryptodome>=3.19.0",
+    "opencv-python-headless>=4.10.0",
 ]
 
 [build-system]

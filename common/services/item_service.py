@@ -1,4 +1,4 @@
-﻿"""
+"""
 商品服务
 
 功能：
@@ -221,92 +221,19 @@ class ItemService:
         Returns:
             (商品列表, 总数)
         """
-        from sqlalchemy import String, and_, cast, func, or_
-        
-        base_stmt = (
-            select(XYCatalogItem, XYAccount.account_id)
-            .outerjoin(XYAccount, XYCatalogItem.account_pk == XYAccount.id)
+        from common.services.item_query_service import ItemQueryService
+
+        rows, total = await ItemQueryService(self.session).get_page(
+            owner_id=owner_id, account_id=account_id, page=page, page_size=page_size,
+            keyword=keyword, is_polished=is_polished, is_multi_spec=is_multi_spec,
+            multi_quantity_delivery=multi_quantity_delivery, sale_status=sale_status,
         )
-        
-        conditions = []
-        if owner_id is not None:
-            conditions.append(XYCatalogItem.owner_id == owner_id)
-        if account_id:
-            conditions.append(XYAccount.account_id == account_id)
-        if sale_status:
-            # 历史记录没有快照时为未检查，不能把缓存的“在卖”当成本次确认。
-            stored_status = XYCatalogItem.metadata_json["sale_snapshot"]["status"].as_string()
-            if sale_status == "unchecked":
-                conditions.append(or_(stored_status.is_(None), stored_status.not_in(("on_sale", "pending_verification"))))
-            else:
-                conditions.append(stored_status == sale_status)
-        if keyword and keyword.strip():
-            keyword_like = f"%{keyword.strip()}%"
-            conditions.append(
-                or_(
-                    XYCatalogItem.item_id.like(keyword_like),
-                    XYCatalogItem.title.like(keyword_like),
-                    cast(XYCatalogItem.metadata_json, String).like(keyword_like),
-                )
-            )
-        
-        # 是否擦亮筛选（直接字段）
-        if is_polished is not None:
-            conditions.append(XYCatalogItem.is_polished == is_polished)
-        
-        # 多规格筛选（metadata_json字段）
-        if is_multi_spec is not None:
-            if is_multi_spec:
-                conditions.append(
-                    XYCatalogItem.metadata_json["is_multi_spec"].as_boolean() == True
-                )
-            else:
-                conditions.append(
-                    or_(
-                        XYCatalogItem.metadata_json.is_(None),
-                        XYCatalogItem.metadata_json["is_multi_spec"].as_boolean() == False,
-                        XYCatalogItem.metadata_json["is_multi_spec"].is_(None)
-                    )
-                )
-        
-        # 多数量发货筛选（metadata_json字段）
-        if multi_quantity_delivery is not None:
-            if multi_quantity_delivery:
-                conditions.append(
-                    XYCatalogItem.metadata_json["multi_quantity_delivery"].as_boolean() == True
-                )
-            else:
-                conditions.append(
-                    or_(
-                        XYCatalogItem.metadata_json.is_(None),
-                        XYCatalogItem.metadata_json["multi_quantity_delivery"].as_boolean() == False,
-                        XYCatalogItem.metadata_json["multi_quantity_delivery"].is_(None)
-                    )
-                )
-        
-        if conditions:
-            base_stmt = base_stmt.where(and_(*conditions))
-        
-        # 查询总数：仅在按账号筛选时才需要 JOIN 账号表，否则直接基于商品表统计，避免无谓 JOIN
-        count_stmt = select(func.count(XYCatalogItem.id)).select_from(XYCatalogItem)
-        if account_id:
-            count_stmt = count_stmt.outerjoin(XYAccount, XYCatalogItem.account_pk == XYAccount.id)
-        if conditions:
-            count_stmt = count_stmt.where(and_(*conditions))
-        total_result = await self.session.execute(count_stmt)
-        total = total_result.scalar() or 0
-        
-        # 分页查询
-        offset = (page - 1) * page_size
-        stmt = base_stmt.order_by(XYCatalogItem.created_at.desc()).offset(offset).limit(page_size)
-        rows = await self.session.execute(stmt)
-        items_data = rows.all()
-        
-        # 批量查询所有商品的默认回复状态和卡券状态
-        default_reply_map = await self._get_default_reply_status_batch(items_data)
-        card_set = await self._get_card_status_batch(items_data)
-        
-        items = [self._serialize_item(item, acct_id, default_reply_map.get((acct_id, item.item_id)), item.item_id in card_set) for item, acct_id in items_data]
+        items = [
+            self._serialize_item(item, acct_id,
+                                 {"enabled": bool(enabled), "has_config": bool(has_reply)},
+                                 bool(has_card))
+            for item, acct_id, enabled, has_reply, has_card in rows
+        ]
         return items, total
 
     async def fetch_items_page_from_account(
@@ -1285,6 +1212,9 @@ class ItemService:
             "sale_checked_at": snapshot.get("checked_at"),
             "sale_last_seen_at": snapshot.get("last_seen_at"),
             "sale_sync_id": snapshot.get("sync_id"),
+            "sale_verification_reason": snapshot.get("reason"),
+            "polish_status": (metadata.get("polish_check") or {}).get("status"),
+            "polish_checked_at": (metadata.get("polish_check") or {}).get("checked_at"),
             # 多规格明细：供前端「规格数」列与规格详情弹窗展示
             "item_sku_list": detail_obj.get("idle_item_sku_list") or [],
             "item_sku_count": len(detail_obj.get("idle_item_sku_list") or []),

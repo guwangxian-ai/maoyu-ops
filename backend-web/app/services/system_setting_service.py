@@ -12,9 +12,11 @@ from __future__ import annotations
 from typing import Dict
 
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from common.models.system_setting import SystemSetting
+from common.services.registration_policy import is_registration_enabled
 from common.services.remote_token_api import (
     TOKEN_REMOTE_SECRET_KEY_SETTING_KEY,
     TOKEN_REMOTE_URL_SETTING_KEY,
@@ -53,6 +55,7 @@ DEFAULT_LOGIN_SYSTEM_DESCRIPTION = "商品管理、AI 回复、网盘资料与�
 DEFAULT_AUTH_FOOTER_AD_HTML = "© 2026 划算云服务器 ·<a href=\"http://www.hsykj.com\" target=\"_BLANK\">www.hsykj.com</a>"
 
 DEFAULT_SYSTEM_SETTINGS: dict[str, tuple[str, str | None]] = {
+    "registration_enabled": ("false", "是否允许用户自助注册"),
     "disclaimer.title": ("免责声明", "系统免责声明标题"),
     "disclaimer.content": (DEFAULT_DISCLAIMER_CONTENT, "系统免责声明正文"),
     "disclaimer.checkbox_text": ("我已阅读并同意以上免责声明", "免责声明勾选提示文案"),
@@ -187,7 +190,20 @@ class SystemSettingService:
         if not missing_records:
             return
 
-        self.session.add_all(missing_records)
+        # 保存点仅撤销本次默认值插入；并发写入的管理员配置优先，不能用默认值覆盖。
+        for record in missing_records:
+            try:
+                async with self.session.begin_nested():
+                    self.session.add(record)
+                    await self.session.flush()
+            except IntegrityError:
+                existing = await self.session.execute(
+                    # MySQL REPEATABLE READ 的普通查询仍使用插入前快照；锁定读读取
+                    # 已提交的新行，才能识别并发初始化或管理员已保存的配置。
+                    select(SystemSetting.key).where(SystemSetting.key == record.key).with_for_update()
+                )
+                if existing.scalar_one_or_none() is None:
+                    raise
         await self.session.commit()
 
     async def list_settings(self, include_sensitive: bool = False) -> Dict[str, str]:
@@ -202,6 +218,9 @@ class SystemSettingService:
             if not include_sensitive and entry.key in SENSITIVE_KEYS:
                 continue
             settings[entry.key] = entry.value
+        settings["registration_enabled"] = (
+            "true" if is_registration_enabled(settings.get("registration_enabled")) else "false"
+        )
         password_login_mode = str(settings.get("password_login.mode") or "").strip().lower()
         settings["password_login.mode"] = (
             password_login_mode
@@ -219,6 +238,8 @@ class SystemSettingService:
         return settings
 
     async def set_setting(self, key: str, value: str, description: str | None = None) -> None:
+        if key == "registration_enabled":
+            value = "true" if is_registration_enabled(value) else "false"
         if key in SENSITIVE_KEYS:
             raise ValueError("敏感设置不能通过通用接口修改")
         stmt = select(SystemSetting).where(SystemSetting.key == key)
@@ -260,6 +281,8 @@ class SystemSettingService:
         records = {record.key: record for record in result.scalars().all()}
 
         for key, (value, description) in settings.items():
+            if key == "registration_enabled":
+                value = "true" if is_registration_enabled(value) else "false"
             safe_value = value if key in NO_ESCAPE_KEYS else escape_xss(value)
             safe_description = escape_xss(description) if description else None
             record = records.get(key)

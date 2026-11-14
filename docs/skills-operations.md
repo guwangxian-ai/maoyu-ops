@@ -1,6 +1,19 @@
 # 闲鱼运营 Skill
 
+2026.11.14.1 增加卡券轻量选择 MCP、通知事件分类和注册校验说明。项目、本机与服务器公开包已同步并校验一致；公开包共 19 个文件，SHA-256 为 `1ac68a3a59e6b9855b6a318092e1f43f9a3158a601fc414b92c865fbd260a129`。真实 MCP 会话列出 221 个工具，新轻量接口以既有 `xianyu:read` 成功查询；密钥、权限和期限未改。详见 [上游改进整合](upstream-update-20261114.md)及[当前部署记录](tencent-hermes-deployment.json)。其他设备需重新下载 Skill，并重连 MCP。
+
+2026.11.06.1 增加凭证发货后的纯文字副本：卡券开关、订单去重、独立发送回执和仅重试明确失败的 MCP 工具。配置与恢复见 [订单发货](../skills/xianyu-operations/references/orders.md#凭证发货后补发纯文字)。实际部署与验证状态以 [部署记录](tencent-hermes-deployment.json) 为准。
+
+2026.11.04.1 新增竞品按次采样、历史和候选证据，以及监控失败暂停/恢复状态；五个 `market_*` 工具沿用 `xianyu:read`。当前 Agent 根据证据分析，不新增后台付费模型、自动发布或持续任务。用法见 [竞品研究](../skills/xianyu-operations/references/market-research.md)；部署验收以本轮部署记录为准。
+
 ## 当前接入与源码
+
+2026-10-29 项目、本机和服务器公开 Skill 已同步为 `2026.10.29.1`（18 个文件）。[能力索引](../skills/xianyu-operations/references/capabilities.md) 核对了 80 个路由模块及 27 组 MCP 白名单，补齐账号、聊天/回复、数据分析、地址、AI 上架、自动重发、订单评价及网盘任务流程，并明确分销、监控、通知、登录风控、管理员调度等尚未开放 MCP 的能力。覆盖检查会校验模块入口、真实工具名称和公开包引用；不代表逐一实测所有业务动作，也不自动扩权。
+
+本轮修复擦亮误删商品：仅处理确认在售记录，平台状态拒绝时保留商品、卡券、AI/默认回复和历史，标记待核实；并发新快照不被旧响应覆盖。发布后按[擦亮核验](../skills/xianyu-operations/references/listing.md#发布后擦亮核验)分别检查开关和实际结果。已通过 MCP 开启两账号，猫王 79 件、文红梅 75 件均确认今日擦亮（含平台确认今日已擦亮的响应）。原自动发货与 AI 开关保留。
+
+按本轮授权未备份，仅切换 Backend-Web 与 Scheduler；59 项云端隔离检查通过，5 个服务健康，公开包/本机/项目源文件与新 MCP 提示一致。原商品及卡券/默认回复/商品 AI 配置保留，密钥权限和期限未改。首次切换只完成后端，已核对回执后补齐调度服务，未重复切换后端。公开包 SHA-256 为 `58a0c01c61c7faad388a7ad6a4e3de2ee30bdc95233ba9280855b69aab6df9aa`；详见[部署记录](tencent-hermes-deployment.json)及私有 `data/ops-runs/polish-capabilities-20261029/`。其他客户端需更新已安装的旧包并重连 MCP。
+
 
 2026-10-28 项目、本机与服务器公开 Skill 已同步为 `2026.10.28.1`：选品先调用真实搜索接口，核对想要标签、未知值和样本范围，再做候选与小规模验证；完整方法集中在[选品与需求验证](../skills/xianyu-operations/references/selection.md)。公开接入说明、包内 `CONNECT.md`、新 MCP 会话的初始化提示、guide 资源及 `mcp_capabilities` 已核验包含同样指引。两个 Skill 的格式校验、30 处相对引用、Python 语法及公开包与本机的 15 文件一致性检查通过；包 SHA-256 为 `c0b6ae981edbadfae816af595caed02a898b40f89b227a82ae41bbd036fe0b3a`。未启动本地业务服务或运行本地功能测试套件；私有记录在 `data/ops-runs/skills-selection-20261028/`。
 

@@ -1,294 +1,208 @@
 {
   "product": "MaoYuOps（猫鱼运营）",
   "repository": "https://github.com/guwangxian-ai/maoyu-ops",
-  "source_commit": "3d34088b9ad53711d91159392d497cfe47bd5cc5",
   "upstream_repository": "https://github.com/zhinianboke/xianyu-auto-reply",
-  "upstream_base": "10fc70ebfd3c3b481cc1d6975153cc20ee746c3d",
-  "upstream_commit": "990f701fe03d7f62c3cf1fe571fc5bb6de57c778",
   "license": "AGPL-3.0",
   "url": "https://43.136.91.22/maoyu-ops/",
   "ai_access_url": "https://43.136.91.22/maoyu-ops/ai-access",
   "mcp_url": "https://43.136.91.22/maoyu-ops/mcp",
   "skill_url": "https://43.136.91.22/maoyu-ops/ai/skills/xianyu-operations.zip",
   "backup_policy": "Ask once before a future deployment unless the user has already chosen backup or no backup; no automatic backup or rollback tags.",
-  "source_revision_note": "Selection Skill and shared MCP guidance patch over the verified 2026-10-25 upstream release. Working-tree patch deployment; no Git commit/push in this task.",
-  "source_patch_files": [
-    "AGENTS.md",
-    "backend-web/_bootstrap.py",
-    "backend-web/app/api/deps.py",
-    "backend-web/app/api/routes/_exports.py",
-    "backend-web/app/api/routes/auth.py",
-    "backend-web/app/api/routes/captcha.py",
-    "backend-web/app/api/routes/chat_new_image.py",
-    "backend-web/app/api/routes/db_backup_logs.py",
-    "backend-web/app/api/routes/email_logs.py",
-    "backend-web/app/api/routes/items.py",
-    "backend-web/app/api/routes/notifications.py",
-    "backend-web/app/api/routes/system_settings.py",
-    "backend-web/app/api/routes/user_login_logs.py",
-    "backend-web/app/mcp/onboarding.py",
-    "backend-web/app/mcp/server.py",
-    "backend-web/app/services/chat_new/im_client.py",
-    "backend-web/app/services/chat_new/im_token.py",
-    "backend-web/app/services/chat_new/im_transport.py",
-    "backend-web/app/services/db_backup_log_service.py",
-    "backend-web/app/services/email_log_service.py",
-    "backend-web/app/services/email_service.py",
-    "backend-web/app/services/settlement_service.py",
-    "backend-web/app/services/user_login_log_service.py",
-    "backend-web/tests/test_catalog_snapshot.py",
-    "backend-web/tests/test_upstream_20261025.py",
-    "backend-web/tests/test_upstream_mysql.py",
-    "common/db/init_database.py",
-    "common/models/_exports.py",
-    "common/models/data_dictionary.py",
-    "common/models/email_log.py",
-    "common/models/user_login_log.py",
-    "common/services/auto_relist_task.py",
-    "common/services/email_log_service.py",
-    "common/services/item_service.py",
-    "common/services/xianyu_seller_item_client.py",
-    "common/utils/http_utils.py",
-    "common/utils/item_info_manager.py",
-    "common/utils/notification_utils.py",
-    "common/utils/xianyu_official_accounts.py",
-    "deploy/tencent-hermes/README.md",
-    "deploy/tencent-hermes/compose.yaml",
-    "deploy/tencent-hermes/nginx-location.conf",
-    "docs/ai-access-center.md",
-    "docs/deployment-history/20261016T055818Z-free-chat.json",
-    "docs/deployment-history/20261019T051339Z-maoyu-3d34088.json",
-    "docs/deployment-history/20261019T095600Z-maoyu-url.json",
-    "docs/deployment-history/20261020T085906Z-skills-20261020.json",
-    "docs/deployment-history/20261022T021123Z-skills-20261022.json",
-    "docs/deployment-history/20261022T061318Z-skills-compliance-20261022.json",
-    "docs/deployment-history/20261023T030735Z-catalog-state.json",
-    "docs/deployment-history/20261023T075715Z-virtual-service.json",
-    "docs/deployment-history/20261023T163653Z-all-account-skills.json",
-    "docs/maoyu-ops-branding.md",
-    "docs/mcp-api.md",
-    "docs/skills-operations.md",
-    "docs/tencent-hermes-deployment.json",
-    "docs/upstream-review-20261025.md",
-    "docs/upstream-update-20261025.md",
-    "frontend/index.html",
-    "frontend/src/App.tsx",
-    "frontend/src/api/admin.ts",
-    "frontend/src/api/dbBackupLogs.ts",
-    "frontend/src/api/emailLogs.ts",
-    "frontend/src/api/items.ts",
-    "frontend/src/api/userLoginLogs.ts",
-    "frontend/src/components/common/ConfirmModal.tsx",
-    "frontend/src/components/common/Pager.tsx",
-    "frontend/src/components/layout/TabsBar.tsx",
-    "frontend/src/config/navigation.ts",
-    "frontend/src/pages/admin/DbBackupLogs.tsx",
-    "frontend/src/pages/admin/DbBackupLogsTable.tsx",
-    "frontend/src/pages/admin/EmailLogs.tsx",
-    "frontend/src/pages/admin/UserLoginLogs.tsx",
-    "frontend/src/pages/items/Items.tsx",
-    "frontend/src/styles/globals.css",
-    "frontend/src/types/index.ts",
-    "frontend/src/utils/request.ts",
-    "frontend/src/utils/scopedStorage.ts",
-    "frontend/vite.config.ts",
-    "skills/xianyu-operations/SKILL.md",
-    "skills/xianyu-operations/agents/openai.yaml",
-    "skills/xianyu-operations/references/catalog-sync.md",
-    "skills/xianyu-operations/references/compliance.md",
-    "skills/xianyu-operations/references/listing.md",
-    "skills/xianyu-operations/references/orders.md",
-    "skills/xianyu-operations/references/selection.md",
-    "websocket/app/services/xianyu/message_handler.py",
-    "websocket/app/services/xianyu/xianyu_async.py",
-    "websocket/tests/test_official_robot_guard.py"
-  ],
-  "deployed_patch_files": {
-    "backend-web/_bootstrap.py": "85cc447d41a389584f6bfc2dceaed732a18226284e1e7131b9fc7524e7278b6f",
-    "backend-web/app/api/deps.py": "089e3a1060a5218d91c9e21231a38e239b29485912a90f6c3cfc96175eb9be93",
-    "backend-web/app/api/routes/_exports.py": "7565b74156dcd5c7e9598fadc7aa9281feedfd43765160482aaf1d4af16f8fb0",
-    "backend-web/app/api/routes/auth.py": "c1578eb68e12c873ccdcb363e44d2adf923051ed746591f9345131fe36a8886e",
-    "backend-web/app/api/routes/captcha.py": "f187f1171fe2af7b70aa0db7c74bc882f2bbeee8abc53accc81929d860644bf4",
-    "backend-web/app/api/routes/chat_new_image.py": "67679380d593ca4fef313bf71824db04642da275c8aa6d2bbb11a12d8923e1d2",
-    "backend-web/app/api/routes/db_backup_logs.py": "bc529ee192b17efe7917f02b51d33df8bf407d4e1c0af3af1a5e7037729eab7d",
-    "backend-web/app/api/routes/email_logs.py": "9dc788ce100441254ebbc2ce50e7aedfa00ebe17b51110acc2b3d337bbfa484c",
-    "backend-web/app/api/routes/notifications.py": "951290dfe758a39aaf2bb37f1b35b550521cad14c7cfe3b758ca9350a3f5e5e7",
-    "backend-web/app/api/routes/system_settings.py": "7575d6c079d04ada016e39840bdcc357f1ba30262042d256c98c6ee8a7a7b5c3",
-    "backend-web/app/api/routes/user_login_logs.py": "88fba8ebf35f7a448c0fa7fd0c54700bc541539dd55a87e1282a5020813c3780",
-    "backend-web/app/services/chat_new/im_client.py": "e8e202296372e31aefd602536852ed294aa71821203cfd27c2203d659fdb90de",
-    "backend-web/app/services/chat_new/im_token.py": "0116d27815cf66744547fb85cc9c239f6b8240b3073ab9d474fbb0532e4da0fe",
-    "backend-web/app/services/chat_new/im_transport.py": "fad3cad3923083525a2b6f823037f25501d6bc368aead209dbc6c758f39844be",
-    "backend-web/app/services/db_backup_log_service.py": "52be37dd9a6ac00e3a15ad90b206d7b09694ef764469bcaa6164f9a00d764009",
-    "backend-web/app/services/email_log_service.py": "01b84b3e6a07361af870c5dba940bfd8b99a1411a072a5d12cbca03228d04f6b",
-    "backend-web/app/services/email_service.py": "a5c1520b7b2d606601182df6de6d9e5adc684401f2a3b906e41a1f5cfea83849",
-    "backend-web/app/services/settlement_service.py": "24e7b58f913d023a00638fd3405d042763e1c475ad40b3e9c951ef8492599c4c",
-    "backend-web/app/services/user_login_log_service.py": "469271f98e5bef8b1809f94347153549e2e87fb06efcbb0eae93c9be5a3438d8",
-    "common/db/init_database.py": "87e57d528a1e1bd76d6c5ec904d9b1449b868046a045e8d86c61f34e93aa0a82",
-    "common/models/_exports.py": "478555de900a8c8bd3e57f8ff86043169d1b37720a7695e16b6b0427ce199ba7",
-    "common/models/data_dictionary.py": "3291940e7bb7267a3e271f2d7508834c0f80d8835663ddbf57066a3c23e56618",
-    "common/models/email_log.py": "6392fb301b539f1789c84e3e5bea64b117149cb98d5d64dc43ffd5e95008b25f",
-    "common/models/user_login_log.py": "b08513153e277d90293a203b88718015a3f8fb363d61a0b7561e0e5f7abdc9a7",
-    "common/services/email_log_service.py": "70351b9f01a134db266f2f38015919fad3d7bf78969fb317a2fc31f3f88ac9e2",
-    "common/utils/http_utils.py": "0f2444af200254775df3b96c446500243766c741adfd73401196d1bfd2b70c66",
-    "common/utils/notification_utils.py": "3989fe3229be4f091ce5f29599fa3f91e50803d9b6d9ccb822215b2362fa01b4",
-    "common/utils/xianyu_official_accounts.py": "0c845587999aa7a2dc6b220b7bdf8958968381057769b7cfa9fa3d0d6d677a4c",
-    "frontend/src/App.tsx": "b1205d0336a01c0b8ca7a8f3ae41be23f499e29595d38c6e1f9daa7788f40bdc",
-    "frontend/src/api/admin.ts": "e46493bda1f7b6c3dffd6e55c949af64963810de3727ac3a0869af1d90ccf237",
-    "frontend/src/api/dbBackupLogs.ts": "e53e52976f8358a2fd1559b489b73b5de128d5e8b7297345e8936c28df647e5c",
-    "frontend/src/api/emailLogs.ts": "140b53188e8d37008939eac02e701b1fb31694d823a8ddeae4896eadc59e79d9",
-    "frontend/src/api/userLoginLogs.ts": "1fff23d4e5220ba84ab320c29194cb5530bcddf58a95481133783b7a784ade83",
-    "frontend/src/components/common/ConfirmModal.tsx": "d899a1e716982b28b512df1e95e48bc5e77fa94edd1310569e498fff7fcedd51",
-    "frontend/src/components/common/Pager.tsx": "82a2d2ae3a1cb75d7ffb0127942a770dae9b65c87acb9b44c4c4ee705b28a9d7",
-    "frontend/src/components/layout/TabsBar.tsx": "b84a9743fc91fd971f67f6efe87775a4fec3f9475766e55cbf3d3edbe31a689d",
-    "frontend/src/config/navigation.ts": "a99b124b7cc699004819211c553999d04c232fb73d14b1e0e340c33173d724cf",
-    "frontend/src/pages/admin/DbBackupLogs.tsx": "1c9444a64cbfd91409a60b4445973f10c719f0ce832e0853d5806115320c28ff",
-    "frontend/src/pages/admin/DbBackupLogsTable.tsx": "cd4bdcaf04a7bce59f17c86c5f5e12db22d6141a1e91aba233ad128e34f1a2fa",
-    "frontend/src/pages/admin/EmailLogs.tsx": "235d0a62d3165ea7ff42aa8747ec5685d5f40fd1415905cd32a631fceb923358",
-    "frontend/src/pages/admin/UserLoginLogs.tsx": "d991c4b69b92c3377d7afb71aeb940f571d4093630da4ac6d4686c278a0800bf",
-    "frontend/src/styles/globals.css": "3e168b0edb2073086dfa44c41f8459795d3456a54834e358ab84349b01af5d40",
-    "frontend/src/utils/request.ts": "a41eb11e3fdb5312f19ec9ad5337f7644dc82dbae40212bc70a8e1cd4747a7f2",
-    "websocket/app/services/xianyu/message_handler.py": "dc00360cf740d569470ffbb263378a1ce3f82e47c5a3e4cd6f7ebefc1a58a9d9",
-    "websocket/app/services/xianyu/xianyu_async.py": "53478ffa289649940b994a03b4bf769ec7728b4023f71732eb19e16b895350dc",
-    "deploy/tencent-hermes/compose.yaml": "ffcb2e6bc8c3499352b915b0913b6b8c57b3e404130c627dc62ee56214c3b481",
-    "backend-web/tests/test_upstream_20261025.py": "65d15d58f17f8ea5ed7a03857207268d2f30acee590fdbbf97bc25d656f08736",
-    "backend-web/tests/test_upstream_mysql.py": "06347b3b79c18b45ab8aa123223843bf04ae5f80a3c4eca9b5ac4fb6b507fc0a",
-    "websocket/tests/test_official_robot_guard.py": "72d3dbd28048e8fc0a65e53fec04da6df514966843dfc704f35fb4d428e1e44b",
-    "backend-web/app/mcp/onboarding.py": "636b0ae3d5a8801c1bd819dd1b1617a635c8030c897041340693c7f715c0e38a",
-    "backend-web/app/mcp/server.py": "7c9be77238b9d40e963cb4aed8abbdcd91582ed6f6540de31e041b41ff3369ba",
-    "skills/xianyu-operations/SKILL.md": "d57009ce28e0345982840c74c4dce3221979074fb26095bed9e0c7bfa41aba6a",
-    "skills/xianyu-operations/agents/openai.yaml": "b3504c58b236888c34b43de518c7f127aa4fd1dd7e840d3a1667c2ad40570607",
-    "skills/xianyu-operations/references/selection.md": "386276412b9a79c22c6f1439bf5c07fd17d024a359af5b0c9e29efab5a437410",
-    "AGENTS.md": "86f57919d5fe03b93b4d5b99291a57569516553cd7b47d557cdf544ff6332adb"
-  },
-  "release_patch_files": {
-    "backend-web/app/mcp/onboarding.py": "636b0ae3d5a8801c1bd819dd1b1617a635c8030c897041340693c7f715c0e38a",
-    "backend-web/app/mcp/server.py": "7c9be77238b9d40e963cb4aed8abbdcd91582ed6f6540de31e041b41ff3369ba",
-    "skills/xianyu-operations/SKILL.md": "d57009ce28e0345982840c74c4dce3221979074fb26095bed9e0c7bfa41aba6a",
-    "skills/xianyu-operations/agents/openai.yaml": "b3504c58b236888c34b43de518c7f127aa4fd1dd7e840d3a1667c2ad40570607",
-    "skills/xianyu-operations/references/selection.md": "386276412b9a79c22c6f1439bf5c07fd17d024a359af5b0c9e29efab5a437410",
-    "AGENTS.md": "86f57919d5fe03b93b4d5b99291a57569516553cd7b47d557cdf544ff6332adb"
-  },
-  "carried_forward_patch_record": "docs/deployment-history/20261025T134713Z-upstream.json",
-  "skill_version": "2026.10.28.1",
-  "skill_sha256": "c0b6ae981edbadfae816af595caed02a898b40f89b227a82ae41bbd036fe0b3a",
-  "release_id": "20261028T075513Z-selection-skills",
-  "previous_release_id": "20261025T134713Z-upstream",
-  "previous_record": "docs/deployment-history/20261025T134713Z-upstream.json",
-  "deployed_at": "2026-10-28T08:06:21.677921+00:00",
-  "verified_at": "2026-10-28T08:16:59.536407+00:00",
+  "release_id": "20261114T051149Z-upstream-ops",
+  "previous_release_id": "20261106T070000Z-delivery-text",
+  "previous_record": "docs/deployment-history/20261106T070000Z-delivery-text.json",
+  "source_commit": "7f0976ca8c74d1fe8533b0c676023bd1f37a2471",
+  "runtime_source_commit": "7f0976ca8c74d1fe8533b0c676023bd1f37a2471",
+  "source_branch": "codex/upstream-ops-20261114",
+  "pull_request": "https://github.com/guwangxian-ai/maoyu-ops/pull/1",
+  "source_revision_note": "Runtime built from the code commit; a later documentation-only commit records verification. Includes previously deployed uncommitted operations features.",
+  "upstream_full_integration_commit": "990f701fe03d7f62c3cf1fe571fc5bb6de57c778",
+  "upstream_reviewed_commit": "1e4831391d6af6c227e39a8e622fecb009549a9c",
+  "upstream_integration_mode": "selected_features",
   "status": "deployed_and_verified",
+  "deployed_at": "2026-11-14T05:22:34.814777+00:00",
+  "verified_at": "2026-11-14T05:26:07.738226+00:00",
   "changes": [
-    "Competitor selection first obtains real MCP search samples and validates want-count labels, missing values and sample scope.",
-    "Reuse current evidence; cumulative want counts are not sales, conversion, income or proof of resale permission.",
-    "Synchronize project/installed/public Skill and shared public/MCP guidance; existing listing, refund and payment-before-delivery rules remain."
+    "Server-side registration policy and email-code validation",
+    "Notification event subscriptions with legacy compatibility",
+    "Bounded item/card selection and readonly MCP query",
+    "Shared publishing modules used by all three application services"
   ],
-  "database_migration": {
-    "executed": false,
-    "schema_changes": false
-  },
-  "backup_choice": "explicit_no_backup",
+  "carried_forward_features": [
+    "Market research evidence and scoped MCP tools",
+    "Plaintext delivery copies with order deduplication and sending receipts"
+  ],
+  "skill_version": "2026.11.14.1",
+  "skill_sha256": "1ac68a3a59e6b9855b6a318092e1f43f9a3158a601fc414b92c865fbd260a129",
+  "skill_archive_files": 19,
+  "backup_choice": "本轮用户明确不备份",
   "backup_created": false,
   "backup_available": false,
   "backup_directory": null,
   "rollback_script": null,
   "rollback_available": false,
   "recovery_options": {
-    "previous_backend_image_id": "sha256:fd05a1cd6d9ae444a5f55f46d55bcd720d13b00e80d14477f45e9dd24f42934f",
-    "note": "No backup or rollback tag created. Inspect available source/image IDs before code-only recovery; no database or authorization-volume restore is supplied by this deployment."
+    "note": "No source, database or volume backup and no rollback tags were created. A code-only corrective release can be prepared from Git and the release manifest; no data restoration copy is promised."
   },
+  "database_migration": true,
+  "migration_policy": "Idempotent notification columns and online item indexes; preserve rows and existing settings.",
   "images": {
-    "backend-web": "sha256:29b1e73b079476c4d4f11203e514f7513d43c00517233c76db84bb717e494e26",
-    "scheduler": "sha256:84523d7037dde8dce911d62504cfa124e723da9bed77ba0cacc2d4f087fe6de7",
-    "websocket": "sha256:06bdd488c84b38afefdfd1a6e2481b4620f69a64149119f6cf8aed836a6320fd",
+    "scheduler": "sha256:a85ab25dc4b3614825fd138d9538e8820c307fa8763f4c66d392461e7d5875a9",
+    "websocket": "sha256:605f4b85310b8c871e8992c6fdc7a1631f50596a896dac036b7b752dae9cf304",
+    "backend-web": "sha256:74ef0efc88960ae9a05bb32ce0e6e800b7d5f7950334014c5761554d785b6b5b",
     "redis": "sha256:6ab0b6e7381779332f97b8ca76193e45b0756f38d4c0dcda72dbb3c32061ab99",
     "mysql": "sha256:7dcddc01f13bab2f15cde676d44d01f61fc9f99fe7785e86196dfc07d358ae2b"
   },
   "ready_seconds": {
-    "backend-web": 14.79
+    "backend-web": 15.2,
+    "websocket": 32.51,
+    "scheduler": 50.29
   },
+  "release_manifest": "/srv/xianyu-auto-reply/releases/20261114T051149Z-upstream-ops/manifest.json",
   "verification": {
-    "cloud_isolated_tests": {
-      "passed": true,
-      "total": 27,
-      "suites": [
-        "test_ai_access.PublicAccessTests",
-        "test_mcp_gateway"
-      ],
-      "network": "none",
-      "memory_limit_mib": 512,
-      "cpu_limit": 1,
-      "production_credentials_or_volumes": false
-    },
-    "local_checks": [
-      "skill_format_source_and_installed",
-      "30_relative_references",
-      "python_ast_syntax",
-      "15_file_package_consistency",
-      "git_diff_whitespace"
+    "candidate_image_tests": 146,
+    "candidate_image_test_summary": [
+      "Ran 146 tests in 48.126s",
+      "OK"
     ],
-    "local_functional_tests_run": false,
-    "five_services_healthy": true,
-    "only_backend_recreated": true,
-    "environment_and_mounts_unchanged": true,
-    "frontend_index_and_nginx_unchanged": true,
-    "other_project_entries": {
-      "/douyin-leads/": {
-        "status": 303,
-        "location": "/douyin-leads/login"
+    "python_syntax": true,
+    "typescript_and_subpath_build": true,
+    "isolated_mysql_groups": 7,
+    "isolated_chromium_groups": 5,
+    "source_files_match_before_documentation_finalization": 62,
+    "frontend_files_match": 174,
+    "http_checks": {
+      "/": {
+        "http": 200
       },
-      "/weixin-bot-notification-platform/": {
-        "status": 200,
-        "location": null
+      "/login": {
+        "http": 200
       },
-      "/hermes/": {
-        "status": 302,
-        "location": "/hermes/login?next=%2F"
+      "/register": {
+        "http": 200
       },
-      "/libretv/": {
-        "status": 308,
-        "location": "/libretv"
+      "/cards": {
+        "http": 200
+      },
+      "/notification-channels": {
+        "http": 200
+      },
+      "anonymous_mcp": {
+        "http": 401,
+        "denied": true
+      },
+      "/maoyu-ops/api/v1/items/selectable/paginated": {
+        "http": 200,
+        "business_code": 401,
+        "data_returned": false
+      },
+      "/api/v1/items/selectable/paginated": {
+        "http": 200,
+        "business_code": 401,
+        "data_returned": false
       }
     },
-    "public_package_files": 15,
-    "public_source_routes": 10,
-    "public_package_sha256_verified": true,
-    "cache_304_and_private_404_and_anonymous_mcp_401": true,
-    "fresh_mcp_initialize_resource_capabilities_match": true,
-    "mcp_tools": 213,
-    "mcp_scopes_and_private_config_unchanged": true,
-    "account_settings_preserved": true,
-    "account_online_states_unchanged": true,
-    "drive_authorization_status": {
-      "quark": {
-        "connected": true,
-        "verified": true
+    "skill_sources_match": true,
+    "captcha_initialization": {
+      "http": 200,
+      "service_available": 1,
+      "message": "获取成功"
+    },
+    "real_mcp": {
+      "passed": true,
+      "tool_count": 221,
+      "new_readonly_tool": "items_get_selectable_items_paginated",
+      "scope": "xianyu:read",
+      "real_result_rows": 5,
+      "total_visible_local_records": 244,
+      "business_fields_only": [
+        "item_id",
+        "title",
+        "price"
+      ],
+      "delivery_tools_retained": true,
+      "business_writes_performed": false,
+      "credentials_or_scopes_changed": false
+    },
+    "all_five_healthy": true,
+    "new_exception_counts": {
+      "backend-web": {
+        "tracebacks": 0,
+        "import_errors": 0
       },
-      "baidu": {
-        "connected": true,
-        "verified": true
+      "websocket": {
+        "tracebacks": 0,
+        "import_errors": 0
+      },
+      "scheduler": {
+        "tracebacks": 0,
+        "import_errors": 0
       }
     },
-    "new_service_restarts": 0,
-    "errors_since_cutover": {
-      "backend-web": 0,
-      "websocket": 0,
-      "scheduler": 0
+    "volumes_and_env_unchanged": true,
+    "mysql_and_redis_not_recreated": true,
+    "protected_configuration_hashes_match": {
+      "xy_catalog_items": true,
+      "xy_cards": true,
+      "xy_card_item_relations": true,
+      "xy_default_replies": true,
+      "xy_accounts": true,
+      "xy_mcp_access_tokens": true,
+      "xy_message_notifications": true,
+      "xy_notification_channels": true,
+      "xy_ai_listing_configs": true
     },
-    "real_order_delivery_refund_or_buyer_message_test": false,
-    "business_writes": 0,
-    "product_publication_paused_by_user": true,
+    "order_history_ids_preserved": true,
+    "counts_before": {
+      "xy_catalog_items": 244,
+      "xy_cards": 137,
+      "xy_card_item_relations": 244,
+      "xy_default_replies": 249,
+      "xy_accounts": 2,
+      "xy_mcp_access_tokens": 2,
+      "xy_message_notifications": 0,
+      "xy_notification_channels": 0,
+      "xy_ai_listing_configs": 0,
+      "orders": 62
+    },
+    "counts_after": {
+      "xy_catalog_items": 244,
+      "xy_cards": 137,
+      "xy_card_item_relations": 244,
+      "xy_default_replies": 249,
+      "xy_accounts": 2,
+      "xy_mcp_access_tokens": 2,
+      "xy_message_notifications": 0,
+      "xy_notification_channels": 0,
+      "xy_ai_listing_configs": 0,
+      "orders": 62
+    },
+    "other_project_entries_unchanged": true,
+    "no_test_product_publishing_or_buyer_messages": true,
     "performance": {
-      "health_before_median_ms": 3.45,
-      "health_after_median_ms": 3.02,
-      "sample_count": 3,
-      "disk_free_bytes": 7225856000,
-      "memory_available_kib": 2252616,
-      "backend_added_image_bytes": 29691,
-      "note": "Short post-deploy observations only; not a load test or evidence of conversion, income or long-term stability."
+      "environment": "same isolated MySQL database, 241 rows, page size 20, six warmed repeats",
+      "before_median_ms": 5.3,
+      "after_median_ms": 3.91,
+      "before_selects": 5,
+      "after_selects": 2,
+      "production_load_test": false
     },
-    "new_dependencies": 0,
-    "new_paid_services": 0
+    "production_resource_sample": {
+      "health_median_ms": 4.64,
+      "disk_free_bytes": 2720043008,
+      "memory_available_kib": 1867824,
+      "application_memory_mib": {
+        "backend-web": 185.8,
+        "websocket": 120,
+        "scheduler": 112.7
+      }
+    },
+    "limitations": [
+      "No real product publishing or buyer delivery was performed during verification.",
+      "Health and resource readings are point-in-time samples, not a production load benchmark.",
+      "Existing per-account enabled/disabled settings were retained."
+    ]
   },
-  "operations_evidence": "data/ops-runs/skills-selection-20261028/",
-  "server_release_directory": "/srv/xianyu-auto-reply/releases/20261028T075513Z-selection-skills"
+  "private_evidence": "data/ops-runs/deploy-upstream-20261114/",
+  "additional_paid_resources": 0
 }

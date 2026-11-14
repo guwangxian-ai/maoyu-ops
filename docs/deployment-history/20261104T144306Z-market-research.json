@@ -1,0 +1,364 @@
+{
+  "product": "MaoYuOps（猫鱼运营）",
+  "repository": "https://github.com/guwangxian-ai/maoyu-ops",
+  "upstream_repository": "https://github.com/zhinianboke/xianyu-auto-reply",
+  "upstream_base": "10fc70ebfd3c3b481cc1d6975153cc20ee746c3d",
+  "upstream_commit": "990f701fe03d7f62c3cf1fe571fc5bb6de57c778",
+  "license": "AGPL-3.0",
+  "url": "https://43.136.91.22/maoyu-ops/",
+  "ai_access_url": "https://43.136.91.22/maoyu-ops/ai-access",
+  "mcp_url": "https://43.136.91.22/maoyu-ops/mcp",
+  "skill_url": "https://43.136.91.22/maoyu-ops/ai/skills/xianyu-operations.zip",
+  "backup_policy": "Ask once before a future deployment unless the user has already chosen backup or no backup; no automatic backup or rollback tags.",
+  "release_id": "20261104T144306Z-market-research",
+  "previous_release_id": "20261029T132257Z-polish-capabilities",
+  "previous_record": "docs/deployment-history/20261029T132257Z-polish-capabilities.json",
+  "source_commit": "ac03d0251e52ecc3ea94ffd35d871181672ee967",
+  "source_revision_note": "Working tree release on the recorded base commit. Current patch hashes follow; earlier changes are in the previous release record.",
+  "source_patch_files": [
+    "backend-web/app/api/routes/market_research.py",
+    "backend-web/tests/market_mysql_smoke.py",
+    "backend-web/tests/market_ui_smoke.py",
+    "backend-web/tests/test_market_research.py",
+    "common/db/market_schema.py",
+    "common/models/market_observation.py",
+    "common/services/market_metrics.py",
+    "common/services/market_research.py",
+    "docs/market-research.md",
+    "frontend/src/api/marketResearch.ts",
+    "frontend/src/pages/product-monitor/MarketHistory.tsx",
+    "frontend/src/pages/product-monitor/MarketResearch.tsx",
+    "skills/xianyu-operations/references/capabilities.md",
+    "skills/xianyu-operations/references/market-research.md",
+    "skills/xianyu-operations/references/project-admin.md",
+    "backend-web/app/api/routes/_exports.py",
+    "backend-web/app/mcp/catalog.py",
+    "backend-web/app/mcp/onboarding.py",
+    "common/db/init_database.py",
+    "common/models/_exports.py",
+    "common/services/xianyu_search_client.py",
+    "docs/ai-access-center.md",
+    "docs/mcp-api.md",
+    "docs/skills-operations.md",
+    "frontend/src/App.tsx",
+    "frontend/src/components/layout/TabsBar.tsx",
+    "frontend/src/config/navigation.ts",
+    "frontend/src/pages/product-monitor/MonitorItemDetailModal.tsx",
+    "scheduler/app/services/scheduler/listing_monitor_task.py",
+    "skills/xianyu-operations/SKILL.md",
+    "skills/xianyu-operations/references/selection.md"
+  ],
+  "deployed_patch_files": {
+    "backend-web/app/api/routes/market_research.py": "6dabac34c864e67d3fa981d63bd0b6d5f6fda22673466e93befe3e2f7c4b326f",
+    "backend-web/tests/market_mysql_smoke.py": "9a5037a55a57d90a0b7f31e308d25147a1bfa6253cc5a4a118840096805b44d7",
+    "backend-web/tests/market_ui_smoke.py": "438f7ca89ab942bf987e509e201e6afcd53c8bbddc16d2888c44530d3b800236",
+    "backend-web/tests/test_market_research.py": "f20f1a6a6c4b8f9fe8677e2f1b29f30ad2b301c2c0951634916f177b728a75fb",
+    "common/db/market_schema.py": "38776c890c9cfde7565f86063e2d500c899373e2acbf0b6d1a7a896bcd0302b3",
+    "common/models/market_observation.py": "0405607377e6726a50d0628a2f466792f5a1e87aed18167776e4e75d49e30ad9",
+    "common/services/market_metrics.py": "d922e082e362d5ab4d5baf89e94883f538304276329958cc6695d826071ea24e",
+    "common/services/market_research.py": "83a2fe89d2a7e146be7813fed6a5c0accd962c7ae730bd071b8f8ad6deba216f",
+    "docs/market-research.md": "199741dfcdaf9218f6932659ec7ae86b2560c7624309324e4cd2149c8d013bf1",
+    "frontend/src/api/marketResearch.ts": "854e7e463eb3cda09fc11dc56be3bda33fdd4b4f6c8ffe294cca3d1fca5852fe",
+    "frontend/src/pages/product-monitor/MarketHistory.tsx": "e559bdf78db908da099e3d008d26acf91b1f08e3c78fdc6cb96b9e72e4a3fe72",
+    "frontend/src/pages/product-monitor/MarketResearch.tsx": "82986dccf4bfc9735aaea6ac70e29e5882786aa87a44c2f0eabcbe1000e89a74",
+    "skills/xianyu-operations/references/capabilities.md": "37f72ccdf069e393de608929664f69ba0b796b8b73417dc747314ae0a78f381b",
+    "skills/xianyu-operations/references/market-research.md": "0e33c5bb648fc9b99c3a99476b233673fa87067b3154b82ce0f5457897a881b6",
+    "skills/xianyu-operations/references/project-admin.md": "1bb45f95c802add47224d7d347971023f12f54996451f05a3956b2369a88c4a2",
+    "backend-web/app/api/routes/_exports.py": "dad616a5df366e6c851fceeaf9e42a064238a9632096fc32d75fe9c016730889",
+    "backend-web/app/mcp/catalog.py": "a6e1ba95d5920efdc490313c217bb95afea6c64a2edb4dfee2892c116ec6529b",
+    "backend-web/app/mcp/onboarding.py": "e1079804c901bba2d62a66a2df7cb694a5aa2302a93479416ea173b2bcef5813",
+    "common/db/init_database.py": "0b3863eb9e8daf8ada22f07bf08604ee250cbcb3a574ec9cbe6fe80191cb853a",
+    "common/models/_exports.py": "5f08fb79f3be8fb7ff9bc32e75ba6b6561f3ea4f9d8f070c7657235ef5cb1ebd",
+    "common/services/xianyu_search_client.py": "1c8457f59a6b8ebfe27b23cd3e659a1e133f1650ad1ca8439dbd8e9fc81305e2",
+    "docs/ai-access-center.md": "a054ecb4b57d4ebe0c24ec13f3c6f4729987e83188e0d01dee8183941c86ebbd",
+    "docs/mcp-api.md": "15b77bc7eac0ed01ca738abcff1b71dd96f3e2ab8ade08907928f6ad9b07b2e7",
+    "docs/skills-operations.md": "259d64f547a135220662292d5947e3fbf7f138010ec6c7174ea9d81dc2d1c5c3",
+    "frontend/src/App.tsx": "e13943c3f5df7bb17795175cde63daaa2ebdcfddfee932b68bb50588f2d90949",
+    "frontend/src/components/layout/TabsBar.tsx": "0cfc3e4047d2536e2d67d7763ce9e6850d565a3942c209b5c0de6a8814e88045",
+    "frontend/src/config/navigation.ts": "22bea092d13fdd27ea42b8cfd8c9af82fe61c1ff74c9f1180c17431e39a71602",
+    "frontend/src/pages/product-monitor/MonitorItemDetailModal.tsx": "8c95b1f2259061600f9e40c3bba2e3f0d5d48438d413d2a3ac7ec0a1d7b6bcd2",
+    "scheduler/app/services/scheduler/listing_monitor_task.py": "c676b009a4747aae4576a01e0313cb8461f1c32253fd91f9baee26140ce693ba",
+    "skills/xianyu-operations/SKILL.md": "dce6eac5eb607eb535a1c5e79e4542ad01ff889452ec3602840884b145727fd6",
+    "skills/xianyu-operations/references/selection.md": "3d8d5cc1a7f494accbea0d0616e5550da08464b630bb0b0fe602030d54b142da"
+  },
+  "carried_forward_patch_record": "docs/deployment-history/20261029T132257Z-polish-capabilities.json",
+  "skill_version": "2026.11.04.1",
+  "skill_sha256": "0fa666bece6de7b9e86fbb9202a644eee16a13001a8609400a8913edbee685be",
+  "status": "deployed_and_verified",
+  "deployed_at": "2026-11-05T01:53:45.172512+00:00",
+  "verified_at": "2026-11-05T02:03:01.691829+00:00",
+  "market_research_url": "https://43.136.91.22/maoyu-ops/product-monitor/research",
+  "changes": [
+    "Bounded market samples with stable replay, observed metric sources and up to 90 days of history.",
+    "Keyword filtering and comparable changes with evidence for the operating Agent.",
+    "Persisted pause and recovery of existing listing monitors after repeated collection failures.",
+    "Research page, five owner-scoped MCP tools and matching local and public Skills."
+  ],
+  "reference_commit": "Usagi-org/ai-goofish-monitor@77f8d75869acd65f9dba72731b95c7c49ea67bdf",
+  "database_migration": true,
+  "added_tables": [
+    "xy_market_sample_runs",
+    "xy_market_observations",
+    "xy_market_monitor_states"
+  ],
+  "backup_choice": "不备份，直接部署",
+  "backup_created": false,
+  "backup_available": false,
+  "backup_directory": null,
+  "rollback_script": null,
+  "rollback_available": false,
+  "recovery_options": {
+    "note": "A code-only repair can be prepared from the source and this manifest. This release has no database or volume recovery copy."
+  },
+  "images": {
+    "scheduler": "sha256:3bb6197eeee605074c6ebb8509eaa4f88dedd0d7def097c1e96dd2c4d30752c7",
+    "backend-web": "sha256:c28b4ee18a6939f51f92f77bb7b94fc18e9d07bb662cc7c13af4e8563fe0cd79",
+    "websocket": "sha256:06bdd488c84b38afefdfd1a6e2481b4620f69a64149119f6cf8aed836a6320fd",
+    "redis": "sha256:6ab0b6e7381779332f97b8ca76193e45b0756f38d4c0dcda72dbb3c32061ab99",
+    "mysql": "sha256:7dcddc01f13bab2f15cde676d44d01f61fc9f99fe7785e86196dfc07d358ae2b"
+  },
+  "ready_seconds": {
+    "backend-web": 14.96,
+    "scheduler": 23.63
+  },
+  "verification": {
+    "cloud_isolated_tests": 83,
+    "isolated_test_database_or_fixtures": true,
+    "mysql": {
+      "mysql_schema_idempotent": true,
+      "observations": 10000,
+      "candidate_items": 100,
+      "query_ms": [
+        172.72,
+        93.17,
+        87.79,
+        85.69,
+        85.59
+      ],
+      "median_ms": 87.79,
+      "scope_isolation": true
+    },
+    "browser": {
+      "desktop": [
+        1365,
+        900
+      ],
+      "mobile": [
+        390,
+        844
+      ],
+      "states": [
+        "empty",
+        "loading",
+        "success",
+        "error",
+        "unknown",
+        "history",
+        "filter",
+        "interruption_resume"
+      ],
+      "no_duplicate_sample_on_resume": true,
+      "duplicate_heading": false,
+      "page_errors": []
+    },
+    "skills_files": 19,
+    "source_local_public_packages_match": true,
+    "new_mcp_tools": 5,
+    "mcp_tools": 218,
+    "existing_token_scopes_and_expiry_verified": true,
+    "private_client_configuration_verified": true,
+    "live_mcp": {
+      "passed": true,
+      "real_platform": true,
+      "keyword": "进销存表格",
+      "pages": 1,
+      "page_size": 5,
+      "detail_limit": 2,
+      "discovered_tools": 218,
+      "new_tools_on_existing_read_scope": 5,
+      "sample_status": "success",
+      "error_code": null,
+      "sampled_items": 5,
+      "pages_completed": 1,
+      "started_at": "2026-11-05T09:55:34+08:00",
+      "finished_at": "2026-11-05T09:55:36+08:00",
+      "one_batch_after_replay": true,
+      "monitor_state_rows": 0,
+      "candidates": 5,
+      "known_want_items": 3,
+      "known_browse_items": 2,
+      "want_sources": {
+        "detail.wantCnt": 2,
+        "unknown": 2,
+        "search.serviceUtParams": 1
+      },
+      "history_verified": true,
+      "current_snapshot_only": true,
+      "backend_model_calls": 0
+    },
+    "business_records": {
+      "xy_catalog_items": {
+        "before_count": 213,
+        "after_count": 213,
+        "all_original_ids_present": true,
+        "changed_selected_row_digests": 0
+      },
+      "xy_cards": {
+        "before_count": 114,
+        "after_count": 114,
+        "all_original_ids_present": true,
+        "changed_selected_row_digests": 0
+      },
+      "xy_card_item_relations": {
+        "before_count": 213,
+        "after_count": 213,
+        "all_original_ids_present": true,
+        "changed_selected_row_digests": 0
+      },
+      "xy_default_replies": {
+        "before_count": 218,
+        "after_count": 218,
+        "all_original_ids_present": true,
+        "changed_selected_row_digests": 0
+      },
+      "xy_accounts": {
+        "before_count": 2,
+        "after_count": 2,
+        "all_original_ids_present": true,
+        "changed_selected_row_digests": 2
+      },
+      "xy_mcp_access_tokens": {
+        "before_count": 2,
+        "after_count": 2,
+        "all_original_ids_present": true,
+        "changed_selected_row_digests": 0
+      },
+      "xy_ai_listing_configs": {
+        "before_count": 0,
+        "after_count": 0,
+        "all_original_ids_present": true,
+        "changed_selected_row_digests": 0
+      }
+    },
+    "order_counts": {
+      "before": 58,
+      "after": 58
+    },
+    "account_switches_after": [
+      {
+        "active": true,
+        "auto_confirm": true,
+        "auto_polish": true,
+        "delivery_enabled": true,
+        "ai_enabled": true
+      },
+      {
+        "active": true,
+        "auto_confirm": true,
+        "auto_polish": true,
+        "delivery_enabled": true,
+        "ai_enabled": true
+      }
+    ],
+    "account_audit": "Both IDs, active status and polish flags matched across cutover. AI reply, delivery and confirmation flags were checked live. The account row digests include dynamic fields, and both changed during the observation window.",
+    "new_schema_counts": {
+      "xy_market_sample_runs": 1,
+      "xy_market_observations": 5,
+      "xy_market_monitor_states": 0,
+      "monitor_tasks": 0
+    },
+    "monitor_task_counts": {
+      "before": 0,
+      "after": 0
+    },
+    "source_files_verified": 31,
+    "frontend_files_verified": 174,
+    "public_access_checks": {
+      "/mcp": {
+        "http": 401,
+        "authenticated": false
+      },
+      "/maoyu-ops/api/v1/market-research/samples": {
+        "http": 200,
+        "business_code": 401,
+        "data_returned": false
+      },
+      "/api/v1/market-research/samples": {
+        "http": 200,
+        "business_code": 401,
+        "data_returned": false
+      },
+      "/": 200,
+      "/product-monitor/research": 200
+    },
+    "all_five_services_healthy": true,
+    "only_backend_and_scheduler_recreated": true,
+    "mounts_and_environments_preserved": true,
+    "other_project_entries": {
+      "/douyin-leads/": {
+        "status": 303,
+        "location": "/douyin-leads/login"
+      },
+      "/weixin-bot-notification-platform/": {
+        "status": 200,
+        "location": null
+      },
+      "/hermes/": {
+        "status": 302,
+        "location": "/hermes/login?next=%2F"
+      },
+      "/libretv/": {
+        "status": 308,
+        "location": "/libretv"
+      }
+    },
+    "other_project_entries_unchanged": true,
+    "health_probe_ms": [
+      4.52,
+      3.65,
+      3.49
+    ],
+    "health_median_ms": 3.65,
+    "baseline_health_median_ms": 3.86,
+    "runtime_stats": [
+      {
+        "Name": "xianyu-auto-reply-scheduler-1",
+        "CPUPerc": "1.71%",
+        "MemUsage": "111.4MiB / 768MiB",
+        "PIDs": "7"
+      },
+      {
+        "Name": "xianyu-auto-reply-backend-web-1",
+        "CPUPerc": "0.10%",
+        "MemUsage": "202.7MiB / 1.221GiB",
+        "PIDs": "13"
+      },
+      {
+        "Name": "xianyu-auto-reply-websocket-1",
+        "CPUPerc": "0.22%",
+        "MemUsage": "59.25MiB / 1.221GiB",
+        "PIDs": "114"
+      },
+      {
+        "Name": "xianyu-auto-reply-redis-1",
+        "CPUPerc": "0.46%",
+        "MemUsage": "5.273MiB / 320MiB",
+        "PIDs": "7"
+      },
+      {
+        "Name": "xianyu-auto-reply-mysql-1",
+        "CPUPerc": "1.05%",
+        "MemUsage": "206.4MiB / 768MiB",
+        "PIDs": "53"
+      }
+    ],
+    "tracebacks_since_cutover": {
+      "backend-web": 0,
+      "scheduler": 0
+    },
+    "unexpected_service_restarts": false,
+    "performance_note": "Database timing used 10,000 isolated observations on one CPU. Production latency was sampled at the health endpoint."
+  },
+  "operations_evidence": "data/ops-runs/market-research-20261104/",
+  "server_release_directory": "/srv/xianyu-auto-reply/releases/20261104T144306Z-market-research"
+}

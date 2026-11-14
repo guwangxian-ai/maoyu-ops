@@ -15,6 +15,7 @@ from common.schemas.notification import (
     NotificationChannelUpdate,
 )
 from common.utils.notification_template import validate_notification_templates
+from common.utils.notification_types import normalize_notify_types
 from app.services.account_service import AccountService
 
 
@@ -142,9 +143,21 @@ class NotificationChannelService:
 class MessageNotificationService:
     """Account notification subscriptions."""
 
+    VALID_NOTIFY_TYPES = ("chat", "delivery", "account")
+    DEFAULT_NOTIFY_TYPES = "chat,delivery,account"
+
     def __init__(self, session: AsyncSession):
         self.session = session
         self.account_service = AccountService(session)
+
+    @classmethod
+    def normalize_notify_types(cls, value) -> str:
+        """把入参归一化成逗号分隔串。
+
+        只保留合法值，按固定顺序输出；空值或全非法时回落到全开，
+        避免用户误操作把渠道变成永不触发。
+        """
+        return ",".join(normalize_notify_types(value))
 
     async def list_notifications(self, owner_id: int) -> dict[str, list[dict[str, Any]]]:
         rows = await self._query_notifications(owner_id)
@@ -179,6 +192,9 @@ class MessageNotificationService:
         if subscription:
             subscription.enabled = bool(payload.enabled)
             subscription.account_identifier = account.account_id
+            # 只有显式传了才改：旧客户端只切启用/禁用时不会把已有订阅重置成全开
+            if payload.notify_types is not None:
+                subscription.notify_types = self.normalize_notify_types(payload.notify_types)
         else:
             subscription = MessageNotification(
                 owner_id=owner_id,
@@ -186,6 +202,7 @@ class MessageNotificationService:
                 account_identifier=account.account_id,
                 channel_id=channel.id,
                 enabled=bool(payload.enabled),
+                notify_types=self.normalize_notify_types(payload.notify_types),
             )
 
         self.session.add(subscription)
@@ -264,6 +281,7 @@ class MessageNotificationService:
                     "channel_name": channel.name,
                     "channel_type": channel.channel_type,
                     "channel_config": channel.config_payload or {},
+                    "notify_types": (subscription.notify_types or self.DEFAULT_NOTIFY_TYPES).split(","),
                 }
             )
         return aggregated

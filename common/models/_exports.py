@@ -12,6 +12,7 @@ from common.models.xy_account import XYAccount
 from common.models.xy_catalog_item import XYCatalogItem
 from common.models.xy_keyword_rule import XYKeywordRule
 from common.models.xy_order import XYOrder
+from common.models.delivery_text import DeliveryTextReceipt, DeliveryTextAttempt
 from common.models.card import Card
 from common.models.default_reply import DefaultReply, DefaultReplyRecord
 from common.models.ai_chat_message import AIChatMessage
@@ -55,6 +56,7 @@ from common.models.listing_monitor_category import ListingMonitorCategory
 from common.models.listing_monitor_task import ListingMonitorTask
 from common.models.listing_monitor_item import ListingMonitorItem
 from common.models.listing_monitor_log import ListingMonitorLog
+from common.models.market_observation import MarketSampleRun, MarketObservation, MarketMonitorState
 from common.models.collect_fallback_account import CollectFallbackAccount
 from common.models.order_fallback_account import OrderFallbackAccount
 from common.models.shared_scan_session import SharedScanSession
@@ -88,6 +90,8 @@ __all__ = [
     "XYCatalogItem",
     "XYKeywordRule",
     "XYOrder",
+    "DeliveryTextReceipt",
+    "DeliveryTextAttempt",
     "Card",
     "DefaultReply",
     "DefaultReplyRecord",
@@ -135,6 +139,9 @@ __all__ = [
     "ListingMonitorTask",
     "ListingMonitorItem",
     "ListingMonitorLog",
+    "MarketSampleRun",
+    "MarketObservation",
+    "MarketMonitorState",
     "CollectFallbackAccount",
     "OrderFallbackAccount",
     "SharedScanSession",

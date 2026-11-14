@@ -123,5 +123,33 @@
     "Real Xianyu IM reconnect requires an authorized connected Xianyu account; local account list is empty"
   ],
   "deployment_performed": false,
-  "git_push_performed": false
+  "git_push_performed": false,
+  "latest_selected_integration": {
+    "date": "2026-11-14",
+    "reviewed_ref": "1e4831391d6af6c227e39a8e622fecb009549a9c",
+    "previous_full_integration_ref": "990f701fe03d7f62c3cf1fe571fc5bb6de57c778",
+    "mode": "selected_features",
+    "features": [
+      "registration_and_email_code",
+      "notification_event_subscriptions",
+      "item_and_card_selection_queries",
+      "shared_single_item_publish_modules"
+    ],
+    "record": "docs/upstream-update-20261114.md",
+    "skill_version": "2026.11.14.1",
+    "deployment_performed": true,
+    "git_push_performed": true,
+    "not_integrated": [
+      "scheduled_publish",
+      "api_keywords",
+      "personal_remote_token",
+      "online_install",
+      "advertisement_and_payment_and_settlement"
+    ],
+    "release_id": "20261114T051149Z-upstream-ops",
+    "runtime_source_commit": "7f0976ca8c74d1fe8533b0c676023bd1f37a2471",
+    "deployment_record": "docs/tencent-hermes-deployment.json",
+    "pull_request": "https://github.com/guwangxian-ai/maoyu-ops/pull/1",
+    "backup_created": false
+  }
 }

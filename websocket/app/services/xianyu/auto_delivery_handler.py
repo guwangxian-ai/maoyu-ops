@@ -1374,7 +1374,8 @@ class AutoDeliveryHandler:
                     delivery_contents = []
                     success_count = 0
                     order_already_shipped = False  # 标记订单是否已发货
-                    form_delivery_content = None  # 无需邮寄表单成功时记录凭证，但不发送聊天消息
+                    form_delivery_content = None  # 无需邮寄凭证内容
+                    form_text_receipt_id = None
                     # 对接卡券退化标记：多数量循环里若第 1 张匹配到对接卡券，强制 break 退化为 1 张
                     # 规避底层 _create_agent_order + settlement_service 在 N 次调用时引发的金额 bug
                     quantity_degraded_for_dock = False
@@ -1401,6 +1402,7 @@ class AutoDeliveryHandler:
                                 delivery_content = delivery_result.get('content')
                                 if delivery_result.get('form_only_delivered'):
                                     form_delivery_content = delivery_content
+                                    form_text_receipt_id = delivery_result.get('text_receipt_id')
                                 platform_shipping_confirmed = (
                                     platform_shipping_confirmed
                                     or bool(delivery_result.get('platform_shipping_confirmed'))
@@ -1455,7 +1457,10 @@ class AutoDeliveryHandler:
                             logger.error(f"第 {i+1}/{quantity_to_send} 个卡券获取异常: {self._safe_str(e)}")
 
                     # 无需邮寄表单已经在确认发货接口提交成功，只落库，不再发送聊天消息。
-                    if form_delivery_content:
+                    if form_text_receipt_id:
+                        self.mark_delivery_sent(order_id)
+                        logger.info("凭证已保存，文字发送由订单队列处理 receipt={}", form_text_receipt_id)
+                    elif form_delivery_content:
                         self.mark_delivery_sent(order_id)
                         try:
                             from common.services.order_service import OrderService
@@ -2325,6 +2330,7 @@ class AutoDeliveryHandler:
                 'card_api_config': card.get('api_config'),
                 'card_delay_seconds': card.get('delay_seconds', 0),
                 'use_no_logistics_form': bool(card.get('use_no_logistics_form', False)),
+                'send_text_after_form': bool(card.get('send_text_after_form', False)),
                 'card_description': card.get('description'),
                 'is_multi_spec': card.get('is_multi_spec', False),
                 'spec_name': card.get('spec_name'),
@@ -2374,6 +2380,17 @@ class AutoDeliveryHandler:
                     return None
                 if not order_id or skip_confirm or not self.is_auto_confirm_enabled():
                     self._last_delivery_fail_reason = "无需邮寄表单发货需要订单ID并开启自动确认发货"
+                    return None
+
+            if use_no_logistics_form and rule.get('send_text_after_form'):
+                from app.services.xianyu.delivery_text import deliver_form_with_text
+                try:
+                    return await deliver_form_with_text(
+                        self.parent, order_no=order_id, item_id=item_id, card_id=rule['card_id'],
+                        buyer_id=send_user_id, chat_id=chat_id, content=form_trade_text,
+                    )
+                except ValueError as exc:
+                    self._last_delivery_fail_reason = str(exc)
                     return None
 
             # 如果调用方明确指示跳过确认发货（如"禁止发货 + 关闭订单后只发卡券"场景），

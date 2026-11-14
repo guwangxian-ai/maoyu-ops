@@ -38,7 +38,7 @@ class CardService:
     # 等大字段，避免一次性返回全部卡券时传输/读取超大内容）
     _LITE_COLUMNS = (
         Card.id, Card.user_id, Card.item_id, Card.name, Card.type,
-        Card.enabled, Card.delay_seconds, Card.use_no_logistics_form,
+        Card.enabled, Card.delay_seconds, Card.use_no_logistics_form, Card.send_text_after_form,
         Card.delivery_count, Card.price,
         Card.is_dockable, Card.fee_payer, Card.min_price, Card.dock_visibility,
         Card.is_multi_spec, Card.spec_name, Card.spec_value,
@@ -479,6 +479,7 @@ class CardService:
         enabled: bool = True,
         delay_seconds: int = 0,
         use_no_logistics_form: bool = False,
+        send_text_after_form: bool = False,
         price: Optional[str] = None,
         is_dockable: bool = False,
         fee_payer: Optional[str] = None,
@@ -505,6 +506,8 @@ class CardService:
         if duplicate_msg:
             raise ValueError(duplicate_msg)
 
+        if send_text_after_form and (not use_no_logistics_form or card_type != "text"):
+            raise ValueError("补发纯文字需使用固定文字卡券并开启无需邮寄凭证")
         if use_no_logistics_form and card_type != "text":
             raise ValueError("无需邮寄表单发货仅支持固定文字卡券")
         
@@ -522,6 +525,7 @@ class CardService:
             enabled=enabled,
             delay_seconds=delay_seconds,
             use_no_logistics_form=use_no_logistics_form,
+            send_text_after_form=send_text_after_form,
             price=price,
             is_dockable=is_dockable,
             fee_payer=fee_payer,
@@ -564,6 +568,8 @@ class CardService:
             "use_no_logistics_form", card.use_no_logistics_form
         )
 
+        if kwargs.get("send_text_after_form", card.send_text_after_form) and (not new_use_no_logistics_form or new_type != "text"):
+            raise ValueError("补发纯文字需使用固定文字卡券并开启无需邮寄凭证")
         if new_use_no_logistics_form and new_type != "text":
             raise ValueError("无需邮寄表单发货仅支持固定文字卡券")
 
@@ -633,6 +639,7 @@ class CardService:
         enabled: bool = True,
         delay_seconds: int = 0,
         use_no_logistics_form: bool = False,
+        send_text_after_form: bool = False,
         price: Optional[str] = None,
         is_dockable: bool = False,
         fee_payer: Optional[str] = None,
@@ -652,6 +659,8 @@ class CardService:
         Returns:
             {"card_id": 新建卡券ID, "bindCount": 绑定商品数}
         """
+        if send_text_after_form and (not use_no_logistics_form or card_type != "text"):
+            raise ValueError("补发纯文字需使用固定文字卡券并开启无需邮寄凭证")
         if use_no_logistics_form and card_type != "text":
             raise ValueError("无需邮寄表单发货仅支持固定文字卡券")
 
@@ -670,6 +679,7 @@ class CardService:
             enabled=enabled,
             delay_seconds=delay_seconds,
             use_no_logistics_form=use_no_logistics_form,
+            send_text_after_form=send_text_after_form,
             price=price,
             is_dockable=is_dockable,
             fee_payer=fee_payer,
@@ -776,6 +786,7 @@ class CardService:
             "enabled": card.enabled,
             "delay_seconds": card.delay_seconds,
             "use_no_logistics_form": card.use_no_logistics_form,
+            "send_text_after_form": bool(card.send_text_after_form),
             "delivery_count": card.delivery_count,
             "price": card.price,
             "is_dockable": card.is_dockable,
@@ -811,6 +822,7 @@ class CardService:
             "enabled": card.enabled,
             "delay_seconds": card.delay_seconds,
             "use_no_logistics_form": card.use_no_logistics_form,
+            "send_text_after_form": bool(card.send_text_after_form),
             "delivery_count": card.delivery_count,
             "price": card.price,
             "is_dockable": card.is_dockable,
@@ -850,6 +862,7 @@ class CardService:
             "enabled": card.enabled,
             "delay_seconds": card.delay_seconds,
             "use_no_logistics_form": card.use_no_logistics_form,
+            "send_text_after_form": bool(card.send_text_after_form),
             "delivery_count": card.delivery_count,
             "price": card.price,
             "is_dockable": card.is_dockable,

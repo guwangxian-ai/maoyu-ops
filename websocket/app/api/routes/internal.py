@@ -1653,6 +1653,37 @@ async def _deliver_order_impl(request: DeliverOrderRequest):
                         "data": None,
                     }
 
+        # 固定文字凭证后的聊天副本与自动发货共用同一持久化订单流程。
+        async with async_session_maker() as form_session:
+            form_card = await form_session.get(Card, request.card_id)
+            if form_card and form_card.send_text_after_form:
+                if skip_shipping_confirm:
+                    return {"success": False, "message": "只发卡券/关闭订单不能提交发货凭证", "data": None}
+                from common.services.cloud_asset_delivery import resolve_cloud_asset_delivery
+                from app.services.xianyu.delivery_text import deliver_form_with_text
+                if form_card.delay_seconds:
+                    await asyncio.sleep(form_card.delay_seconds)
+                asset_text = await resolve_cloud_asset_delivery(form_session, form_card)
+                form_text = asset_text if asset_text is not None else form_card.text_content
+                form_card_id = form_card.id
+            else:
+                form_card_id = None
+        if form_card_id:
+            try:
+                form_result = await deliver_form_with_text(
+                    xianyu_live, order_no=request.order_no, item_id=request.item_id,
+                    card_id=form_card_id, buyer_id=request.buyer_id, chat_id=request.chat_id,
+                    content=form_text, method=request.delivery_method,
+                )
+            except ValueError as exc:
+                return {"success": False, "message": str(exc), "data": None}
+            return {"success": True, "message": "凭证发货已确认，文字副本已登记",
+                    "data": {**form_result, "order_no": request.order_no,
+                             "delivery_content": form_result["content"], "delivery_type": "text",
+                             "delivery_method": request.delivery_method,
+                             "quantity_requested": max(1, int(request.quantity or 1)), "quantity_sent": 1,
+                             "quantity_degraded_for_fixed_content": int(request.quantity or 1) > 1}}
+
         # 检查是否开启"卡券发送成功再确认发货"模式
         send_before_confirm_mode = False
         if not skip_shipping_confirm:

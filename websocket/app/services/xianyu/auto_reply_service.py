@@ -1093,7 +1093,7 @@ class AutoReplyService:
             from common.db.compat import db_manager
             
             # 获取账号的通知配置(使用get_account_notifications方法)
-            notifications = db_manager.get_account_notifications(self.cookie_id)
+            notifications = db_manager.get_account_notifications(self.cookie_id, notify_type='chat')
             if not notifications:
                 logger.debug(f"【{self.cookie_id}】未配置消息通知，跳过通知发送")
                 return

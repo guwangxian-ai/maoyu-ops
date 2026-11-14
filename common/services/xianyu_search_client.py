@@ -19,6 +19,7 @@ from typing import Any, Dict, List, Optional
 from loguru import logger
 
 from common.services.xianyu_mtop import mtop_call
+from common.services.market_metrics import want_from_tags
 
 SEARCH_API = "mtop.taobao.idlemtopsearch.pc.search"
 SEARCH_VERSION = "1.0"
@@ -103,15 +104,15 @@ class XianyuSearchClient:
 
         res_json = result.get("res")
         if res_json is not None:
-            # 打印搜索接口完整返回结果（便于排查风控/验证等问题）
-            logger.info(
-                f"【{self.cookie_id}】搜索接口返回（关键字={keyword}，第{page_number}页）: "
-                f"{json.dumps(res_json, ensure_ascii=False)}"
-            )
+            logger.info("【{}】搜索第{}页，success={}，结果数={}", self.cookie_id, page_number,
+                        bool(result.get("success")), len((res_json.get("data") or {}).get("resultList") or []))
 
         if result.get("success"):
             data_node = (res_json or {}).get("data", {}) or {}
-            result_list = data_node.get("resultList", []) or []
+            result_list = data_node.get("resultList")
+            if not isinstance(result_list, list):
+                return {"success": False, "items": [], "has_next_page": False,
+                        "account_invalid": False, "error": "搜索结果结构异常：缺少 resultList 数组", "punish_url": ""}
             result_info = data_node.get("resultInfo", {}) or {}
             has_next = bool(result_info.get("hasNextPage"))
             return {"success": True, "items": result_list, "has_next_page": has_next,
@@ -213,12 +214,11 @@ def parse_search_item(result_entry: dict) -> Optional[Dict[str, Any]]:
             if content and content not in tags:
                 tags.append(content)
             # 从"235人想要"中提取真实想要数
-            if want_count is None:
-                matched = re.search(r"(\d+)\s*人?想要", content)
-                if matched:
-                    want_count = matched.group(1)
+            # 数字稍后统一解析，避免把 1.2 万误识别为 2 人。
     # 标签兜底：部分商品想要数也可能在 fishTags 文本中，这里仅以 serviceUtParams 为准
     tags_text = ",".join(tags) if tags else None
+    parsed_want, want_approximate = want_from_tags(tags)
+    want_count = str(parsed_want) if parsed_want is not None else None
 
     return {
         "item_id": item_id,
@@ -232,6 +232,9 @@ def parse_search_item(result_entry: dict) -> Optional[Dict[str, Any]]:
         "seller_nick": str(seller_nick) if seller_nick is not None else None,
         "seller_avatar": str(seller_avatar) if seller_avatar is not None else None,
         "want_count": want_count,
+        "want_source": "search.serviceUtParams" if want_count is not None else None,
+        "want_approximate": want_approximate,
+        "price_source": "search.list_price",
         "tags": tags_text,
         "publish_time_ms": str(publish_time) if publish_time is not None else None,
         "target_url": str(target_url) if target_url is not None else None,

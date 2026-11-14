@@ -135,3 +135,7 @@ export const batchDeleteOrders = (ids: number[]): Promise<ApiResponse> => {
 export const updateOrderStatus = async (_id: string, _status: string): Promise<ApiResponse> => {
   return { success: false, message: '后端暂未实现订单状态更新接口' }
 }
+
+
+export const retryDeliveryText = (orderNo: string): Promise<ApiResponse> =>
+  post(`${ORDER_PREFIX}/${encodeURIComponent(orderNo)}/delivery-text/retry`)

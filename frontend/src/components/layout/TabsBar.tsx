@@ -91,6 +91,7 @@ const routeTitles: Record<string, string> = {
   '/product-publish/addresses': '地址库',
   '/product-publish/logs': '发布日志',
   '/product-monitor/overview': '监控总览',
+  '/product-monitor/research': '竞品研究',
   '/product-monitor/listing': '商品监控',
   '/product-monitor/categories': '监控分类',
   '/product-monitor/logs': '监控日志',

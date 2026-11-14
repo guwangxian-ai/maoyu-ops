@@ -1,0 +1,399 @@
+{
+  "product": "MaoYuOps（猫鱼运营）",
+  "repository": "https://github.com/guwangxian-ai/maoyu-ops",
+  "upstream_repository": "https://github.com/zhinianboke/xianyu-auto-reply",
+  "upstream_base": "10fc70ebfd3c3b481cc1d6975153cc20ee746c3d",
+  "upstream_commit": "990f701fe03d7f62c3cf1fe571fc5bb6de57c778",
+  "license": "AGPL-3.0",
+  "url": "https://43.136.91.22/maoyu-ops/",
+  "ai_access_url": "https://43.136.91.22/maoyu-ops/ai-access",
+  "mcp_url": "https://43.136.91.22/maoyu-ops/mcp",
+  "skill_url": "https://43.136.91.22/maoyu-ops/ai/skills/xianyu-operations.zip",
+  "backup_policy": "Ask once before a future deployment unless the user has already chosen backup or no backup; no automatic backup or rollback tags.",
+  "release_id": "20261106T070000Z-delivery-text",
+  "previous_release_id": "20261104T144306Z-market-research",
+  "previous_record": "docs/deployment-history/20261104T144306Z-market-research.json",
+  "source_commit": "ac03d0251e52ecc3ea94ffd35d871181672ee967",
+  "source_revision_note": "Working tree release; preserves earlier modifications. Patch files and current hashes are listed below.",
+  "source_patch_files": [
+    "backend-web/tests/delivery_text_mysql_smoke.py",
+    "backend-web/tests/delivery_text_ui_smoke.py",
+    "backend-web/tests/test_delivery_text_api.py",
+    "common/db/delivery_text_schema.py",
+    "common/models/delivery_text.py",
+    "common/services/delivery_text_service.py",
+    "frontend/src/pages/orders/DeliveryTextPanel.tsx",
+    "skills/xianyu-operations/references/capabilities.md",
+    "websocket/app/services/xianyu/delivery_text.py",
+    "backend-web/app/api/routes/cards.py",
+    "backend-web/app/api/routes/orders.py",
+    "backend-web/app/mcp/catalog.py",
+    "backend-web/app/mcp/onboarding.py",
+    "backend-web/app/mcp/server.py",
+    "backend-web/app/services/card_service.py",
+    "common/db/init_database.py",
+    "common/models/_exports.py",
+    "common/models/card.py",
+    "common/schemas/order.py",
+    "common/services/card_matcher.py",
+    "docs/mcp-api.md",
+    "docs/skills-operations.md",
+    "frontend/src/api/cards.ts",
+    "frontend/src/api/orders.ts",
+    "frontend/src/pages/cards/CardFormModal.tsx",
+    "frontend/src/pages/orders/Orders.tsx",
+    "frontend/src/types/index.ts",
+    "scheduler/app/services/scheduler/redelivery_task.py",
+    "skills/xianyu-operations/SKILL.md",
+    "skills/xianyu-operations/references/delivery-assets.md",
+    "skills/xianyu-operations/references/orders.md",
+    "websocket/_bootstrap.py",
+    "websocket/app/api/routes/internal.py",
+    "websocket/app/services/xianyu/auto_delivery_handler.py",
+    "websocket/app/services/xianyu/xianyu_async.py"
+  ],
+  "deployed_patch_files": {
+    "backend-web/tests/delivery_text_mysql_smoke.py": "008d0fb0f842325243d043dded583d746465bb04d44ab4f5dbe5c7b8c77910bd",
+    "backend-web/tests/delivery_text_ui_smoke.py": "8a1459879dbe2040df88e5f2aca4684271cf6f7bd2cdbebaaa0d7f67a7cefbe4",
+    "backend-web/tests/test_delivery_text_api.py": "4fd2aec78618a29b8a768b463882ab957f6b7c54b9ef6ca1554cfaee61254246",
+    "common/db/delivery_text_schema.py": "fecb45da2d3def95d65bd9077b71e8512a1d9900dc8c0739df3b092a29737cb2",
+    "common/models/delivery_text.py": "a07cf13b8e0f71d1023773f7a9ce7f6a87cc7f01658186ef9b8d6ba39c2e7f10",
+    "common/services/delivery_text_service.py": "b3deed738400ea676a8cc2178a2674b21dc3ae8d81fb952502cc96e6d9c5ec48",
+    "frontend/src/pages/orders/DeliveryTextPanel.tsx": "625f7900a97c5baed2c5628829add4fda77e36151591a3865bc0f6eb69fdba7f",
+    "skills/xianyu-operations/references/capabilities.md": "1370a6998e4fddfb23718f2bda8b0312b168f76aa5a6845695d4d6b556bf75fd",
+    "websocket/app/services/xianyu/delivery_text.py": "86937674266340e1f81d17138e8516e5038c1120d449bdc607f37da376e4dcfd",
+    "backend-web/app/api/routes/cards.py": "998ba7355fb127ae22eb9416d69d77d08c56ba9c25dfc42b209662a1607a0a86",
+    "backend-web/app/api/routes/orders.py": "5fecb18bf535c4ed2c42d6704b345eb98d43a5f3a65a755afa3145a9d2e57eea",
+    "backend-web/app/mcp/catalog.py": "8c94b988cbaf0bed3624e03a632e4b09cd3a135f5b060a517c7430c96bc883a7",
+    "backend-web/app/mcp/onboarding.py": "4cf4f3cb2f146cfe475273894a03c916b9c3e1ef91b0b49571c30d9fabf58834",
+    "backend-web/app/mcp/server.py": "b3a72ebffffc54b9304fe725536ef937184d6e766fa134496dc8e99eb93b3cd2",
+    "backend-web/app/services/card_service.py": "c18ba57535c772612b4c141b4cfbca056b4beff3029be1c9661ce11a886a7fef",
+    "common/db/init_database.py": "d4eaa9e945947c469b8a909862ff830556f826f1f0975b290ebe9d05f98e556d",
+    "common/models/_exports.py": "acb9316aae4b7c664851e1514a84fbc72b921cc56bb867a2e44f348836a79b9d",
+    "common/models/card.py": "8ac139671b0b3280864aa017a9a70c3b378e4be65f9b5596e389abdd17357fa7",
+    "common/schemas/order.py": "150292451d8514470a9f81997cde8349ab02dc17e64075ed451f78187663c0e2",
+    "common/services/card_matcher.py": "9fdc0477df26f5829de352e2947ca17c7716842ec2cf605a3a98f785de207256",
+    "docs/mcp-api.md": "74c90202943b37e4fa5d62b34bced9e51b9941000b402c521603211e9fcf8fed",
+    "docs/skills-operations.md": "7566752c2c0b7975ce0d6a48fd1f0cef0310692b7f468f279e3e53f1a8f23a2d",
+    "frontend/src/api/cards.ts": "a618da7f3ae3c310ec4b226cfc00256a79dad4317fb1b5b51f95dc77327c3611",
+    "frontend/src/api/orders.ts": "24cd7d05179eb6733e9960ab62d11338013befda85270bd7dc9e7ed0317489c0",
+    "frontend/src/pages/cards/CardFormModal.tsx": "405c87fd549fec26a8b9ed9d9ecfc079369cba1324578f173a9244dd6fd5ae32",
+    "frontend/src/pages/orders/Orders.tsx": "4905ef023af0d5cba0f2864867046034bacad2f360a43074cdc8705ffab22cdf",
+    "frontend/src/types/index.ts": "b0a4cfa3e2b824407c1847aa2f22aec39ffb11386c8acd995a63f50550380e71",
+    "scheduler/app/services/scheduler/redelivery_task.py": "c49e10936355de34e98729f0aaac4e73e419dc2f6384259f9580c8859199527b",
+    "skills/xianyu-operations/SKILL.md": "268c23b909f69ee1f1491a0b43a7e012bf04afe88593e512cbed6b3913a928ec",
+    "skills/xianyu-operations/references/delivery-assets.md": "017ddc8fdab3246d65e0ba87fa55d64cc79acb259d25ddb008689c4c58744b83",
+    "skills/xianyu-operations/references/orders.md": "001e6c643d3cdf148fd477b27ee442733c1a2b40e7b7b2fb3dddac029f64c036",
+    "websocket/_bootstrap.py": "3bb27d9d2d77a7e9f29138a8785bab6df027d07776c18108b75e3a91c8ff1582",
+    "websocket/app/api/routes/internal.py": "59b9101726deb2bd81aca9e45e90284214d5c9a2f94ac5de1517961fa7bf2275",
+    "websocket/app/services/xianyu/auto_delivery_handler.py": "18341c81f7937278cca2f50ee4296ff256ca716bff43720c7995ceeb0268b531",
+    "websocket/app/services/xianyu/xianyu_async.py": "5c1c1c8cac4b6bf7369149d04d4df9dfda40933aa921df63688fb1ffaf088684"
+  },
+  "carried_forward_patch_record": "docs/deployment-history/20261104T144306Z-market-research.json",
+  "skill_version": "2026.11.06.1",
+  "skill_sha256": "1788a33706e9e15532f68c1adc0b723b1d4ce501f85c0b668ee5bbbc756910db",
+  "status": "deployed_and_verified",
+  "deployed_at": "2026-11-06T03:26:23.860206+00:00",
+  "verified_at": "2026-11-06T03:29:22.186490+00:00",
+  "changes": [
+    "Retain platform shipping credential and optionally send the same order content as plaintext to the original buyer chat.",
+    "Persist a unique account/order receipt before shipping and an individual log for each text attempt; no new card allocation on retry.",
+    "Recover never-sent pending copies after reconnect; stop ambiguous outcomes and permit at most three explicit attempts for known failures.",
+    "Card toggle, order status/history UI, two scoped MCP tools, local and public Skills 2026.11.06.1."
+  ],
+  "database_migration": true,
+  "added_tables": [
+    "xy_delivery_text_receipts",
+    "xy_delivery_text_attempts"
+  ],
+  "added_columns": {
+    "xy_cards": [
+      "send_text_after_form"
+    ]
+  },
+  "backup_choice": "本轮用户明确不备份",
+  "backup_created": false,
+  "backup_available": false,
+  "backup_directory": null,
+  "rollback_script": null,
+  "rollback_available": false,
+  "recovery_options": {
+    "note": "No database/volume or source backup was created. A code-only correction can be prepared from source and this manifest; no data restoration copy is promised."
+  },
+  "images": {
+    "scheduler": "sha256:d3f84d11323e8485d179597e861f2fbc6e800549639cd91903ffd102eb5ede87",
+    "websocket": "sha256:06e542f49ba9fb0a393645832aae751625ede1f0953129c8a843608dc951518a",
+    "backend-web": "sha256:50a3b7054e7e712ec07c41b75eec2743b6459745e0e5297dd0f505e94bc33f6a",
+    "redis": "sha256:6ab0b6e7381779332f97b8ca76193e45b0756f38d4c0dcda72dbb3c32061ab99",
+    "mysql": "sha256:7dcddc01f13bab2f15cde676d44d01f61fc9f99fe7785e86196dfc07d358ae2b"
+  },
+  "ready_seconds": {
+    "backend-web": 22.69,
+    "websocket": 39.94,
+    "scheduler": 55.41
+  },
+  "verification": {
+    "cloud_isolated_tests": 62,
+    "isolated_mysql": {
+      "passed": true,
+      "checks": [
+        "mysql idempotent schema",
+        "unpaid/refund/closed/historical orders rejected",
+        "switch/payment/recipient guards",
+        "12 concurrent preparations -> one immutable receipt",
+        "12 concurrent sends -> one plaintext message, explicit ACK",
+        "replay does not send/confirm/consume another card",
+        "rejected maps to failed without blind retry",
+        "timeout maps to unknown without blind retry",
+        "unrecognized maps to unknown without blind retry",
+        "exception maps to unknown without blind retry",
+        "explicit rejected-message retry limited to 3 with full history",
+        "content frozen at shipping; later card edits do not change delivery",
+        "refund/switch/buyer/chat changes block sending",
+        "offline queue survives and dispatches once on reconnect",
+        "crashed sending lease becomes unknown, never resent",
+        "shared end-to-end helper: credential retained then plaintext, owner isolation",
+        "confirmation failure/already shipped do not send fresh content"
+      ],
+      "checks_count": 17,
+      "concurrent_prepare_send_ms": 62.39,
+      "real_mysql": true,
+      "platform_simulated": true,
+      "production_data": false,
+      "isolated_network": true
+    },
+    "wire_protocol": {
+      "real_send_method_tested": true,
+      "inner_content_type": 1,
+      "external_messages": 0,
+      "persisted_mid_used": true
+    },
+    "browser": {
+      "passed": true,
+      "desktop": [
+        1365,
+        900
+      ],
+      "mobile": [
+        390,
+        844
+      ],
+      "states": [
+        "unknown_no_retry",
+        "failed_retry",
+        "pending",
+        "success",
+        "read_error",
+        "card_switch_save"
+      ],
+      "retry_requests": 1,
+      "page_errors": [],
+      "production_requests": 0
+    },
+    "skills_files": 19,
+    "source_local_public_packages_match": true,
+    "new_mcp_tools": 2,
+    "mcp_tools": 220,
+    "token_scopes_and_expiry_unchanged": true,
+    "card_configuration": {
+      "total_text_cards": 115,
+      "credential_text_cards_enabled": 109,
+      "existing_chat_delivery_cards_unchanged": 6,
+      "original_card_content_and_bindings_preserved": true,
+      "historical_orders_not_backfilled": true
+    },
+    "account_connections": {
+      "accounts": 2,
+      "connected": 2,
+      "auto_confirm_enabled": 2,
+      "auto_delivery_enabled": 2,
+      "only_send_card_enabled": 0
+    },
+    "business_records": {
+      "xy_catalog_items": {
+        "before_count": 220,
+        "after_count": 220,
+        "all_original_ids_present": true,
+        "changed_selected_row_digests": 0
+      },
+      "xy_cards": {
+        "before_count": 115,
+        "after_count": 115,
+        "all_original_ids_present": true,
+        "changed_selected_row_digests": 0
+      },
+      "xy_card_item_relations": {
+        "before_count": 220,
+        "after_count": 220,
+        "all_original_ids_present": true,
+        "changed_selected_row_digests": 0
+      },
+      "xy_default_replies": {
+        "before_count": 225,
+        "after_count": 225,
+        "all_original_ids_present": true,
+        "changed_selected_row_digests": 0
+      },
+      "xy_accounts": {
+        "before_count": 2,
+        "after_count": 2,
+        "all_original_ids_present": true,
+        "changed_selected_row_digests": 2
+      },
+      "xy_mcp_access_tokens": {
+        "before_count": 2,
+        "after_count": 2,
+        "all_original_ids_present": true,
+        "changed_selected_row_digests": 0
+      },
+      "xy_ai_listing_configs": {
+        "before_count": 0,
+        "after_count": 0,
+        "all_original_ids_present": true,
+        "changed_selected_row_digests": 0
+      }
+    },
+    "order_counts": {
+      "before": 59,
+      "after": 59
+    },
+    "account_audit": "Both accounts verified active and connected with auto confirmation and delivery enabled. Account row hashes include dynamic fields and changed during the reconnect window.",
+    "new_schema_counts": {
+      "xy_delivery_text_receipts": 0,
+      "xy_delivery_text_attempts": 0,
+      "monitor_tasks": 0
+    },
+    "source_files_verified": 35,
+    "frontend_files_verified": 174,
+    "public_access_checks": {
+      "/mcp": {
+        "http": 401,
+        "authenticated": false
+      },
+      "/maoyu-ops/api/v1/orders/verification-fixture/delivery-text": {
+        "http": 200,
+        "business_code": 401,
+        "data_returned": false
+      },
+      "/api/v1/orders/verification-fixture/delivery-text": {
+        "http": 200,
+        "business_code": 401,
+        "data_returned": false
+      },
+      "/": 200,
+      "/orders": 200,
+      "/cards": 200
+    },
+    "all_five_services_healthy": true,
+    "three_app_services_recreated": true,
+    "mysql_redis_containers_preserved": true,
+    "mounts_and_environments_preserved": true,
+    "other_project_entries": {
+      "/douyin-leads/": {
+        "status": 303,
+        "location": "/douyin-leads/login"
+      },
+      "/weixin-bot-notification-platform/": {
+        "status": 200,
+        "location": null
+      },
+      "/hermes/": {
+        "status": 302,
+        "location": "/hermes/login?next=%2F"
+      },
+      "/libretv/": {
+        "status": 308,
+        "location": "/libretv"
+      }
+    },
+    "other_project_entries_unchanged": true,
+    "new_error_counts": {
+      "scheduler": {
+        "Traceback (most recent call last)": 0,
+        "ImportError": 0,
+        "凭证后文字队列暂不可用": 0
+      },
+      "websocket": {
+        "Traceback (most recent call last)": 0,
+        "ImportError": 0,
+        "凭证后文字队列暂不可用": 0
+      },
+      "backend-web": {
+        "Traceback (most recent call last)": 0,
+        "ImportError": 0,
+        "凭证后文字队列暂不可用": 0
+      }
+    },
+    "runtime_stats": [
+      {
+        "Name": "xianyu-auto-reply-scheduler-1",
+        "CPUPerc": "2.93%",
+        "MemUsage": "114.1MiB / 768MiB",
+        "PIDs": "7"
+      },
+      {
+        "Name": "xianyu-auto-reply-websocket-1",
+        "CPUPerc": "0.15%",
+        "MemUsage": "121.8MiB / 1.221GiB",
+        "PIDs": "7"
+      },
+      {
+        "Name": "xianyu-auto-reply-backend-web-1",
+        "CPUPerc": "0.09%",
+        "MemUsage": "187.6MiB / 1.221GiB",
+        "PIDs": "13"
+      },
+      {
+        "Name": "xianyu-auto-reply-redis-1",
+        "CPUPerc": "0.48%",
+        "MemUsage": "2.199MiB / 320MiB",
+        "PIDs": "7"
+      },
+      {
+        "Name": "xianyu-auto-reply-mysql-1",
+        "CPUPerc": "0.48%",
+        "MemUsage": "154.4MiB / 768MiB",
+        "PIDs": "56"
+      }
+    ],
+    "health_median_ms": 4.06,
+    "baseline_health_median_ms": 3.95,
+    "performance_note": "One-CPU isolated MySQL verification covered 12 concurrent submissions/sends in 62.39 ms. Runtime idle memory/CPU and health probes were sampled; not a production throughput benchmark.",
+    "live_buyer_delivery_verified": false,
+    "live_buyer_delivery_note": "No new real order was sent during acceptance; platform was simulated only in isolated tests. Buyer receipt/copy behavior remains to be observed on the next paid order."
+  },
+  "cleanup": {
+    "passed": true,
+    "staging_removed_bytes": 17685030,
+    "candidate_aliases_removed": [
+      "xianyu-auto-reply-backend-web:20261106T070000Z-delivery-text",
+      "xianyu-auto-reply-websocket:20261106T070000Z-delivery-text",
+      "xianyu-auto-reply-scheduler:20261106T070000Z-delivery-text"
+    ],
+    "unused_test_images_removed": [],
+    "production_images_preserved": true,
+    "backup_created": false,
+    "disk_free_bytes": 5074948096,
+    "new_error_counts": {
+      "scheduler": {
+        "Traceback (most recent call last)": 0,
+        "ImportError": 0,
+        "凭证后文字队列暂不可用": 0
+      },
+      "websocket": {
+        "Traceback (most recent call last)": 0,
+        "ImportError": 0,
+        "凭证后文字队列暂不可用": 0
+      },
+      "backend-web": {
+        "Traceback (most recent call last)": 0,
+        "ImportError": 0,
+        "凭证后文字队列暂不可用": 0
+      }
+    }
+  },
+  "new_dependencies": [],
+  "new_paid_services": false,
+  "operations_evidence": "data/ops-runs/delivery-text-20261106/",
+  "server_release_directory": "/srv/xianyu-auto-reply/releases/20261106T070000Z-delivery-text"
+}

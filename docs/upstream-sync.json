@@ -137,14 +137,19 @@
     ],
     "record": "docs/upstream-update-20261114.md",
     "skill_version": "2026.11.14.1",
-    "deployment_performed": false,
-    "git_push_performed": false,
+    "deployment_performed": true,
+    "git_push_performed": true,
     "not_integrated": [
       "scheduled_publish",
       "api_keywords",
       "personal_remote_token",
       "online_install",
       "advertisement_and_payment_and_settlement"
-    ]
+    ],
+    "release_id": "20261114T051149Z-upstream-ops",
+    "runtime_source_commit": "7f0976ca8c74d1fe8533b0c676023bd1f37a2471",
+    "deployment_record": "docs/tencent-hermes-deployment.json",
+    "pull_request": "https://github.com/guwangxian-ai/maoyu-ops/pull/1",
+    "backup_created": false
   }
 }

@@ -20,6 +20,7 @@ from common.models.xy_account import XYAccount
 from sqlalchemy import select as order_select
 
 from common.utils.time_utils import safe_isoformat
+from common.services.delivery_text_service import DeliveryTextService
 router = APIRouter(tags=["orders"])
 
 
@@ -103,6 +104,8 @@ async def list_orders(
         page_size=page_size,
     )
 
+    text_summaries = await DeliveryTextService(order_service.session).summaries(orders)
+
     # 批量查询哪些订单是代销订单
     from sqlalchemy import select as sa_select
     from common.models.agent_order import AgentOrder
@@ -146,6 +149,7 @@ async def list_orders(
                 receiver_name=order.receiver_name or "",
                 receiver_phone=order.receiver_phone or "",
                 receiver_address=order.receiver_address or "",
+                delivery_text=text_summaries.get((order.account_id, order.order_no)),
                 delivery_method=order.delivery_method or "",
                 delivery_content=order.delivery_content or "",
                 delivery_fail_reason=order.delivery_fail_reason or "",
@@ -314,6 +318,7 @@ async def get_order_detail(
             "receiver_name": order.receiver_name or "",
             "receiver_phone": order.receiver_phone or "",
             "receiver_address": order.receiver_address or "",
+            "delivery_text": await DeliveryTextService(order_service.session).get(order.account_id, order.order_no, order.owner_id),
             "delivery_method": order.delivery_method or "",
             "delivery_content": order.delivery_content or "",
             "delivery_fail_reason": order.delivery_fail_reason or "",
@@ -739,3 +744,40 @@ async def manual_delivery(
         import traceback
         logger.error(traceback.format_exc())
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"发货失败: {str(e)}")
+
+
+async def _delivery_text_order(order_no, current_user, order_service):
+    order = await order_service.get_order_by_no(order_no)
+    _, is_admin = resolve_owner_scope(current_user)
+    if not order or (not is_admin and order.owner_id != current_user.id):
+        raise HTTPException(status_code=404, detail="订单不存在或无权访问")
+    return order
+
+
+@router.get("/{order_no}/delivery-text")
+async def get_delivery_text(
+    order_no: str,
+    current_user: User = Depends(deps.get_current_active_user),
+    order_service: OrderService = Depends(deps.get_order_service),
+):
+    """查询凭证后文字副本与逐次发送记录。平台确认、发送成功和买家已读分别判断。"""
+    order = await _delivery_text_order(order_no, current_user, order_service)
+    data = await DeliveryTextService(order_service.session).get(order.account_id, order.order_no, order.owner_id)
+    return ApiResponse(success=True, data=data)
+
+
+@router.post("/{order_no}/delivery-text/retry")
+async def retry_delivery_text(
+    order_no: str,
+    current_user: User = Depends(deps.get_current_active_user),
+    order_service: OrderService = Depends(deps.get_order_service),
+):
+    """只重新排队明确失败的本单文字副本，最多3次。未知结果禁止重发；不取新卡、不确认发货。"""
+    order = await _delivery_text_order(order_no, current_user, order_service)
+    if order.status not in {"shipped", "completed"}:
+        return ApiResponse(success=False, message="订单已非发货/完成状态，不能补发文字")
+    try:
+        data = await DeliveryTextService(order_service.session).retry(order.account_id, order.order_no, order.owner_id)
+        return ApiResponse(success=True, message="已读取或更新文字发送队列，请查询本单发送记录", data=data)
+    except ValueError as exc:
+        return ApiResponse(success=False, message=str(exc))

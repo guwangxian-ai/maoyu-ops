@@ -34,6 +34,9 @@ class Card(Base):
     use_no_logistics_form: Mapped[bool] = mapped_column(
         Boolean, nullable=False, default=False, server_default="0", comment='是否通过无需邮寄表单发货'
     )
+    send_text_after_form: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=False, server_default="0", comment='凭证发货成功后补发纯文字'
+    )
     delivery_count: Mapped[int] = mapped_column(Integer, default=0, comment='发货次数')
     price: Mapped[Optional[str]] = mapped_column(String(32), nullable=True, comment='对接价格')
     is_dockable: Mapped[bool] = mapped_column(Boolean, default=False, comment='是否可对接')

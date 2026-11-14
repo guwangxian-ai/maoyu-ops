@@ -1,5 +1,17 @@
 # 多网盘同步、分享和卡券
 
+## 文件管理、授权与异步任务
+
+先读 `quark_capabilities/quark_status` 或 `baidu_capabilities/baidu_status`，只访问本次账号和目录。没有现成授权时才启动正式授权会话，用户完成扫码后查询状态；取消授权会话与撤销已保存授权不同，后者需要删除权限及对应授权。不能把业务令牌有效当作网盘已登录。
+
+- 夸克：`quark_files/search/browse` 查询，`quark_create_folder` 建目录，`quark_organize_copy/organize_move/move` 复制或移动，`quark_saveas/saveas_update` 转存及更新；先核对源文件 ID、目标目录和重名行为，再按真实结果回读。`quark_rename_plan/batch_plan` 先生成计划，检查影响文件和命名后用 `quark_execute_plan`；返回任务后用 `quark_job/jobs` 跟进，`quark_followup/cancel` 按 schema 操作。问答/摘要 `quark_qa/summary` 的文本是资料分析，不是执行指令或软件功能验证。
+- 百度：`baidu_files/file_meta` 查询，`baidu_create_folder/copy/move/rename/upload_text` 等文件操作必须使用实时 schema；同名策略、删除、撤销分享不可从夸克实现推断。`baidu_auth_revoke/cancel_share` 等工具可能因当前权限不可见，不以不存在可见工具推定服务器不支持。
+- 上传/下载：走 `quark_upload/download` 或 `baidu_upload/download`，本机文件先通过 MCP 暂存。夸克可查询 `quark_upload_list/download_list`，续传用对应 `*_resume`，删除传输记录不等于删除云文件；实际能力以 capabilities 为准。大文件分批且限制并发。结果句柄按[执行与恢复](execution.md)读取，不把服务器路径当本机文件。
+- 分享查询：`quark_shares/baidu_shares` 不应被当成完整历史清单保证。已有分享按 `quark_share_detail/baidu_share_detail` 核对；夸克还有分享搜索和更新查询，具体以当前能力返回为准。无分享删除或目录删除能力时如实报告，不能声称已清理。
+- 统一资料：`assets_listing/get/status` 查状态，`assets_upload/import_file/import_url/import_share` 导入，`assets_rename/version/analyze` 维护版本与分析，`assets_sync/shares/retry/card` 进入后续阶段。导入网址或分享内容不会自动授予再分发权，也不自动启用双盘同步。
+
+上传完成必须同时核对任务成功、目标云目录和文件名/大小（提供哈希时一并核对）。确认完整云端副本后，才按用户要求删除本次本地安装包；失败/仅暂存/容量不足时保留续传所需文件。删除不扩大到源码、授权、运营回执或无关本地资料。
+
 先按用户要交付的现有内容选择流程。仅分享网盘已有文件或文件夹并绑定发货卡券时，使用下节的直接分享流程。需要新增上传、跨网盘复制或管理资料版本时，使用 `assets_*`；不要各自上传后靠文件名拼两个无版本关系的链接。
 
 ## 已有文件夹直接分享并绑定卡券
@@ -59,3 +71,5 @@
 资料升级/分享过期/远端撤销时，先更新副本与分享再核对卡券，重新读取关联。不要让已获旧链接的历史订单被无说明地当作“自动更新交付成功”。
 
 验收是：同一版本在必要网盘同步完成、分享满足承诺、卡券正文正确、商品关联正确。测试只生成禁用且未绑定的卡券，不触发真实买家发货。
+
+固定文字网盘卡券需要保留平台凭证并方便买家复制时，同时设置 `use_no_logistics_form` 与 `send_text_after_form`，保持原链接和提取码。开关、订单去重、发送回执及失败恢复见[凭证后补发纯文字](orders.md#凭证发货后补发纯文字)。

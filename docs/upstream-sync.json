@@ -123,5 +123,28 @@
     "Real Xianyu IM reconnect requires an authorized connected Xianyu account; local account list is empty"
   ],
   "deployment_performed": false,
-  "git_push_performed": false
+  "git_push_performed": false,
+  "latest_selected_integration": {
+    "date": "2026-11-14",
+    "reviewed_ref": "1e4831391d6af6c227e39a8e622fecb009549a9c",
+    "previous_full_integration_ref": "990f701fe03d7f62c3cf1fe571fc5bb6de57c778",
+    "mode": "selected_features",
+    "features": [
+      "registration_and_email_code",
+      "notification_event_subscriptions",
+      "item_and_card_selection_queries",
+      "shared_single_item_publish_modules"
+    ],
+    "record": "docs/upstream-update-20261114.md",
+    "skill_version": "2026.11.14.1",
+    "deployment_performed": false,
+    "git_push_performed": false,
+    "not_integrated": [
+      "scheduled_publish",
+      "api_keywords",
+      "personal_remote_token",
+      "online_install",
+      "advertisement_and_payment_and_settlement"
+    ]
+  }
 }

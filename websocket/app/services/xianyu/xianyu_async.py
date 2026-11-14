@@ -1988,7 +1988,7 @@ class XianyuAsync:
             logger.error(f"[{msg_time}] 【{self.cookie_id}】处理确认收货图片失败: {e}")
             return None
     
-    async def send_msg(self, websocket, chat_id: str, send_user_id: str, content: str):
+    async def send_msg(self, websocket, chat_id: str, send_user_id: str, content: str, *, message_id: str | None = None, log_content: bool = True):
         """发送文本消息（参照旧框架实现）
 
         消息通过 WebSocket 发出后立即返回成功（不阻塞自动回复）。
@@ -2020,7 +2020,7 @@ class XianyuAsync:
             content_json = json.dumps(msg_content, ensure_ascii=False)
             content_base64 = base64.b64encode(content_json.encode("utf-8")).decode("utf-8")
 
-            mid = generate_mid()
+            mid = message_id or generate_mid()
             msg = {
                 "lwp": "/r/MessageSend/sendByReceiverScope",
                 "headers": {"mid": mid},
@@ -2067,7 +2067,8 @@ class XianyuAsync:
                 logger.warning(f"【{self.cookie_id}】注册发送结果检测失败（不影响发送）: {self._safe_str(reg_e)}")
 
             await websocket.send(msg_str)
-            logger.info(f"【{self.cookie_id}】发送消息成功: {content[:50]}...")
+            if log_content:
+                logger.info(f"【{self.cookie_id}】发送消息成功: {content[:50]}...")
             return {
                 "success": True,
                 "mode": "text",

@@ -620,6 +620,10 @@ class RedeliveryTask:
                         # 仍返回 True，避免任务重复触发；视为本次处理完成
                         return True, None, cookie_string
 
+                    if result_data.get('text_receipt_id'):
+                        # 新流程已原子保存凭证与订单，不能覆盖并发退款状态。
+                        return True, None, cookie_string
+
                     if result_data.get('only_send_card'):
                         # 平台订单仍是待发货，不能伪装成 shipped；写持久化标记防止下轮重复发券。
                         order.card_only_delivered = True

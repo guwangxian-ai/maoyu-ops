@@ -54,6 +54,7 @@ interface CardFormData {
   imageUrls: string[]
   delaySeconds: number
   useNoLogisticsForm: boolean
+  sendTextAfterForm: boolean
   price: string
   isDockable: boolean
   feePayer: string
@@ -98,6 +99,7 @@ export function cardToFormData(card: CardData): CardFormData {
     imageUrls: imageUrlsList,
     delaySeconds: card.delay_seconds || 0,
     useNoLogisticsForm: card.use_no_logistics_form || false,
+    sendTextAfterForm: card.send_text_after_form || false,
     price: card.price || '',
     isDockable: card.is_dockable || false,
     feePayer: card.fee_payer || '',
@@ -132,6 +134,7 @@ export const emptyCardFormData: CardFormData = {
   imageUrls: [],
   delaySeconds: 0,
   useNoLogisticsForm: false,
+  sendTextAfterForm: false,
   price: '',
   isDockable: false,
   feePayer: '',
@@ -283,6 +286,7 @@ export function CardFormModal({ cardId, initialData, onClose, onSaved }: CardFor
         enabled: true,
         delay_seconds: formData.delaySeconds,
         use_no_logistics_form: formData.type === 'text' && formData.useNoLogisticsForm,
+        send_text_after_form: formData.type === 'text' && formData.useNoLogisticsForm && formData.sendTextAfterForm,
         price: formData.price.trim() || null,
         is_dockable: formData.isDockable,
         fee_payer: formData.isDockable ? formData.feePayer : null,
@@ -488,10 +492,20 @@ export function CardFormModal({ cardId, initialData, onClose, onSaved }: CardFor
                   />
                   <span>
                     <span className="block text-sm font-medium text-gray-900 dark:text-white">填写到无需邮寄凭证</span>
-                    <span className="block text-xs text-gray-500 mt-0.5">开启后不再向买家发送卡券聊天消息</span>
+                    <span className="block text-xs text-gray-500 mt-0.5">将卡券内容保存在平台发货凭证中</span>
                   </span>
                 </label>
               </div>
+            )}
+
+            {formData.type === 'text' && formData.useNoLogisticsForm && (
+              <label className="flex items-start gap-2 cursor-pointer">
+                <input type="checkbox" checked={formData.sendTextAfterForm}
+                  onChange={(e) => updateField('sendTextAfterForm', e.target.checked)}
+                  className="mt-0.5 w-4 h-4 rounded border-gray-300" />
+                <span><span className="block text-sm font-medium">发货成功后补发纯文字</span>
+                  <span className="block text-xs text-gray-500 mt-0.5">保留凭证，再把本单链接和提取码发到聊天。按订单去重；超时待核实，不重复发送。不补发历史订单。</span></span>
+              </label>
             )}
 
             {/* 批量数据配置 */}

@@ -1061,17 +1061,20 @@ class DBManagerCompat:
                 'total_cleaned': 0
             }
     
-    def get_account_notifications(self, cookie_id: str) -> List[Dict[str, Any]]:
+    def get_account_notifications(self, cookie_id: str, notify_type: str = None) -> List[Dict[str, Any]]:
         """获取账号的通知配置
         
         Args:
             cookie_id: Cookie ID
+            notify_type: 通知类型 chat/delivery/account。给定值时只返回订阅了该类型的渠道，
+                         为空时返回全部绑定（兼容旧调用）
             
         Returns:
             通知配置列表
         """
         from common.models.notification_channel import NotificationChannel
         from common.models.message_notification import MessageNotification
+        from common.utils.notification_types import allows_notification
         
         async def _query(session_maker):
             async with session_maker() as session:
@@ -1090,10 +1093,15 @@ class DBManagerCompat:
                 
                 notifications = []
                 for notification, channel in rows:
+                    # 绑定级订阅（账号+渠道），空值视为全开，兼容历史数据
+                    subscribed = getattr(notification, "notify_types", None)
+                    if not allows_notification(subscribed, channel.config_payload, notify_type):
+                        continue
                     notifications.append({
                         'id': notification.id,
                         'channel_id': channel.id,
                         'enabled': notification.enabled,
+                        'notify_types': subscribed or 'chat,delivery,account',
                         'channel_name': channel.name,
                         'channel_type': channel.channel_type,
                         'channel_config': channel.config_payload

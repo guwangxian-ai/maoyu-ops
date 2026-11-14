@@ -135,6 +135,7 @@ export const mainNavItems: NavEntry[] = [
     label: '商品监控',
     children: [
       { key: 'product-monitor-overview', icon: LayoutDashboard, label: '监控总览', path: '/product-monitor/overview' },
+      { key: 'product-monitor-research', icon: PackageSearch, label: '竞品研究', path: '/product-monitor/research' },
       { key: 'product-monitor-categories', icon: Tags, label: '监控分类', path: '/product-monitor/categories' },
       { key: 'product-monitor-listing', icon: PackageSearch, label: '商品监控', path: '/product-monitor/listing' },
       { key: 'product-monitor-logs', icon: ScrollText, label: '监控日志', path: '/product-monitor/logs' },

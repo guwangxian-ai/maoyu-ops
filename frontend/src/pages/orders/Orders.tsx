@@ -9,6 +9,7 @@ import { useAuthStore } from '@/store/authStore'
 import { PageLoading } from '@/components/common/Loading'
 import { Select } from '@/components/common/Select'
 import { ConfirmModal } from '@/components/common/ConfirmModal'
+import { DeliveryTextPanel, deliveryTextLabel } from './DeliveryTextPanel'
 import { BlacklistLevelModal } from './BlacklistLevelModal'
 import type { Order, Account } from '@/types'
 
@@ -712,7 +713,11 @@ export function Orders() {
                           case 'delivery_send_status':
                             return (
                               <td key={col.key} className="whitespace-nowrap text-sm">
-                                {order.delivery_send_status ? (
+                                {order.delivery_text ? (
+                                  <span className={order.delivery_text.state === 'success' ? 'badge-success' : 'badge-warning'} title={order.delivery_text.reason || '凭证后的文字副本'}>
+                                    {deliveryTextLabel(order.delivery_text.state)}
+                                  </span>
+                                ) : order.delivery_send_status ? (
                                   <div className="group relative cursor-pointer">
                                     <span className={
                                       order.delivery_send_status === 'success' ? 'badge-success' :
@@ -1066,6 +1071,8 @@ export function Orders() {
                       </div>
                     </div>
                   )}
+
+                  <DeliveryTextPanel order={orderDetail} onRefresh={setOrderDetail} />
 
                   {/* 发货失败原因 */}
                   {orderDetail.delivery_fail_reason && (

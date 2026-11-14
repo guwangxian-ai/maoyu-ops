@@ -28,6 +28,7 @@ class OrderOut(BaseModel):
     receiver_phone: str | None = None  # 收货人手机号
     receiver_address: str | None = None  # 收货地址
     # 发货信息
+    delivery_text: dict | None = None  # 凭证后的独立文字副本与发送回执
     delivery_method: str | None = None  # 发货方式：manual-手动发货, auto-自动发货, scheduled-定时发货
     delivery_content: str | None = None  # 发货内容（卡券内容）
     delivery_fail_reason: str | None = None  # 发货失败原因

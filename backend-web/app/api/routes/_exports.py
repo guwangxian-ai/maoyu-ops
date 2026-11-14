@@ -48,6 +48,7 @@ from . import (
     goofish_crawler,
     health,
     items,
+    selectable_items,
     keywords,
     message,
     message_filters,
@@ -60,6 +61,7 @@ from . import (
     personal_addresses,
     listing_monitor_category,
     listing_monitor,
+    market_research,
     collect_fallback_account,
     order_fallback_account,
     external_cookie,
@@ -117,6 +119,7 @@ api_router.include_router(quark_drive.router)
 api_router.include_router(cookies.router, prefix="/cookies", tags=["账号管理"])
 
 # 商品和订单
+api_router.include_router(selectable_items.router)  # 静态选择路由必须在商品动态路由之前挂载
 api_router.include_router(items.items_router, tags=["商品管理"])  # items.py已定义prefix="/items"
 api_router.include_router(orders.router, prefix="/orders", tags=["订单管理"])
 api_router.include_router(product_publish.router, tags=["商品发布"])  # 已定义prefix="/product-publish"
@@ -126,6 +129,7 @@ api_router.include_router(publish_addresses.router, tags=["商品发布随机地
 api_router.include_router(personal_addresses.router, tags=["个人发布地址库"])  # 已定义prefix="/product-publish/personal-addresses"
 api_router.include_router(listing_monitor_category.router, tags=["商品监控分类"])  # 已定义prefix="/product-monitor/categories"
 api_router.include_router(listing_monitor.router, tags=["商品上新监控"])  # 已定义prefix="/product-monitor/listing-tasks"
+api_router.include_router(market_research.router)
 api_router.include_router(collect_fallback_account.router, tags=["兜底采集账号"])  # 已定义prefix="/product-monitor/collect-fallback-accounts"
 api_router.include_router(order_fallback_account.router, tags=["兜底下单账号"])  # 已定义prefix="/product-monitor/order-fallback-accounts"
 api_router.include_router(external_cookie.router, tags=["外部Cookie同步"])  # 已定义prefix="/external/account-cookie"

@@ -10,6 +10,8 @@
 
 ## 调用与样本范围
 
+当前版本优先按 [竞品历史与候选证据](market-research.md) 使用 `market_list_market_samples` 复用有效样本，必要时 `market_collect_market_sample` 留存新基线，再用 `market_get_market_candidates` / `market_get_market_history` 分析。服务器返回事实与规则信号，当前 Agent 结合交付资源给出判断，不开新付费模型或持续任务。以下为旧实例缺新工具时的搜索回退及原始证据核对方式，不必与新接口重复采样。
+
 1. 复用接入检查及实时 schema，优先调用只读工具 `search_search_items`（`xianyu:read`）。按实际使用场景选少量关键词，先跑通一页；有必要再扩大词或页数。输入示例：
 
    ```json
@@ -32,7 +34,7 @@
 | 标签为“1.2万人想要”等缩写 | 保留原文，并标记换算为近似值；不能声称精确到个位 |
 | API 值与原始标签矛盾 | 标记待核实，先保留回执并检查解析，不能静默选较大的数字 |
 
-统计有效覆盖数（例如“有可核对标签的商品数/样本总数”），未知值不混入零值均值或排行。公开 API 本身未因这份 Skill 改变返回格式；以上是分析层处理要求。
+统计有效覆盖数（例如“有可核对标签的商品数/样本总数”），未知值不混入零值均值或排行。新 `market_*` 接口已保留空值、来源与近似标记；旧搜索接口仍按上述规则复核，不能假设格式完全相同。
 
 建议保存：`keyword`、`page`、`observed_at`、`item_id`、`source_url`、`price`、`publish_time_reported`、`want_count_api`、`want_count_verified`、`want_label`、`want_count_source`、`want_count_status`（verified/approximate/unknown/conflict）及原始回执位置。账号凭证与业务样本存到 Git 忽略的私有运营目录，不写入公开技能包。
 

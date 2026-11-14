@@ -78,6 +78,7 @@ const MonitorOverview = React.lazy(() => import('@/pages/product-monitor/Monitor
 const MonitorCategory = React.lazy(() => import('@/pages/product-monitor/MonitorCategory').then(m => ({ default: m.MonitorCategory })))
 const MonitorLogs = React.lazy(() => import('@/pages/product-monitor/MonitorLogs').then(m => ({ default: m.MonitorLogs })))
 const MonitorItems = React.lazy(() => import('@/pages/product-monitor/MonitorItems').then(m => ({ default: m.MonitorItems })))
+const MarketResearch = React.lazy(() => import('@/pages/product-monitor/MarketResearch').then(m => ({ default: m.MarketResearch })))
 const OrderFallbackAccount = React.lazy(() => import('@/pages/product-monitor/OrderFallbackAccount').then(m => ({ default: m.OrderFallbackAccount })))
 const CollectFallbackAccount = React.lazy(() => import('@/pages/product-monitor/CollectFallbackAccount').then(m => ({ default: m.CollectFallbackAccount })))
 
@@ -392,6 +393,7 @@ function App() {
             <Route path="product-monitor/listing" element={<ListingMonitor />} />
             <Route path="product-monitor/logs" element={<MonitorLogs />} />
             <Route path="product-monitor/items" element={<MonitorItems />} />
+            <Route path="product-monitor/research" element={<MarketResearch />} />
             <Route path="product-monitor/order-fallback-accounts" element={<OrderFallbackAccount />} />
             <Route path="product-monitor/collect-fallback-accounts" element={<CollectFallbackAccount />} />
             <Route path="personal-settings" element={<PersonalSettings />} />

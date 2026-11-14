@@ -14,6 +14,7 @@ import {
 } from '@/api/listingMonitor'
 import { useUIStore } from '@/store/uiStore'
 import { getApiErrorMessage } from '@/utils/apiError'
+import { MarketHistory } from './MarketHistory'
 
 interface MonitorItemDetailModalProps {
   itemPk: number
@@ -145,6 +146,8 @@ export function MonitorItemDetailModal({ itemPk, onClose }: MonitorItemDetailMod
                   </div>
                 ))}
               </div>
+
+              <MarketHistory key={item.item_id} itemId={item.item_id} />
 
               {item.detail_json != null && (
                 <details className="rounded-md border border-slate-200 dark:border-slate-700">

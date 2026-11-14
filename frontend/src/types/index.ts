@@ -158,7 +158,19 @@ export interface Item {
 }
 
 // 订单相关类型
+export interface DeliveryTextReceipt {
+  state: string
+  attempts: number
+  reason?: string | null
+  updated_at: string
+  confirmed_at?: string | null
+  can_retry: boolean
+  content?: string
+  history?: Array<{ number: number; mid: string; state: string; reason?: string | null; started_at: string; finished_at?: string | null }>
+}
+
 export interface Order {
+  delivery_text?: DeliveryTextReceipt | null
   id: string
   order_id: string
   cookie_id: string
@@ -223,12 +235,16 @@ export interface NotificationChannel {
 
 // 消息通知相关类型 - 匹配后端接口
 // 后端返回格式: { cookie_id: [ { id, channel_id, enabled, channel_name, ... } ] }
+export type NotifyType = 'chat' | 'delivery' | 'account'
+
 export interface MessageNotification {
   id: number
   cookie_id: string
   channel_id: number
   channel_name?: string
   enabled: boolean
+  /** 订阅哪几类通知，缺省视为全开 */
+  notify_types?: NotifyType[]
 }
 
 // 系统设置相关类型

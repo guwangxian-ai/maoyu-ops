@@ -13,7 +13,7 @@ from app.core.config import get_settings
 from app.mcp.permissions import scope_options
 
 SKILL_NAME = "xianyu-operations"
-SKILL_VERSION = "2026.10.28.1"
+SKILL_VERSION = "2026.11.14.1"
 # Shared by the public guide and MCP instructions so either entry carries the
 # same instance publishing convention. Full workflow stays in the Skill.
 LISTING_COPY_GUIDE = (
@@ -46,12 +46,15 @@ CATALOG_SYNC_GUIDE = (
     "商品在售核验：无需删除本地商品；先完整同步指定账号，检查 success、snapshot_complete、state_updated 均为 true。"
     "完整成功后返回商品标记 on_sale，未返回的历史商品标记 pending_verification（原因待核实），保留卡券、AI 回复和订单。"
     "失败、跳过、单页或截断不更新原检查状态/时间；多账号逐项查看 results，不能只看顶层 success。"
-    "本地查询的 sale_status、sale_checked_at、sale_last_seen_at、sale_sync_id 是最近完整检查快照；"
+    "本地查询的 sale_checked_at、sale_last_seen_at、sale_sync_id 是最近完整检查快照；"
+    "sale_status 也可因擦亮状态拒绝转为待核实，原因和证据时间见 sale_verification_reason、polish_checked_at；"
     "item_status_desc 是旧平台文案，不作为当前在售证明。待核实不是违规或售罄证据，不据此自动重发。"
     "分页列表可用 sale_status 筛选；具体判断见最新 Skill 的 references/catalog-sync.md。"
 )
 SELECTION_GUIDE = (
-    "选品与需求分析：先读 Skill 的 references/selection.md，调用 search_search_items 获取真实竞品样本；"
+    "选品与需求分析：先读 Skill 的 references/selection.md，先按 references/market-research.md 查询 market_list_market_samples，必要时 market_collect_market_sample 留存有界样本；"
+    "用 market_get_market_candidates / market_get_market_history 读取同范围历史，由当前 Agent 给出候选；后台模型调用为0。"
+    "采样使用稳定 sample_key，断线沿用原编号；核对 run.status、latest_attempt、来源和缺失值。"
     "同轮有效回执可复用，离线分析或仅讨论方案注明证据日期，不把已有商品编辑/发货扩展为市场调研。"
     "保存关键词、时间、页码、商品 ID 和原始人数标签，按商品 ID 去重；本地商品列表不能替代市场搜索。"
     "want_count 须核对平台‘人想要’标签，缺标签为未知；原始 wantNum 可能为 0，不能当作无人关注。"
@@ -60,11 +63,30 @@ SELECTION_GUIDE = (
     "查询授权不包含自动跟卖、私信、购买或持续采集；遇平台验证交还用户，不换账号绕过。"
 )
 SKILL_ROOT = Path(__file__).resolve().parents[3] / "skills" / SKILL_NAME
+DELIVERY_TEXT_GUIDE = (
+    "凭证后补发纯文字：固定文字卡券同时开启 use_no_logistics_form 与 send_text_after_form；"
+    "平台凭证成功后向原订单买家发送文字，按账号+订单去重，不追发历史订单。"
+    "orders_get_delivery_text 查询原内容及发送记录；orders_retry_delivery_text 仅重试明确失败，最多3次，"
+    "不取新卡、不再次确认发货。pending 等待账号恢复，unknown/shipping_unknown 先核实且禁止盲目重发；"
+    "success 仅为平台发送回执，不代表已读。见 Skill references/orders.md。"
+)
+CAPABILITY_GUIDE = (
+    "卡券关联选品：items_get_selectable_items_paginated 以 xianyu:read 读取本站轻量分页，仅按名称/ID查询，不确认平台当前在售；保存绑定前保留已有和孤立关联。"
+    "项目能力入口：Skill references/capabilities.md 按账号、聊天回复、选品、商品/素材/地址、"
+    "自动重发、订单评价、网盘和资料同步分组，按任务加载对应流程。"
+    "references/project-admin.md 列明分销、监控配置、通知、登录风控、调度日志及系统管理的现有入口和 MCP 缺口；"
+    "文档收录不等于工具开放或权限授予，不猜工具名、不直接改业务库。"
+    "发布后必须核验账号 auto_polish、完整同步后的 on_sale 与实际擦亮结果，流程见 references/listing.md。"
+    "擦亮是账号级设置，已有开启授权直接沿用；开关开启不等于擦亮成功。"
+    "任务仅处理确认在售商品；平台状态拒绝时保留商品、卡券及 AI/默认回复，标记待核实，"
+    "网络/登录失败不改在售状态。polish_status/polish_checked_at 是擦亮证据，sale_checked_at 仍是完整同步时间。"
+)
 # Intentionally not recursive: never ship local credentials, receipts or caches.
 SKILL_FILES = (
     "SKILL.md", "agents/openai.yaml", "scripts/mcp_ops.py",
-    "references/execution.md", "references/catalog-sync.md", "references/selection.md",
+    "references/execution.md", "references/catalog-sync.md", "references/selection.md", "references/market-research.md",
     "references/listing.md", "references/compliance.md", "references/delivery-assets.md", "references/orders.md",
+    "references/capabilities.md", "references/accounts-replies.md", "references/project-admin.md",
 )
 
 
@@ -128,7 +150,7 @@ def skill_bundle(base: str) -> bytes:
         "不要覆盖其他已安装技能或客户端配置；核对现有版本后再更新。\n\n"
         "已有客户端更新：重新下载并核验新包，替换同一实例的旧技能文件，保留私有凭证和运营回执；"
         "已安装的 Skill 不会自动更新。重新连接 MCP 或读取 mcp_capabilities，取得最新服务端使用说明。\n\n"
-        f"{LISTING_COPY_GUIDE}\n\n{LISTING_COMPLIANCE_GUIDE}\n\n{CATALOG_SYNC_GUIDE}\n\n{SELECTION_GUIDE}\n\n"
+        f"{LISTING_COPY_GUIDE}\n\n{LISTING_COMPLIANCE_GUIDE}\n\n{CATALOG_SYNC_GUIDE}\n\n{SELECTION_GUIDE}\n\n{CAPABILITY_GUIDE}\n\n{DELIVERY_TEXT_GUIDE}\n\n"
         "原生 MCP 客户端：使用 xianyu-mcp.toml 或 xianyu-mcp.json 模板。"
         "通用 JSON 并非所有客户端的导入格式，应按客户端文档适配。"
         "Codex 的 XIANYU_MCP_TOKEN 必须能被启动该客户端的进程读取；首次配置后重新连接。\n\n"
@@ -230,6 +252,9 @@ def guide() -> str:
 
 {CATALOG_SYNC_GUIDE}
 {SELECTION_GUIDE}
+{CAPABILITY_GUIDE}
+{DELIVERY_TEXT_GUIDE}
+项目全部能力与入口见 [能力索引]({base}/ai/skills/xianyu-operations/references/capabilities.md)。
 完整选品流程见 [选品与需求验证]({base}/ai/skills/xianyu-operations/references/selection.md)。
 完整准入与处罚流程见 [商品合规规则]({base}/ai/skills/xianyu-operations/references/compliance.md)。
 异步提交不等于执行完成；超时或结果未知先查原任务/平台，不盲目重复发布、分享或发货。

@@ -15,11 +15,13 @@ from app.api import deps
 from app.api.routes.captcha import check_email_code
 from app.core.security import decode_token, get_password_hash
 from common.models.user import User, UserRole, UserStatus
+from common.services.registration_policy import get_registration_rejection_message
 from common.schemas.auth import LoginRequest, LoginResponse, VerifyResponse
 from common.schemas.common import ApiResponse
 from common.schemas.user import UserCreate, UserPublic
 from app.services.auth import AuthService
 from app.services.user_service import UserService
+from app.services.system_setting_service import SystemSettingService
 from app.services.user_login_log_service import (
     LOGIN_METHOD_EMAIL_CODE,
     LOGIN_METHOD_EMAIL_PASSWORD,
@@ -247,11 +249,15 @@ async def check_default_password(
     )
 
 
-@router.post("/register", response_model=ApiResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/register", response_model=ApiResponse)
 async def register_user(
     payload: UserCreate,
     user_service: UserService = Depends(deps.get_user_service),
+    setting_service: SystemSettingService = Depends(deps.get_system_setting_service),
 ) -> ApiResponse:
+    rejection = get_registration_rejection_message(await setting_service.list_settings())
+    if rejection:
+        return ApiResponse(success=False, code=403, message=rejection)
     # 验证邮箱验证码
     if payload.email and payload.verification_code:
         code_valid, code_msg = check_email_code(payload.email, payload.verification_code, "register")

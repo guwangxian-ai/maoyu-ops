@@ -1,5 +1,11 @@
 # 闲鱼与网盘 MCP
 
+2026.11.04.1 新增竞品按次采样、历史和候选证据，以及监控失败暂停/恢复状态；五个 `market_*` 工具沿用 `xianyu:read`。当前 Agent 根据证据分析，不新增后台付费模型、自动发布或持续任务。用法见 [竞品研究](../skills/xianyu-operations/references/market-research.md)；部署验收以本轮部署记录为准。
+
+完整能力入口见 [Skill 能力索引](../skills/xianyu-operations/references/capabilities.md)，未开放的后台能力见 [管理边界](../skills/xianyu-operations/references/project-admin.md)。工具参数仍由真实路由生成，新增 HTTP API 不自动进入 MCP 白名单。
+
+`2026.10.29.1` 商品查询新增 `sale_verification_reason`、`polish_status`、`polish_checked_at`：擦亮任务仅选确认在售商品，状态拒绝保留记录并标待核实；网络/登录失败不改在售快照。擦亮检查时间与完整商品同步时间分开，账号开关成功不能冒充平台擦亮成功。参见 [发布后擦亮核验](../skills/xianyu-operations/references/listing.md#发布后擦亮核验)。
+
 ## 当前实现
 
 当前使用云端 `https://43.136.91.22/maoyu-ops/mcp`，使用官方 Python MCP SDK 的 **Streamable HTTP**。MCP 与云端网页调用相同的业务接口、数据库、网盘授权和任务实现。网页入口为 `https://43.136.91.22/maoyu-ops/`。本地开发、备份后部署和云端验证流程见 [项目规则](../AGENTS.md)。
@@ -200,3 +206,13 @@ mcp_upload_file / HTTP 上传
 2026-10-23 的 `2026.10.23.2` 已同步[虚拟商品售后与发货承诺](../skills/xianyu-operations/references/listing.md#虚拟商品售后与发货承诺)。当前版本、后续全账号发布约定与验证结果统一见[运营技能文档](skills-operations.md)；以下保留该轮商品快照功能的历史验证记录。完整成功同步后一次更新账号的在售快照，未返回的历史商品标记待核实；失败、锁被跳过或范围不完整不改检查状态。卡券、AI 回复与历史记录保留。分页列表新增 `sale_status` 筛选，返回最近完整检查时间与最近确认在售时间；详情与操作规则统一见 [账号商品同步与查询](../skills/xianyu-operations/references/catalog-sync.md)。
 
 已完成前端子路径构建、48 项云端隔离回归、真实 MCP 完整/截断同步及状态筛选验证；公开包、源码与本机文件一致。页面筛选、空结果、同步反馈及布局使用云端已部署前端配合浏览器内隔离 API/存储数据验证，未冒充生产后台登录验收。既有密钥、权限、授权卷和运营设置保持，未执行平台发布、下架或订单发货。本次用户明确不备份，部署信息见 [当前记录](tencent-hermes-deployment.json)。
+
+## 凭证后的文字消息
+
+`cards_create_card/cards_update_card` 的 `send_text_after_form` 默认为 false，仅可与固定文字卡券及 `use_no_logistics_form=true` 合用。`orders_get_delivery_text` 返回持久化订单副本与尝试记录（delivery:read）；`orders_retry_delivery_text` 使用 delivery:orders:write、稳定 operation_id 和 confirm，只排队明确失败记录，最多3次。成功、处理中或待发送返回原状态；未知结果拒绝重发。详见 [Skill 订单流程](../skills/xianyu-operations/references/orders.md#凭证发货后补发纯文字)。
+
+## 卡券关联的轻量商品选择（2026.11.14.1）
+
+`items_get_selectable_items_paginated` 对应 `GET /api/v1/items/selectable/paginated`，使用既有 `xianyu:read`。query 支持 page（从 1 起）、page_size（1–100）、keyword（商品名称或 ID，最长 255）。响应 data 内包含 list/total/page/page_size/total_pages/has_more；商品仅返回 item_id/title/price，不读取详情、卡券或回复正文。归属由现有登录用户解析，不能通过参数选择其他用户。
+
+该接口读取本站记录，不能替代平台商品同步和在售核验。旧实例没有该工具时使用既有 `items_list_items_paginated`，以实际 schema 为准。通知事件分类通过现有后台管理入口配置，本轮没有向 MCP 开放通知渠道凭证或管理员注册设置。

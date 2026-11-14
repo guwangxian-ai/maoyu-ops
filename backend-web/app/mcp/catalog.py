@@ -32,8 +32,10 @@ ALLOW = {
         get_item_detail update_item update_item_multi_spec update_item_price get_seller_item_edit_detail
         update_seller_item update_item_multi_quantity_delivery delete_item_unified delete_item batch_delete_items
         batch_offline_items batch_delete_xianyu_items fetch_items_from_account fetch_all_items_from_account search_items""",
-    "orders": "list_orders fetch_xianyu_orders get_order_detail no_logistics_delivery cancel_order manual_delivery",
+    "orders": "list_orders fetch_xianyu_orders get_order_detail get_delivery_text retry_delivery_text no_logistics_delivery cancel_order manual_delivery",
+    "selectable_items": "get_selectable_items_paginated",
     "search": "search_items",
+    "market_research": "collect_market_sample list_market_samples get_market_history get_market_candidates list_market_monitor_states",
     "product_publish": """recommend_category create_material list_materials batch_delete_materials
         get_auto_relist_rule save_auto_relist_rule list_auto_relist_events list_all_auto_relist_events
         reconcile_auto_relist_event mark_auto_relist_event_failed get_material update_material delete_material
@@ -70,11 +72,11 @@ ALLOW = {
     "cloud_assets": "status listing upload import_file import_url import_share get rename version sync shares retry analyze card",
 }
 ALLOW = {module: set(names.split()) for module, names in ALLOW.items()}
-PREFIXES = {"product_publish": "publish", "product_publish_capability": "account",
+PREFIXES = {"selectable_items": "items", "market_research": "market", "product_publish": "publish", "product_publish_capability": "account",
             "quark_drive": "quark", "baidu_drive": "baidu", "cloud_assets": "assets",
             "personal_addresses": "personal_address", "publish_addresses": "address",
             "chat_new": "chat", "chat_new_image": "chat_image", "cookies": "account"}
-READ_POSTS = {"search_items", "search_goofish", "recommend_category", "get_seller_summary", "get_browse_summary",
+READ_POSTS = {"collect_market_sample", "search_items", "search_goofish", "recommend_category", "get_seller_summary", "get_browse_summary",
               "query_avatars", "fetch_items_from_account", "fetch_all_items_from_account", "fetch_xianyu_orders"}
 
 

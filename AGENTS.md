@@ -34,6 +34,8 @@
 
 ## 商品在售核验
 
+- 2026-10-29：所有项目能力按 [Skill 能力索引](skills/xianyu-operations/references/capabilities.md) 分流，新增能力同步其流程和公开包白名单；尚未开放 MCP 的管理员/分销/监控功能明确标识，不默认增加权限。发布后按 [擦亮核验](skills/xianyu-operations/references/listing.md#发布后擦亮核验) 检查账号开关及真实结果。擦亮拒绝不删除商品或运营配置，只更新有证据的状态。
+
 - 2026-10-23：完整成功同步才更新在售快照；未返回标待核实，失败或范围不完整保留状态。保留卡券、AI 回复和历史记录，不能通过删除本地商品刷新平台状态。字段、筛选与判断集中见 [账号商品同步与查询](skills/xianyu-operations/references/catalog-sync.md)。
 
 ## 商品文案与回复
